@@ -1,7 +1,7 @@
 #lang racket/base
 
 (require rackunit net/url racket/set)
-(require "coerce.rkt" "container.rkt" "string.rkt" "list.rkt")
+(require "coerce.rkt" "container.rkt" "string.rkt" "list.rkt" "len.rkt")
 
 (check-equal? (->string "foo") "foo")
 (check-equal? (->string '()) "")

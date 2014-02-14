@@ -3,7 +3,7 @@
 (module+ test (require rackunit))
 (require "len.rkt")
 
-(provide ->int ->string ->list ->boolean ->symbol)
+(provide ->int ->string ->list ->boolean ->symbol ->path)
 
 ;; general way of coercing to integer
 (define/contract (->int x)
