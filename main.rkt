@@ -7,7 +7,8 @@
   "list.rkt"
   "misc.rkt"
   "string.rkt"
-  "len.rkt")
+  "len.rkt"
+  "try.rkt")
 
 (provide 
  (all-from-out
@@ -17,4 +18,5 @@
   "list.rkt"
   "misc.rkt"
   "string.rkt"
-  "len.rkt"))
+  "len.rkt"
+  "try.rkt"))
