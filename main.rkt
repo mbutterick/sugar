@@ -8,7 +8,7 @@
   "misc.rkt"
   "string.rkt"
   "len.rkt"
-  "try.rkt"
+  "exceptions.rkt"
   "scribble.rkt")
 
 (provide 
@@ -20,5 +20,5 @@
   "misc.rkt"
   "string.rkt"
   "len.rkt"
-  "try.rkt"
+  "exceptions.rkt"
   "scribble.rkt"))
