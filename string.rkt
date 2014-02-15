@@ -1,15 +1,14 @@
 #lang racket/base
 (require racket/contract)
-(require "coerce.rkt" "container.rkt" "len.rkt")
+(require "coerce.rkt" "container.rkt" "len.rkt" "try.rkt")
 
-(provide starts-with? ends-with?)
+(provide starts-with? ends-with? stringish?)
 
 ;; stringish: data type that can be trivially converted to string
 ;; todo: merge this with pathish
 (define/contract (stringish? x)
   (any/c . -> . boolean?)
-  (with-handlers ([exn:fail? (λ(e) #f)])
-    (->boolean (->string x))))
+  (try (->boolean (->string x)) (except [exn:fail? (λ(e) #f)])))
 
 ;; python-style string testers
 (define/contract (starts-with? str starter)
