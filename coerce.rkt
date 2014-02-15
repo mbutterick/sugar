@@ -1,25 +1,32 @@
 #lang racket/base
 (require racket/contract net/url xml racket/set)
 (module+ test (require rackunit))
-(require "len.rkt")
+(require "len.rkt" "try.rkt")
 
-(provide ->int ->string ->list ->boolean ->symbol ->path)
+(provide (contract-out
+          [->int (any/c . -> . integer?)]
+          [->string (any/c . -> . string?)]
+          [->symbol (any/c . -> . symbol?)]
+          [->path (any/c . -> . path?)]
+          [->complete-path (any/c . -> . complete-path?)]
+          [->url (any/c . -> . url?)]
+          [->list (any/c . -> . list?)]
+          [->vector (any/c . -> . vector?)]
+          [->boolean (any/c . -> . boolean?)]))
 
 ;; general way of coercing to integer
-(define/contract (->int x)
-  (any/c . -> . integer?)
+(define (->int x)
   (cond
     [(integer? x) x]
     [(real? x) (floor x)]
     [(and (string? x) (> (len x) 0)) (->int (string->number x))]
     [(symbol? x) (->int (->string x))]
     [(char? x) (char->integer x)]
-    [else (or (len x) (error "Can't convert to integer:" x))])) ; try len before giving up
+    [else (try (len x) (except [exn:fail? (λ(e) (error "Can't convert to integer:" x))]))]))
 
 
 ;; general way of coercing to string
-(define/contract (->string x)
-  (any/c . -> . string?)
+(define (->string x)
   (cond 
     [(string? x) x]
     [(equal? '() x) ""]
@@ -38,8 +45,7 @@
   (string->symbol (->string thing))) 
 
 ;; general way of coercing to path
-(define/contract (->path thing)
-  (any/c . -> . path?)
+(define (->path thing)
   ; todo: on bad input, it will pop a string error rather than path error
   (cond 
     [(url? thing) (apply build-path (map path/param-path (url-path thing)))]
@@ -47,8 +53,7 @@
 
 
 ;; general way of coercing to url
-(define/contract (->url thing)
-  (any/c . -> . url?)
+(define (->url thing)
   ; todo: on bad input, it will pop a string error rather than url error
   (string->url (->string thing)))
 
@@ -57,8 +62,7 @@
 
 
 ;; general way of coercing to a list
-(define/contract (->list x)
-  (any/c . -> . list?)
+(define (->list x)
   (cond 
     [(list? x) x]
     [(vector? x) (vector->list x)]
@@ -69,7 +73,6 @@
 
 ;; general way of coercing to vector
 (define (->vector x)
-  (any/c . -> . vector?)
   ; todo: on bad input, it will pop a list error rather than vector error
   (cond
     [(vector? x) x]
@@ -78,8 +81,7 @@
 
 
 ;; general way of coercing to boolean
-(define/contract (->boolean x)
-  (any/c . -> . boolean?)
+(define (->boolean x)
   ;; in Racket, everything but #f is true
   (if x #t #f))
 

@@ -18,4 +18,4 @@
     [(hash? x) (len (hash-keys x))]
     [(set? x) (len (set->list x))]
     [(integer? x) (len (number->string x))]
-    [else #f]))
+    [else (error "len: can’t calculate length of" x)]))
