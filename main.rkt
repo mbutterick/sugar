@@ -8,7 +8,8 @@
   "misc.rkt"
   "string.rkt"
   "len.rkt"
-  "try.rkt")
+  "try.rkt"
+  "scribble.rkt")
 
 (provide 
  (all-from-out
@@ -19,4 +20,5 @@
   "misc.rkt"
   "string.rkt"
   "len.rkt"
-  "try.rkt"))
+  "try.rkt"
+  "scribble.rkt"))
