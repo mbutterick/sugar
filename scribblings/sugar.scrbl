@@ -23,9 +23,10 @@ After that, you can update the package from the command line:
 
 @section{Interface}
 
-@defmodule[sugar]
+@subsection{Container functions}
 
-Hello sugar.
+@defmodule[sugar/container]
+
 
 
 @section{License & source code}

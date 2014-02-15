@@ -1,6 +1,6 @@
 #lang racket/base
 (require racket/contract)
-(require "coerce.rkt" "container.rkt" "len.rkt" "try.rkt")
+(require "coerce.rkt" "container.rkt" "len.rkt" "exception.rkt")
 
 (provide starts-with? ends-with? stringish?)
 

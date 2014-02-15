@@ -1,7 +1,7 @@
 #lang racket/base
 (require racket/contract net/url xml racket/set)
 (module+ test (require rackunit))
-(require "len.rkt" "try.rkt")
+(require "len.rkt" "exception.rkt")
 
 (provide (contract-out
           [->int (any/c . -> . integer?)]
