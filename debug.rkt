@@ -5,7 +5,7 @@
 ; report the current value of the variable, then return it
 (define-syntax-rule (report var)
   (begin 
-    (basic-message 'var "=" var) 
+    (displayln (format "~a = ~a" 'var var) (current-error-port)) 
     var))
 
 

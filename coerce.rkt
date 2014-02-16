@@ -1,13 +1,14 @@
 #lang racket/base
 (require racket/contract net/url xml racket/set)
 (module+ test (require rackunit))
-(require "len.rkt" "exception.rkt" "define.rkt")
+(require "len.rkt" "exception.rkt" "define.rkt" "debug.rkt")
+
 
 (define (make-coercion-error-handler target-format x)
   (λ(e) (error (format "Can't convert ~a to ~a" x target-format))))
 
 ;; general way of coercing to integer
-(define/provide/contract (->int x)
+(define+provide/contract (->int x)
   (any/c . -> . integer?)
   (try 
    (cond
@@ -21,7 +22,7 @@
 
 
 ;; general way of coercing to string
-(define/provide/contract (->string x)
+(define+provide/contract (->string x)
   (any/c . -> . string?)
   (try 
    (cond 
@@ -37,13 +38,13 @@
 
 
 ;; general way of coercing to symbol
-(define/provide/contract (->symbol x)
+(define+provide/contract (->symbol x)
   (any/c . -> . symbol?)
   (try (string->symbol (->string x)) 
        (except [exn:fail? (make-coercion-error-handler 'symbol x)])))
 
 ;; general way of coercing to path
-(define/provide/contract (->path x)
+(define+provide/contract (->path x)
   (any/c . -> . path?)
   (try
    (cond 
@@ -53,19 +54,19 @@
 
 
 ;; general way of coercing to url
-(define/provide/contract (->url x)
+(define+provide/contract (->url x)
   (any/c . -> . url?)
   (try (string->url (->string x))
        (except [exn:fail? (make-coercion-error-handler 'url x)])))
 
-(define/provide/contract (->complete-path x)
+(define+provide/contract (->complete-path x)
   (any/c . -> . complete-path?)
   (try (path->complete-path (->path x))
        (except [exn:fail? (make-coercion-error-handler 'complete-path x)])))
 
 
 ;; general way of coercing to a list
-(define/provide/contract (->list x)
+(define+provide/contract (->list x)
   (any/c . -> . list?)
   (try
    (cond 
@@ -77,7 +78,7 @@
 
 
 ;; general way of coercing to vector
-(define/provide/contract (->vector x)
+(define+provide/contract (->vector x)
   (any/c . -> . vector?)
   (try
    (cond
@@ -88,11 +89,9 @@
 
 
 ;; general way of coercing to boolean
-(define/provide/contract (->boolean x)
+(define+provide/contract (->boolean x)
   (any/c . -> . boolean?)
-  (try
-   (if x #t #f)
-   (except [exn:fail? (make-coercion-error-handler 'boolean x)])))
+  (if x #t #f))
 
 
 ;;
@@ -134,4 +133,5 @@
   (make-contract
    #:name 'coerce/boolean?
    #:projection (make-blame-handler ->boolean 'can-be-boolean?)))
+
 
