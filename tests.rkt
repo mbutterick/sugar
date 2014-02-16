@@ -11,7 +11,6 @@
 (define file-name-as-text "foo.txt")
 (check-equal? (->string (string->path file-name-as-text)) file-name-as-text)
 (check-equal? (->string #\¶) "¶")
-(check-equal? (->string '(foo "bar")) "<foo>bar</foo>")
 
 
 

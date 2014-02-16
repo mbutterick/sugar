@@ -1,7 +1,7 @@
 #lang racket/base
 (require racket/contract net/url xml racket/set)
 (module+ test (require rackunit))
-(require "len.rkt" "exception.rkt")
+(require "len.rkt" "exception.rkt" "define.rkt")
 
 (provide (contract-out
           [->int (any/c . -> . integer?)]
@@ -16,77 +16,121 @@
 
 ;; general way of coercing to integer
 (define (->int x)
-  (cond
-    [(integer? x) x]
-    [(real? x) (floor x)]
-    [(and (string? x) (> (len x) 0)) (->int (string->number x))]
-    [(symbol? x) (->int (->string x))]
-    [(char? x) (char->integer x)]
-    [else (try (len x) (except [exn:fail? (λ(e) (error "Can't convert to integer:" x))]))]))
+  (try 
+   (cond
+     [(or (integer? x) (real? x)) (inexact->exact (floor x))] 
+     [(and (string? x) (> (len x) 0)) (->int (string->number x))]
+     [(symbol? x) (->int (->string x))]
+     [(char? x) (char->integer x)]
+     [else (len x)])
+   (except [exn:fail? (λ(e) (error "Can't convert to integer:" x))])))
+
 
 
 ;; general way of coercing to string
 (define (->string x)
-  (cond 
-    [(string? x) x]
-    [(equal? '() x) ""]
-    [(symbol? x) (symbol->string x)]
-    [(number? x) (number->string x)]
-    [(url? x) (->string (->path x))] ; todo: a url is more than just a path-string ... it has character encoding issues
-    [(path? x) (path->string x)]
-    [(char? x) (format "~a" x)]
-    [(xexpr? x) (xexpr->string x)] ; put this last so other xexprish things don't get caught
-    [else (error (format "Can't make ~a into string" x))]))
+  (try 
+   (cond 
+     [(string? x) x]
+     [(equal? '() x) ""]
+     [(symbol? x) (symbol->string x)]
+     [(number? x) (number->string x)]
+     [(url? x) (->string (->path x))] ; todo: a url is more than just a path-string ... it has character encoding issues
+     [(path? x) (path->string x)]
+     [(char? x) (format "~a" x)]
+     [else (error)]) ; put this last so other xexprish things don't get caught
+   (except [exn:fail? (λ(e) (error (format "Can't make ~a into string" x)))])))
 
 
 ;; general way of coercing to symbol
-(define (->symbol thing)
-  ; todo: on bad input, it will pop a string error rather than symbol error
-  (string->symbol (->string thing))) 
+(define (->symbol x)
+  (try (string->symbol (->string x)) 
+       (except [exn:fail? (λ(e) (error (format "Can't make ~a into symbol" x)))])))
 
 ;; general way of coercing to path
-(define (->path thing)
-  ; todo: on bad input, it will pop a string error rather than path error
-  (cond 
-    [(url? thing) (apply build-path (map path/param-path (url-path thing)))]
-    [else (string->path (->string thing))]))
+(define (->path x)
+  (try
+   (cond 
+     [(url? x) (apply build-path (map path/param-path (url-path x)))]
+     [else (string->path (->string x))])
+   (except [exn:fail? (λ(e) (error (format "Can't make ~a into path" x)))])))
 
 
 ;; general way of coercing to url
-(define (->url thing)
-  ; todo: on bad input, it will pop a string error rather than url error
-  (string->url (->string thing)))
+(define (->url x)
+  (try (string->url (->string x))
+       (except [exn:fail? (λ(e) (error (format "Can't make ~a into url" x)))])))
 
-(define (->complete-path thing)
-  (path->complete-path (->path thing)))
+(define (->complete-path x)
+  (try (path->complete-path (->path x))
+       (except [exn:fail? (λ(e) (error (format "Can't make ~a into complete-path" x)))])))
 
 
 ;; general way of coercing to a list
 (define (->list x)
-  (cond 
-    [(list? x) x]
-    [(vector? x) (vector->list x)]
-    [(set? x) (set->list x)]
-    [else (list x)])) 
-
+  (try
+   (cond 
+     [(list? x) x]
+     [(vector? x) (vector->list x)]
+     [(set? x) (set->list x)]
+     [else (list x)])
+   (except [exn:fail? (λ(e) (error (format "Can't make ~a into list" x)))])))
 
 
 ;; general way of coercing to vector
 (define (->vector x)
-  ; todo: on bad input, it will pop a list error rather than vector error
-  (cond
-    [(vector? x) x]
-    [else (list->vector (->list x))]))
+  (try
+   (cond
+     [(vector? x) x]
+     [else (list->vector (->list x))])
+   (except [exn:fail? (λ(e) (error (format "Can't make ~a into vector" x)))])))
 
 
 
 ;; general way of coercing to boolean
 (define (->boolean x)
-  ;; in Racket, everything but #f is true
-  (if x #t #f))
+  (try
+   (if x #t #f)
+   (except [exn:fail? (λ(e) (error (format "Can't make ~a into boolean" x)))])))
 
 
+;;
+;; Coercion contracts
+;;
+
+(define-syntax-rule (make-blame-handler try-proc expected-sym)
+  (λ (b)
+    (λ (x)
+      (try (try-proc x)
+           (except [exn:fail? (λ(e)
+                                (raise-blame-error
+                                 b x
+                                 '(expected: "~a" given: "~e")
+                                 expected-sym x))])))))
 
 
+(define/provide coerce/integer?
+  (make-contract
+   #:name 'coerce/integer?
+   #:projection (make-blame-handler ->int 'can-be-integer?)))
 
+(define/provide coerce/string?
+  (make-contract
+   #:name 'coerce/string?
+   #:projection (make-blame-handler ->string 'can-be-string?)))
+
+(define/provide coerce/symbol?
+  (make-contract
+   #:name 'coerce/symbol?
+   #:projection (make-blame-handler ->symbol 'can-be-symbol?)))
+
+(define/provide coerce/path?
+  (make-contract
+   #:name 'coerce/path?
+   #:projection (make-blame-handler ->path 'can-be-path?)))
+
+(define/provide coerce/boolean?
+  (make-contract
+   #:name 'coerce/boolean?
+   #:projection (make-blame-handler ->boolean 'can-be-boolean?)))
 
