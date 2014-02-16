@@ -3,19 +3,12 @@
 (module+ test (require rackunit))
 (require "len.rkt" "exception.rkt" "define.rkt")
 
-(provide (contract-out
-          [->int (any/c . -> . integer?)]
-          [->string (any/c . -> . string?)]
-          [->symbol (any/c . -> . symbol?)]
-          [->path (any/c . -> . path?)]
-          [->complete-path (any/c . -> . complete-path?)]
-          [->url (any/c . -> . url?)]
-          [->list (any/c . -> . list?)]
-          [->vector (any/c . -> . vector?)]
-          [->boolean (any/c . -> . boolean?)]))
+(define (make-coercion-error-handler target-format x)
+  (λ(e) (error (format "Can't convert ~a to ~a" x target-format))))
 
 ;; general way of coercing to integer
-(define (->int x)
+(define/provide/contract (->int x)
+  (any/c . -> . integer?)
   (try 
    (cond
      [(or (integer? x) (real? x)) (inexact->exact (floor x))] 
@@ -23,12 +16,13 @@
      [(symbol? x) (->int (->string x))]
      [(char? x) (char->integer x)]
      [else (len x)])
-   (except [exn:fail? (λ(e) (error "Can't convert to integer:" x))])))
+   (except [exn:fail? (make-coercion-error-handler 'integer x)])))
 
 
 
 ;; general way of coercing to string
-(define (->string x)
+(define/provide/contract (->string x)
+  (any/c . -> . string?)
   (try 
    (cond 
      [(string? x) x]
@@ -39,59 +33,66 @@
      [(path? x) (path->string x)]
      [(char? x) (format "~a" x)]
      [else (error)]) ; put this last so other xexprish things don't get caught
-   (except [exn:fail? (λ(e) (error (format "Can't make ~a into string" x)))])))
+   (except [exn:fail? (make-coercion-error-handler 'string x)])))
 
 
 ;; general way of coercing to symbol
-(define (->symbol x)
+(define/provide/contract (->symbol x)
+  (any/c . -> . symbol?)
   (try (string->symbol (->string x)) 
-       (except [exn:fail? (λ(e) (error (format "Can't make ~a into symbol" x)))])))
+       (except [exn:fail? (make-coercion-error-handler 'symbol x)])))
 
 ;; general way of coercing to path
-(define (->path x)
+(define/provide/contract (->path x)
+  (any/c . -> . path?)
   (try
    (cond 
      [(url? x) (apply build-path (map path/param-path (url-path x)))]
      [else (string->path (->string x))])
-   (except [exn:fail? (λ(e) (error (format "Can't make ~a into path" x)))])))
+   (except [exn:fail? (make-coercion-error-handler 'path x)])))
 
 
 ;; general way of coercing to url
-(define (->url x)
+(define/provide/contract (->url x)
+  (any/c . -> . url?)
   (try (string->url (->string x))
-       (except [exn:fail? (λ(e) (error (format "Can't make ~a into url" x)))])))
+       (except [exn:fail? (make-coercion-error-handler 'url x)])))
 
-(define (->complete-path x)
+(define/provide/contract (->complete-path x)
+  (any/c . -> . complete-path?)
   (try (path->complete-path (->path x))
-       (except [exn:fail? (λ(e) (error (format "Can't make ~a into complete-path" x)))])))
+       (except [exn:fail? (make-coercion-error-handler 'complete-path x)])))
 
 
 ;; general way of coercing to a list
-(define (->list x)
+(define/provide/contract (->list x)
+  (any/c . -> . list?)
   (try
    (cond 
      [(list? x) x]
      [(vector? x) (vector->list x)]
      [(set? x) (set->list x)]
      [else (list x)])
-   (except [exn:fail? (λ(e) (error (format "Can't make ~a into list" x)))])))
+   (except [exn:fail? (make-coercion-error-handler 'list x)])))
 
 
 ;; general way of coercing to vector
-(define (->vector x)
+(define/provide/contract (->vector x)
+  (any/c . -> . vector?)
   (try
    (cond
      [(vector? x) x]
      [else (list->vector (->list x))])
-   (except [exn:fail? (λ(e) (error (format "Can't make ~a into vector" x)))])))
+   (except [exn:fail? (make-coercion-error-handler 'vector x)])))
 
 
 
 ;; general way of coercing to boolean
-(define (->boolean x)
+(define/provide/contract (->boolean x)
+  (any/c . -> . boolean?)
   (try
    (if x #t #f)
-   (except [exn:fail? (λ(e) (error (format "Can't make ~a into boolean" x)))])))
+   (except [exn:fail? (make-coercion-error-handler 'boolean x)])))
 
 
 ;;
