@@ -2,12 +2,12 @@
 (require (for-syntax racket/base))
 (require racket/contract)
 
-(provide define/provide define+provide/contract define/contract+provide)
+(provide define+provide define+provide/contract define/contract+provide)
 
-(define-syntax (define/provide stx)
+(define-syntax (define+provide stx)
   (syntax-case stx ()
     [(_ (proc arg ... . rest-arg) body ...)
-     #'(define/provide proc
+     #'(define+provide proc
          (λ(arg ... . rest-arg) body ...))]
     [(_ name body ...)
      #'(begin

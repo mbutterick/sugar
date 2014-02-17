@@ -37,6 +37,13 @@
    (except [exn:fail? (make-coercion-error-handler 'string x)])))
 
 
+;; general way of coercing to html
+(define+provide/contract (->html x)
+  (any/c . -> . string?)
+  (try (xexpr->string x)
+   (except [exn:fail? (make-coercion-error-handler 'html x)])))
+
+
 ;; general way of coercing to symbol
 (define+provide/contract (->symbol x)
   (any/c . -> . symbol?)
@@ -109,27 +116,27 @@
                                  expected-sym x))])))))
 
 
-(define/provide coerce/integer?
+(define+provide coerce/integer?
   (make-contract
    #:name 'coerce/integer?
    #:projection (make-blame-handler ->int 'can-be-integer?)))
 
-(define/provide coerce/string?
+(define+provide coerce/string?
   (make-contract
    #:name 'coerce/string?
    #:projection (make-blame-handler ->string 'can-be-string?)))
 
-(define/provide coerce/symbol?
+(define+provide coerce/symbol?
   (make-contract
    #:name 'coerce/symbol?
    #:projection (make-blame-handler ->symbol 'can-be-symbol?)))
 
-(define/provide coerce/path?
+(define+provide coerce/path?
   (make-contract
    #:name 'coerce/path?
    #:projection (make-blame-handler ->path 'can-be-path?)))
 
-(define/provide coerce/boolean?
+(define+provide coerce/boolean?
   (make-contract
    #:name 'coerce/boolean?
    #:projection (make-blame-handler ->boolean 'can-be-boolean?)))
