@@ -5,7 +5,7 @@
 
 
 (define (make-coercion-error-handler target-format x)
-  (λ(e) (error (format "Can't convert ~a to ~a" x target-format))))
+  (λ(e) (error (format "Can’t convert ~a to ~a" x target-format))))
 
 ;; general way of coercing to integer
 (define+provide/contract (->int x)

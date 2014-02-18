@@ -56,12 +56,12 @@
 ;; put item as first arg so function can use infix notation
 ;; (item . in . container)
 (define/contract (in? item container)
-  (any/c any/c . -> . boolean?)
-  (->boolean (cond
-               [(list? container) (member item container)] ; returns #f or sublist beginning with item
-               [(vector? container) (vector-member item container)] ; returns #f or zero-based item index
-               [(hash? container) 
-                (and (hash-has-key? container item) (get container item))] ; returns #f or hash value
-               [(string? container) ((->string item) . in? . (map ->string (string->list container)))] ; returns #f or substring beginning with item
-               [(symbol? container) ((->string item) . in? . (->string container))] ; returns #f or subsymbol (?!) beginning with item
-               [else #f])))
+  (any/c any/c . -> . coerce/boolean?)
+  (cond
+    [(list? container) (member item container)] ; returns #f or sublist beginning with item
+    [(vector? container) (vector-member item container)] ; returns #f or zero-based item index
+    [(hash? container) 
+     (and (hash-has-key? container item) (get container item))] ; returns #f or hash value
+    [(string? container) (regexp-match (->string item) (->string container))] ; returns #f or substring beginning with item
+    [(symbol? container) ((->string item) . in? . (->string container))] ; returns #f or subsymbol (?!) beginning with item
+    [else #f]))
