@@ -10,7 +10,8 @@
   "string.rkt"
   "len.rkt"
   "exception.rkt"
-  "scribble.rkt")
+  "scribble.rkt"
+  "values.rkt")
 
 (provide 
  (all-from-out
@@ -23,4 +24,5 @@
   "string.rkt"
   "len.rkt"
   "exception.rkt"
-  "scribble.rkt"))
+  "scribble.rkt"
+  "values.rkt"))
