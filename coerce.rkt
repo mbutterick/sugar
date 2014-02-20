@@ -24,24 +24,25 @@
 ;; general way of coercing to string
 (define+provide/contract (->string x)
   (any/c . -> . string?)
-  (try 
-   (cond 
-     [(string? x) x]
-     [(equal? '() x) ""]
-     [(symbol? x) (symbol->string x)]
-     [(number? x) (number->string x)]
-     [(url? x) (->string (->path x))] ; todo: a url is more than just a path-string ... it has character encoding issues
-     [(path? x) (path->string x)]
-     [(char? x) (format "~a" x)]
-     [else (error)]) ; put this last so other xexprish things don't get caught
-   (except [exn:fail? (make-coercion-error-handler 'string x)])))
+  (if (string? x)
+      x ; fast exit for strings
+      (try   
+       (cond
+         [(equal? '() x) ""]
+         [(symbol? x) (symbol->string x)]
+         [(number? x) (number->string x)]
+         [(url? x) (->string (->path x))] ; todo: a url is more than just a path-string ... it has character encoding issues
+         [(path? x) (path->string x)]
+         [(char? x) (format "~a" x)]
+         [else (error)]) ; put this last so other xexprish things don't get caught
+       (except [exn:fail? (make-coercion-error-handler 'string x)]))))
 
 
 ;; general way of coercing to html
 (define+provide/contract (->html x)
   (any/c . -> . string?)
   (try (xexpr->string x)
-   (except [exn:fail? (make-coercion-error-handler 'html x)])))
+       (except [exn:fail? (make-coercion-error-handler 'html x)])))
 
 
 ;; general way of coercing to symbol
