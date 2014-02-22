@@ -41,8 +41,13 @@
 ;; general way of coercing to html
 (define+provide/contract (->html x)
   (any/c . -> . string?)
+  ;; todo: omit 'script and 'style tags (and ... ?)
   (try (xexpr->string x)
        (except [exn:fail? (make-coercion-error-handler 'html x)])))
+
+; must get this right — no escaped chars
+;(->html '(script ((type "text/javascript")) "3 > 2"))
+
 
 
 ;; general way of coercing to symbol
