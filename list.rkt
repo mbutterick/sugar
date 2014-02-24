@@ -7,10 +7,20 @@
   (list? procedure? . -> . list?)
   (dropf-right (dropf items test-proc) test-proc))
 
+;; convert a list into a list of slices that are len long (last one might be shorter)
+(define+provide/contract (list->slices xs len)
+  (list? integer? . -> . (listof list?))
+  (cond
+    [(equal? xs null) null]
+    [(len . > . (length xs)) (list xs)]
+    [else (cons (take xs len) (list->slices (drop xs len) len))]))
+
+
+
 
 ;; split list into list of sublists using test-proc
 (define+provide/contract (splitf-at* xs split-test)
-    
+  
   ;; todo: better error message when split-test is not a predicate
   (list? predicate/c . -> . (listof list?))
   (define (&splitf-at* xs [acc '()]) ; use acc for tail recursion
