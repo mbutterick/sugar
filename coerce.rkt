@@ -45,7 +45,7 @@
   (try (xexpr->string x)
        (except [exn:fail? (make-coercion-error-handler 'html x)])))
 
-; must get this right — no escaped chars
+; todo: must get this right — no escaped chars
 ;(->html '(script ((type "text/javascript")) "3 > 2"))
 
 
@@ -53,17 +53,21 @@
 ;; general way of coercing to symbol
 (define+provide/contract (->symbol x)
   (any/c . -> . symbol?)
-  (try (string->symbol (->string x)) 
-       (except [exn:fail? (make-coercion-error-handler 'symbol x)])))
+  (if (symbol? x)
+      x
+      (try (string->symbol (->string x)) 
+           (except [exn:fail? (make-coercion-error-handler 'symbol x)]))))
 
 ;; general way of coercing to path
 (define+provide/contract (->path x)
   (any/c . -> . path?)
-  (try
-   (cond 
-     [(url? x) (apply build-path (map path/param-path (url-path x)))]
-     [else (string->path (->string x))])
-   (except [exn:fail? (make-coercion-error-handler 'path x)])))
+  (if (path? x)
+      x 
+      (try
+       (cond 
+         [(url? x) (apply build-path (map path/param-path (url-path x)))]
+         [else (string->path (->string x))])
+       (except [exn:fail? (make-coercion-error-handler 'path x)]))))
 
 
 ;; general way of coercing to url
@@ -81,23 +85,24 @@
 ;; general way of coercing to a list
 (define+provide/contract (->list x)
   (any/c . -> . list?)
-  (try
-   (cond 
-     [(list? x) x]
-     [(vector? x) (vector->list x)]
-     [(set? x) (set->list x)]
-     [else (list x)])
-   (except [exn:fail? (make-coercion-error-handler 'list x)])))
+  (if (list? x)
+      x
+      (try
+       (cond 
+         [(vector? x) (vector->list x)]
+         [(set? x) (set->list x)]
+         [else (list x)])
+       (except [exn:fail? (make-coercion-error-handler 'list x)]))))
 
 
 ;; general way of coercing to vector
 (define+provide/contract (->vector x)
   (any/c . -> . vector?)
-  (try
-   (cond
-     [(vector? x) x]
-     [else (list->vector (->list x))])
-   (except [exn:fail? (make-coercion-error-handler 'vector x)])))
+  (if (vector? x)
+      x
+      (try
+       (list->vector (->list x))
+       (except [exn:fail? (make-coercion-error-handler 'vector x)]))))
 
 
 
