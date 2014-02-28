@@ -1,8 +1,24 @@
 #lang racket/base
 (require (for-syntax racket/base))
-(require racket/contract)
 
-(provide define+provide define+provide/contract define/contract+provide)
+(provide (all-defined-out))
+
+;; this macro requires that the source file also contain
+;; (module+ safe
+;;  (require racket/contract))
+
+(define-syntax (define+provide+safe stx)
+  (syntax-case stx ()
+    [(_ (proc arg ... . rest-arg) contract body ...)
+     #'(define+provide+safe proc contract
+         (λ(arg ... . rest-arg) body ...))]
+    [(_ name contract body ...)
+     #'(begin
+         (define name body ...)
+         (provide name)
+         (module+ safe 
+           (require racket/contract)
+           (provide (contract-out [name contract]))))]))
 
 ;; each define macro recursively converts any form of define
 ;; into its lambda form (define name body ...) and then operates on that.
