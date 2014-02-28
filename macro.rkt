@@ -5,9 +5,17 @@
 
 (define-syntax (macro-map stx)
   (syntax-case stx ()
-    [(_ macro-name item)
-     #'(cons (macro-name item) '())]
-    [(_ macro-name item0 items ...)
+    [(_ macro-name (list item0))
      #'(cons
-         (macro-name item0)
-         (macro-map macro-name items ...))]))
+        (macro-name item0) '())]
+    
+    [(_ macro-name (list item0 items ...))
+     #'(cons
+        (macro-name item0)
+        (macro-map macro-name (list items ...)))]))
+
+
+(define-syntax-rule (add x)
+  (+ 1 x))
+
+(macro-map add (list 24 25 30))
