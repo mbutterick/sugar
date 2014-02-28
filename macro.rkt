@@ -6,8 +6,8 @@
 (define-syntax (macro-map stx)
   (syntax-case stx ()
     [(_ macro-name item)
-     #'(macro-name item)]
+     #'(cons (macro-name item) '())]
     [(_ macro-name item0 items ...)
-     #'(begin
+     #'(cons
          (macro-name item0)
          (macro-map macro-name items ...))]))
