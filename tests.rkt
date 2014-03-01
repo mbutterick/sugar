@@ -83,6 +83,7 @@
 (check-true ("foobar" . starts-with? . "f"))
 (check-true ("foobar" . starts-with? . "foobar"))
 (check-false ("foobar" . starts-with? . "bar"))
+(check-false ("foobar" . starts-with? . "."))
 (check-true ("foobar" . ends-with? . "bar"))
 (check-true ("foobar" . ends-with? . "r"))
 (check-true ("foobar" . ends-with? . "foobar"))

@@ -3,12 +3,12 @@
 
 
 (define+provide/contract (starts-with? str starter)
-  (string? string? . -> . coerce/boolean?)
-  (define starter-pattern (regexp (format "^~a" starter)))
-  (regexp-match starter-pattern str))
+  (coerce/string? coerce/string? . -> . coerce/boolean?)
+  (and (<= (string-length starter) (string-length str)) 
+       (equal? (substring str 0 (string-length starter)) starter)))
 
 
 (define+provide/contract (ends-with? str ender)
-  (string? string? . -> . coerce/boolean?)
-  (define ender-pattern (regexp (format "~a$" ender)))
-  (regexp-match ender-pattern str))
+  (coerce/string? coerce/string? . -> . coerce/boolean?)
+  (and (<= (string-length ender) (string-length str)) 
+       (equal? (substring str (- (string-length str) (string-length ender)) (string-length str)) ender)))
