@@ -1,6 +1,6 @@
 #lang racket/base
 (require racket/list racket/set)
-(require "define/contract.rkt" "len.rkt" "coercion/values.rkt")
+(require "define/contract.rkt" "len.rkt" "coerce/values.rkt")
 
 (define+provide/contract (trim items test-proc)
   (list? procedure? . -> . list?)

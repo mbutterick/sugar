@@ -1,7 +1,7 @@
 #lang racket/base
 
 (require
-  "coercion.rkt"
+  "coerce.rkt"
   "container.rkt"
   "debug.rkt"
   "define.rkt"
@@ -16,7 +16,7 @@
 
 (provide 
  (all-from-out
-  "coercion.rkt"
+  "coerce.rkt"
   "container.rkt"
   "debug.rkt"
   "define.rkt"
