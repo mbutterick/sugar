@@ -44,6 +44,6 @@
     [(list? container) (member item container)] ; returns #f or sublist beginning with item
     [(vector? container) (member item (vector->list container))] ; returns #f or sublist beginning with item
     [(hash? container) (and (hash-has-key? container item) (get container item))] ; returns #f or hash value
-    [(string? container) (and (string? item) (regexp-match (->string item) (->string container)))] ; returns #f or substring beginning with item
-    [(symbol? container) (and (symbol? item) ((->string item) . in? . (->string container)))] ; returns #f or subsymbol (?!) beginning with item
+    [(string? container) (regexp-match (->string item) (->string container))] ; returns #f or substring beginning with item
+    [(symbol? container) ((->string item) . in? . (->string container))] ; returns #f or subsymbol (?!) beginning with item
     [else #f]))

@@ -4,7 +4,7 @@
 
 (define-syntax-rule (report var)
   (begin 
-    (displayln (format "~a = ~a" 'var var) (current-error-port)) 
+    (displayln (format "~a = ~v" 'var var) (current-error-port)) 
     var))
 
 (require (prefix-in williams: describe))
