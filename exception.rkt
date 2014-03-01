@@ -1,9 +1,8 @@
 #lang racket/base
 (require (for-syntax racket/base))
 
-(provide try)
+(provide (all-defined-out))
 
-;; Pythonlike try/except 
 (define-syntax (try stx)
    (syntax-case stx ()
      [(_ body ... (except tests ...))

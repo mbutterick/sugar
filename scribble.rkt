@@ -1,7 +1,6 @@
 #lang racket
 (require (for-syntax racket/base))
-(require "coerce.rkt")
-
+(require "coercion/values.rkt")
 
 (provide when/block)
 
@@ -13,4 +12,7 @@
 (define-syntax (when/block stx)
   (syntax-case stx ()
     [(_ condition body ...)
-  #'(if condition (string-append* (map ->string (list body ...))) "")]))
+     #'(if condition (string-append* 
+                      (with-handlers ([exn:fail? (λ(exn) (error (format "when/block: ~a" (exn-message exn))))])
+                        (map ->string (list body ...))))
+           "")]))

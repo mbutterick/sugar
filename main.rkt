@@ -1,7 +1,7 @@
 #lang racket/base
 
 (require
-  "coerce.rkt"
+  "coercion.rkt"
   "container.rkt"
   "debug.rkt"
   "define.rkt"
@@ -11,11 +11,12 @@
   "len.rkt"
   "exception.rkt"
   "scribble.rkt"
+  "tree.rkt"
   "values.rkt")
 
 (provide 
  (all-from-out
-  "coerce.rkt"
+  "coercion.rkt"
   "container.rkt"
   "debug.rkt"
   "define.rkt"
@@ -25,4 +26,5 @@
   "len.rkt"
   "exception.rkt"
   "scribble.rkt"
+  "tree.rkt"
   "values.rkt"))

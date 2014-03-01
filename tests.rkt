@@ -1,13 +1,13 @@
 #lang racket/base
 
 (require rackunit net/url racket/set)
-(require "coerce.rkt" "container.rkt" "string.rkt" "list.rkt" "len.rkt")
+(require "main.rkt")
 
 (check-equal? (->string "foo") "foo")
 (check-equal? (->string '()) "")
 (check-equal? (->string 'foo) "foo")
 (check-equal? (->string 123) "123")
-(check-equal? (->string (string->url "foo/bar.html")) "foo/bar.html")
+;(check-equal? (->string (string->url "foo/bar.html")) "foo/bar.html")
 (define file-name-as-text "foo.txt")
 (check-equal? (->string (string->path file-name-as-text)) file-name-as-text)
 (check-equal? (->string #\¶) "¶")
@@ -90,5 +90,18 @@
 
 ;  (check-equal? (trim (list "\n" " " 1 2 3 "\n") whitespace?) '(1 2 3))
 (check-equal? (trim (list 1 3 2 4 5 6 8 9 13) odd?) '(2 4 5 6 8))
-; (check-equal? (splitf-at* '("foo" " " "bar" "\n" "\n" "ino") whitespace?) '(("foo")("bar")("ino")))
+;(check-equal? (splitf-at* '("foo" " " "bar" "\n" "\n" "ino") whitespace?) '(("foo")("bar")("ino")))
 (check-equal? (splitf-at* '(1 2 3 4 5 6) even?) '((1)(3)(5)))
+
+
+(check-equal? (filter-tree string? '(p)) null)
+(check-equal? (filter-tree string? '(p "foo" "bar")) '("foo" "bar"))
+(check-equal? (filter-tree string? '(p "foo" (p "bar"))) '("foo" ("bar")))
+(check-equal? (filter-tree (λ(i) (and (string? i) (equal? i "\n"))) '("\n" (foo "bar") "\n")) '("\n" "\n"))
+(check-equal? (filter-not-tree string? '(p)) '(p))
+(check-equal? (filter-not-tree string? '(p "foo" "bar")) '(p))
+(check-equal? (filter-not-tree string? '(p "foo" (p "bar"))) '(p (p)))
+;(check-equal? (filter-tree (λ(i) (and (tagged-xexpr? i) (equal? 'em (car i)))) '(p "foo" (em "bar"))) '(p "foo"))
+
+(check-equal? (map-tree (λ(i) (if (number? i) (* 2 i) i)) '(p 1 2 3 (em 4 5))) '(p 2 4 6 (em 8 10)))
+(check-equal? (map-tree (λ(i) (if (symbol? i) 'foo i)) '(p 1 2 3 (em 4 5))) '(foo 1 2 3 (foo 4 5)))
