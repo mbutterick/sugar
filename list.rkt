@@ -1,5 +1,5 @@
 #lang racket/base
-(require racket/list racket/set)
+(require racket/list)
 (require "define/contract.rkt" "len.rkt" "coerce/values.rkt")
 
 (define+provide/contract (trim items test-proc)
@@ -39,7 +39,7 @@
 (define+provide/contract (members-unique? x)
   (any/c . -> . boolean?)
   (cond 
-    [(list? x) (= (len (apply set x)) (len x))]
+    [(list? x) (= (len (remove-duplicates x)) (len x))]
     [(vector? x) (members-unique? (->list x))]
     [(string? x) (members-unique? (string->list x))]
     [else (error (format "members-unique cannot be determined for ~a" x))]))
