@@ -74,6 +74,6 @@
 
 
 (define+provide (->boolean x)
-  (if x #t #f))
+  (and x #t))
 
 
