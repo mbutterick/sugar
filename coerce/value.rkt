@@ -15,6 +15,7 @@
       [(and (string? x) (> (len x) 0)) (->int (string->number x))]
       [(symbol? x) (->int (->string x))]
       [(char? x) (char->integer x)]
+      [(path? x) (->int (->string x))]
       [else (len x)])))
 
 
