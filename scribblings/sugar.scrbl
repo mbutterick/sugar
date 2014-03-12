@@ -130,7 +130,7 @@ Same as @racket[->list], but returns a vector rather than a list.
 (->boolean
 [v any/c])
 boolean?]
-Returns @racket[#t] for any @racket[_v] except @racket[#f], which remains @racket[#f].
+Return @racket[#t] for any @racket[_v] except @racket[#f], which remains @racket[#f]. Same as @code{(and v #t)}. 
 
 @examples[#:eval my-eval
 (map ->boolean (list "string" 'symbol + '(a) #f))
