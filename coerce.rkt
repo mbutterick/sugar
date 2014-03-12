@@ -1,4 +1,4 @@
 #lang racket/base
 
-(require "coerce/values.rkt" "coerce/contracts.rkt")
-(provide (all-from-out "coerce/values.rkt" "coerce/contracts.rkt"))
+(require "coerce/value.rkt" "coerce/contract.rkt")
+(provide (all-from-out "coerce/value.rkt" "coerce/contract.rkt"))

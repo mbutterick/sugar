@@ -1,6 +1,6 @@
 #lang racket
 (require (for-syntax racket/base))
-(require "coerce/values.rkt")
+(require "coerce/value.rkt")
 
 (provide when/block)
 

@@ -1,4 +1,5 @@
 #lang racket/base
+(require (for-syntax racket/base racket/syntax))
 (require net/url xml racket/set)
 (require "../len.rkt" "../define/provide.rkt")
 
@@ -77,3 +78,19 @@
   (and x #t))
 
 
+(define-syntax (make-*ish-predicate stx)
+  (syntax-case stx ()
+    [(_ stem)
+     (with-syntax ([stemish? (format-id stx "~aish?" #'stem)]
+                   [->stem (format-id stx "->~a" #'stem)])
+       #`(begin
+           (define+provide (stemish? x)
+             (with-handlers ([exn:fail? (λ(e) #f)]) (and (->stem x) #t)))))]))
+
+(make-*ish-predicate int)
+(make-*ish-predicate string)
+(make-*ish-predicate symbol)
+(make-*ish-predicate url)
+(make-*ish-predicate complete-path)
+(make-*ish-predicate path)
+;; no point to having list and vector here; they work with everything
