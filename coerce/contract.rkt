@@ -23,17 +23,17 @@
        (with-syntax ([coerce/stem? (format-id stx "coerce/~a?" #'stem)]
                      [->stem (format-id stx "->~a" #'stem)]
                      [can-be-stem? (format-id stx "can-be-~a?" #'stem)])
-         #'(define+provide coerce/stem?
-             (make-contract
+         #'(make-contract
               #:name 'coerce/stem?
-              #:projection (make-blame-handler ->stem 'can-be-stem?)))))]))
+              #:projection (make-blame-handler ->stem 'can-be-stem?))))]))
 
 
-(make-coercion-contract int)
-(make-coercion-contract string)
-(make-coercion-contract symbol)
-(make-coercion-contract path)
-(make-coercion-contract boolean)
+(define+provide coerce/int? (make-coercion-contract int))
+(define+provide coerce/symbol? (make-coercion-contract symbol))
+(define+provide coerce/path? (make-coercion-contract path))
+(define+provide coerce/boolean? (make-coercion-contract boolean))
+(define+provide coerce/string? (make-coercion-contract string))
+
 
 #|
 (define/contract (foo x)
