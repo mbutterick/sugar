@@ -52,6 +52,6 @@
       (let* ([duplicate-keys (filter-not empty? (hash-map (count-incidence x) 
                                                           (λ(k v) (if (> v 1) k '()))))])
         (error (string-append (if (= (len duplicate-keys) 1) 
-                                  "Item isn’t"
-                                  "Items aren’t") " unique:") duplicate-keys))
+                                  "item isn’t"
+                                  "items aren’t") " unique:") duplicate-keys))
       result))

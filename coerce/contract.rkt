@@ -1,5 +1,7 @@
 #lang racket/base
+(require (for-syntax racket/base racket/syntax))
 (require racket/contract "../define/provide.rkt" "value.rkt")
+
 
 
 (define-syntax-rule (make-blame-handler try-proc expected-sym)
@@ -10,37 +12,30 @@
                                     b x
                                     '(expected: "~a" given: "~e")
                                     expected-sym x))])
-                      (try-proc x)))))
-
-(define+provide coerce/integer?
-  (make-contract
-   #:name 'coerce/integer?
-   #:projection (make-blame-handler ->int 'can-be-integer?)))
+        (try-proc x)))))
 
 
-(define+provide coerce/string?
-  (make-contract
-   #:name 'coerce/string?
-   #:projection (make-blame-handler ->string 'can-be-string?)))
+(provide make-coercion-contract)
+(define-syntax (make-coercion-contract stx)
+  (syntax-case stx ()
+    [(_ stem)
+     (let ([stem-datum (syntax->datum #'stem)])
+       (with-syntax ([coerce/stem? (format-id stx "coerce/~a?" #'stem)]
+                     [->stem (format-id stx "->~a" #'stem)]
+                     [can-be-stem? (format-id stx "can-be-~a?" #'stem)])
+         #'(define+provide coerce/stem?
+             (make-contract
+              #:name 'coerce/stem?
+              #:projection (make-blame-handler ->stem 'can-be-stem?)))))]))
 
 
-(define+provide coerce/symbol?
-  (make-contract
-   #:name 'coerce/symbol?
-   #:projection (make-blame-handler ->symbol 'can-be-symbol?)))
+(make-coercion-contract int)
+(make-coercion-contract string)
+(make-coercion-contract symbol)
+(make-coercion-contract path)
+(make-coercion-contract boolean)
 
-
-(define+provide coerce/path?
-  (make-contract
-   #:name 'coerce/path?
-   #:projection (make-blame-handler ->path 'can-be-path?)))
-
-
-(define+provide coerce/boolean?
-  (make-contract
-   #:name 'coerce/boolean?
-   #:projection (make-blame-handler ->boolean 'can-be-boolean?)))
-
-
-
-
+#|
+(define/contract (foo x)
+  (coerce/string? . -> . any/c)
+  x)|#
