@@ -11,7 +11,6 @@
   "string.rkt"
   "len.rkt"
   "exception.rkt"
-  "scribble.rkt"
   "tree.rkt"
   "values.rkt")
 
@@ -27,6 +26,5 @@
   "string.rkt"
   "len.rkt"
   "exception.rkt"
-  "scribble.rkt"
   "tree.rkt"
   "values.rkt"))
