@@ -145,7 +145,7 @@ Report whether @racket[_v] can be coerced to the specified type.
 
 
 
-@section{Contracts}
+@section{Contracts that coerce}
 @defmodule[sugar/coerce/contract]
 
 @deftogether[(
@@ -168,20 +168,5 @@ If @racket[_v] can be coerced to the specified type, these contracts will return
     (int-sum 1.6 3.8)
 ]
 
-@defproc[
-(make-coercion-contract 
-[type string?]) 
-contract?]
-Make a coercion contract named @code{coerce/type?} that will coerce a value to the speficied type. Assumes the existence of a @code{->type} function to do the coercion.
 
 
-@examples[#:eval my-eval
-(define (->list x)
-    (if (list? x) x (list x)))
-(define coerce/list? (make-coercion-contract list))
-(define/contract (listify x)
-    (any/c . -> . coerce/list?)
-    x)
-(listify '(a b c))
-(listify 24)
-]
