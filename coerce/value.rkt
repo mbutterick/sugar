@@ -19,6 +19,19 @@
       [else (len x)])))
 
 
+(provide ->macrostring)
+(define-syntax-rule (->macrostring x)
+  (if (string? x)
+      x ; fast exit for strings
+      (with-handlers ([exn:fail? (make-coercion-error-handler 'string (format "~a (result of ~a" x 'x))])
+        (cond
+          [(equal? '() x) ""]
+          [(symbol? x) (symbol->string x)]
+          [(number? x) (number->string x)]
+          [(path? x) (path->string x)]
+          [(char? x) (format "~a" x)]
+          [else (error)]))))
+
 (define+provide (->string x)
   (if (string? x)
       x ; fast exit for strings
