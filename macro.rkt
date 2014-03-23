@@ -25,3 +25,8 @@
 
 (bar 4 1)
 (map bar '(2 4 6) '(2 4 6))
+
+(define-syntax zam (add1 x))
+
+(zam 4)
+(map zam '(2 4 6))
