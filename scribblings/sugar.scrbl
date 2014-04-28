@@ -1,6 +1,6 @@
 #lang scribble/manual
 
-@(require scribble/eval (for-label racket "../main.rkt" sugar))
+@(require scribble/eval (for-label racket sugar))
 
 @(define my-eval (make-base-eval))
 @(my-eval `(require sugar))
@@ -22,6 +22,9 @@ After that, you can update the package from the command line:
 
 
 @include-section["coerce.scrbl"]
+
+@include-section["len.scrbl"]
+
 
 @section{License & source code}
 

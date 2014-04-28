@@ -15,18 +15,18 @@
 
 
 ;(define foo (λ(x) (add1 x)))
-(define->macro foo (λ(x) (add1 x)))
+;(define->macro foo (λ(x) (add1 x)))
 
-(foo 4)
-(map foo '(2 4 6))
+;(foo 4)
+;(map foo '(2 4 6))
 
 ;(define (bar x) (add1 x))
-(define->macro (bar x y) (+ x y))
+;(define->macro (bar x y) (+ x y))
 
-(bar 4 1)
-(map bar '(2 4 6) '(2 4 6))
+;(bar 4 1)
+;(map bar '(2 4 6) '(2 4 6))
 
-(define-syntax zam (add1 x))
+;(define-syntax zam (add1 x))
 
-(zam 4)
-(map zam '(2 4 6))
+;(zam 4)
+;(map zam '(2 4 6))
