@@ -6,7 +6,7 @@
 @(my-eval `(require sugar))
 
 
-@title{Sugar}
+@title{Sugar: readability & convenience library}
 
 @author[(author+email "Matthew Butterick" "mb@mbtype.com")]
 
