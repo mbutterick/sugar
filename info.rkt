@@ -1,4 +1,2 @@
-#lang info
-(define collection "sugar")
-(define scribblings '(("scribblings/sugar.scrbl" (multi-page))))
-(define deps '("describe"))
+#lang setup/infotab
+(define collection 'multi)
