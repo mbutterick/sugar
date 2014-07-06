@@ -12,3 +12,7 @@
   (coerce/string? coerce/string? . -> . coerce/boolean?)
   (and (<= (string-length ender) (string-length str)) 
        (equal? (substring str (- (string-length str) (string-length ender)) (string-length str)) ender)))
+
+(define+provide/contract (capitalized? str)
+  (coerce/string? . -> . coerce/boolean?)
+  (char-upper-case? (car (string->list str))))
