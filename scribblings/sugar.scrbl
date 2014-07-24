@@ -20,6 +20,8 @@ A collection of small functions to help make Racket code simpler & more readable
 
 @include-section["coerce.scrbl"]
 
+@include-section["container.scrbl"]
+
 @include-section["len.scrbl"]
 
 @include-section["license.scrbl"]
