@@ -8,6 +8,8 @@
 @title{Coercion}
 @defmodule[sugar/coerce]
 
+Functions that coerce the datatype of a value to another type. Racket already has type-specific conversion functions. But if you're handling values of indeterminate type — as sometimes happens in an untyped language — then handling the possible cases individually gets to be a drag.
+
 @section{Values}
 
 @defproc[

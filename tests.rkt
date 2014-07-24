@@ -47,23 +47,23 @@
 
 
 (check-equal? (get '(0 1 2 3 4 5) 2) 2)
+(check-exn exn:fail? (λ() (get '(0 1 2 3 4 5) 100))) ; index too big
 (check-equal? (get `(0 1 ,(list 2) 3 4 5) 2) (list 2))
 (check-equal? (get '(0 1 2 3 4 5) 0 2) '(0 1))
-(check-equal? (get '(0 1 2 3 4 5) 2 -1) '(2 3 4))
-(check-equal? (get '(0 1 2 3 4 5) 2 'end) '(2 3 4 5))
 (check-equal? (get (list->vector '(0 1 2 3 4 5)) 2) 2)
 (check-equal? (get (list->vector'(0 1 2 3 4 5)) 0 2) (list->vector '(0 1)))
-(check-equal? (get (list->vector'(0 1 2 3 4 5)) 2 -1) (list->vector '(2 3 4)))
-(check-equal? (get (list->vector'(0 1 2 3 4 5)) 2 'end) (list->vector '(2 3 4 5)))
 (check-equal? (get "purple" 2) "r")
 (check-equal? (get "purple" 0 2) "pu")
-(check-equal? (get "purple" 2 -1) "rpl")
-(check-equal? (get "purple" 2 'end) "rple")
 (check-equal? (get 'purple 2) 'r)
 (check-equal? (get 'purple 0 2) 'pu)
-(check-equal? (get 'purple 2 -1) 'rpl)
-(check-equal? (get 'purple 2 'end) 'rple)
+(check-equal? (get (string->path "/root/foo/bar/file.txt") 2) (string->path "foo"))
+(check-equal? (get (string->path "/root/foo/bar/file.txt") 0 2) (list (string->path "/") (string->path "root")))
 (check-equal? (get (make-hash `((a . ,(list 1)) (b . ,(list 2)) (c  . ,(list 3)))) 'a) (list 1))
+(check-exn exn:fail? (λ() (get (make-hash `((a . ,(list 1)) (b . ,(list 2)) (c  . ,(list 3)))) 'z))) ; nonexistent key
+
+(check-equal? (get (string->path "/root/foo/bar/file.txt") 1) (string->path "root"))
+(check-equal? (get (string->path "/root/foo/bar/file.txt") 0 3)
+              (map string->path '("/" "root" "foo")))
 
 
 (check-true (2 . in? . '(1 2 3)))
@@ -76,7 +76,10 @@
 (check-false ("z" . in? . "foobar"))
 (check-true ('o . in? . 'foobar))
 (check-false ('z . in? . 'foobar))
-(check-false ("F" . in? . #\F))
+(check-true ("F" . in? . #\F))
+
+(check-true (in? "foo" (string->path "/root/foo/bar/file.txt")))
+(check-false (in? "zam" (string->path "/root/foo/bar/file.txt")))
 
 
 (check-true ("foobar" . starts-with? . "foo"))
