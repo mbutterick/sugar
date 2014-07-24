@@ -1,5 +1,5 @@
 #lang racket/base
-(require "define/contract.rkt")
+(require "define.rkt")
 (require "coerce.rkt" "len.rkt" racket/list)
 
 (define (sliceable-container? x)

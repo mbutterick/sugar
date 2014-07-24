@@ -1,5 +1,5 @@
 #lang racket/base
-(require "define/contract.rkt" "coerce.rkt")
+(require "define.rkt" "coerce.rkt")
 
 
 (define+provide/contract (starts-with? str starter)

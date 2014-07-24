@@ -1,5 +1,5 @@
 #lang racket/base
-(require "define/contract.rkt")
+(require "define.rkt")
 
 (module+ test (require rackunit))
 

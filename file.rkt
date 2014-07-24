@@ -1,5 +1,5 @@
 #lang racket/base
-(require sugar/define/contract sugar/coerce/contract sugar/string racket/path)
+(require "define.rkt" "coerce.rkt" "string.rkt" racket/path)
 
 
 

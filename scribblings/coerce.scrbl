@@ -9,27 +9,42 @@
 @defmodule[sugar/coerce]
 
 @section{Values}
-@defmodule[sugar/coerce/value]
 
 @defproc[
 (->int
 [v any/c])
 integer?]
-Convert @racket[_v] to an integer in the least surprising way possible, or raise an error if it can't be done
+Convert @racket[_v] to an integer in the least surprising way, or raise an error if no conversion is possible.
 
 Numbers are rounded down to the nearest integer. 
 
-Stringlike values are converted to numbers and rounded down. 
+@examples[#:eval my-eval
+(->int 3)
+(->int 3.5)
+(->int -2.5)
+(->int (+ 3 (/ 1 2)))]
+
+Stringlike values — paths, symbols, and strings — are converted to numbers and rounded down. 
+
+@examples[#:eval my-eval
+(->int "3.5")
+(->int '3.5)
+(->int (string->path "3.5"))]
 
 Characters are directly converted to integers. 
+
+@examples[#:eval my-eval
+(->int #\A)
+(->int #\◊)]
 
 Lists, vectors, and other multi-value datatypes return their length (using @racket[len]).
 
 @examples[#:eval my-eval
-(map ->int (list 3 3.5 -2.5 (+ 3 (/ 1 2))))
-(map ->int (list "3.5" '3.5 (string->path "3.5")))
 (->int (list 5 6 7))
-(->int (hash 'a 1 'b 2 'c 3))
+(->int (hash 'a 1 'b 2 'c 3))]
+
+The function will raise an error if no sensible conversion is possible.
+@examples[#:eval my-eval
 (->int #t)
 ]
 
@@ -52,7 +67,7 @@ Return the most natural string representation of @racket[_v], or raise an error 
 (->symbol
 [v any/c])
 symbol?]
-Same as @racket[->string], but returns a symbol rather than a string.
+Same as @racket[->string], but return a symbol rather than a string.
 
 @examples[#:eval my-eval
 (->symbol "string") 
@@ -74,7 +89,7 @@ path?]
 [v any/c])
 complete-path?]
 )]
-Same as @racket[->string], but returns a path (or complete path) rather than a string.
+Same as @racket[->string], but return a path (or complete path) rather than a string.
 
 @examples[#:eval my-eval
 (->path "string") 
@@ -90,14 +105,18 @@ Same as @racket[->string], but returns a path (or complete path) rather than a s
 (->list
 [v any/c])
 list?]
-Convert a listlike @racket[_v] into a list, or put an atomic @racket[_v] into a single-member list. 
+If @racket[_v] is a listlike data type — a vector, set, stream, sequence, or list — convert it to a list. A hash or dictionary becomes a list using @racket[dict->list]. If @racket[_v] is an atomic value, turn it into a single-member list. 
+
+Note that a string is treated as an atomic value rather than decomposed with @racket[string->list]. This is done so the function handles strings the same way as symbols and paths.
 
 @examples[#:eval my-eval
-(->list "string") 
-(->list 'symbol)
-(->list +)
 (->list '(a b c))
 (->list (list->vector '(a b c)))
+(->list (make-hash '((k . v) (k2 . v2))))
+(->list "string") 
+(->list 'symbol)
+(->list (string->path "path"))
+(->list +)
 ]
 
 @defproc[
@@ -107,21 +126,27 @@ vector?]
 Same as @racket[->list], but returns a vector rather than a list.
 
 @examples[#:eval my-eval
-(->vector "string") 
-(->vector 'symbol)
-(->vector +)
 (->vector '(a b c))
 (->vector (list->vector '(a b c)))
+(->vector (make-hash '((k . v) (k2 . v2))))
+(->vector "string") 
+(->vector 'symbol)
+(->vector (string->path "path"))
+(->vector +)
 ]
 
 @defproc[
 (->boolean
 [v any/c])
 boolean?]
-Return @racket[#t] for any @racket[_v] except @racket[#f], which remains @racket[#f]. Same as @code{(and v #t)}. 
+Return @racket[#t] for all @racket[_v] except @racket[#f], which remains @racket[#f].
 
 @examples[#:eval my-eval
-(map ->boolean (list "string" 'symbol + '(l i s t) #f))
+(->boolean "string")
+(->boolean 'symbol)
+(->boolean +)
+(->boolean '(l i s t))
+(->boolean #f)
 ]
 
 
@@ -131,8 +156,10 @@ Return @racket[#t] for any @racket[_v] except @racket[#f], which remains @racket
 @defproc[(symbolish? [v any/c]) boolean?]
 @defproc[(pathish? [v any/c]) boolean?]
 @defproc[(complete-pathish? [v any/c]) boolean?]
+@defproc[(listish? [v any/c]) boolean?]
+@defproc[(vectorish? [v any/c]) boolean?]
 )]
-Report whether @racket[_v] can be coerced to the specified type.
+Predicates that report whether @racket[_v] can be coerced to the specified type.
 
 @examples[#:eval my-eval
 (map intish? (list 3 3.5 #\A "A" + #t)) 
@@ -140,32 +167,48 @@ Report whether @racket[_v] can be coerced to the specified type.
 (map symbolish? (list 3 3.5 #\A "A" + #t)) 
 (map pathish? (list 3 3.5 #\A "A" + #t)) 
 (map complete-pathish? (list 3 3.5 #\A "A" + #t)) 
-
+(map listish? (list 3 3.5 #\A "A" + #t)) 
+(map vectorish? (list 3 3.5 #\A "A" + #t)) 
 ]
 
 
 
-@section{Contracts that coerce}
-@defmodule[sugar/coerce/contract]
+@section{Coercion contracts}
 
 @deftogether[(
-@defproc[(coerce/int? [v any/c]) int?]
-@defproc[(coerce/string? [v any/c]) string]
-@defproc[(coerce/symbol? [v any/c]) symbol]
+@defproc[(coerce/int? [v any/c]) integer?]
+@defproc[(coerce/string? [v any/c]) string?]
+@defproc[(coerce/symbol? [v any/c]) symbol?]
 @defproc[(coerce/path? [v any/c]) path?]
 @defproc[(coerce/boolean? [v any/c]) boolean?]
 )]
-If @racket[_v] can be coerced to the specified type, these contracts will return it so coerced. If not, they raise the usual contract error. This is an unusual way to use contracts, but it can be handy.
+If @racket[_v] can be coerced to the specified type, change it to that type, then return it. If not, raise the usual contract error. These contracts can be used with input or output values. 
 
 @examples[#:eval my-eval
 (define/contract (add-ints x y)
     (coerce/int? coerce/int? . -> . any/c)
     (+ x y)) 
+(code:comment @#,t{Input arguments will be coerced to integers, then added})
 (add-ints 1.6 3.8)
 (define/contract (int-sum x y)
     (any/c any/c . -> . coerce/int?)
     (+ x y))
+(code:comment @#,t{Input arguments will be added, and the result coerced to an integer})
     (int-sum 1.6 3.8)
+]
+
+
+Please note: this is not an officially sanctioned way to use Racket's contract system, because contracts aren't supposed to mutate their values (see @racket[make-contract]).
+
+But coercion contracts can be useful in two situations:
+
+@itemlist[
+
+@item{You want to be liberal about input types, but don't want to deal with the housekeeping and manual conversions between types.}
+
+@item{Your contract involves an expensive operation that you'd rather avoid performing twice.}
+
+
 ]
 
 

@@ -1,6 +1,6 @@
 #lang racket/base
 (require (for-syntax racket/base))
-(require "define/contract.rkt")
+(require "define.rkt")
 
 (define+provide/contract (bytecount->string bytecount)
   (integer? . -> . string?)

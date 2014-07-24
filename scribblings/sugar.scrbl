@@ -10,7 +10,7 @@
 
 @author[(author+email "Matthew Butterick" "mb@mbtype.com")]
 
-A collection of tiny functions to help make Racket code more readable.
+A collection of small functions to help make Racket code simpler & more readable.
 
 @section{Installation & updates}
 
