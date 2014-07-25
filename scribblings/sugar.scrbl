@@ -14,7 +14,7 @@
 
 A collection of small functions to help make Racket code simpler & more readable.
 
-@local-table-of-contents[]
+@;local-table-of-contents[]
 
 @include-section["installation.scrbl"]
 
@@ -34,4 +34,4 @@ A collection of small functions to help make Racket code simpler & more readable
 
 @include-section["license.scrbl"]
 
-@index-section[]
+@;index-section[]
