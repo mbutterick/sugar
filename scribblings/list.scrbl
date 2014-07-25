@@ -3,7 +3,7 @@
 @(require scribble/eval (for-label racket sugar))
 
 @(define my-eval (make-base-eval))
-@(my-eval `(require sugar))
+@(my-eval `(require sugar racket/list))
 
 @title{List}
 @defmodule[sugar/list]
@@ -81,4 +81,12 @@ A special version of @racket[when] that you can use inside @racket[quasiquote] t
 `(,(when (even? 3) "hooray"))
 `(,@(when/splice (even? 2) "hooray"))
 `(,@(when/splice (even? 3) "hooray"))
+]
+
+@defform[(values->list values)]
+Convert @racket[_values] to a simple list.
+
+@examples[#:eval my-eval
+(split-at '(a b c d e f) 3)
+(values->list (split-at '(a b c d e f) 3))
 ]

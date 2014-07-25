@@ -70,3 +70,9 @@
   (syntax-case stx ()
     [(_ test body)
       #'(if test (list body) '())]))
+
+
+(provide values->list)
+(define-syntax (values->list stx)
+  (syntax-case stx ()
+    [(_ values-expr) #'(call-with-values (λ () values-expr) list)]))

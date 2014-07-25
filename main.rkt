@@ -9,8 +9,7 @@
   "list.rkt"
   "misc.rkt"
   "string.rkt"
-  "len.rkt"
-  "values.rkt")
+  "len.rkt")
 
 (provide 
  (all-from-out
@@ -22,5 +21,4 @@
   "list.rkt"
   "misc.rkt"
   "string.rkt"
-  "len.rkt"
-  "values.rkt"))
+  "len.rkt"))
