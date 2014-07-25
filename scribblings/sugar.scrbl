@@ -30,6 +30,8 @@ A collection of small functions to help make Racket code simpler & more readable
 
 @include-section["list.scrbl"]
 
+@include-section["string.scrbl"]
+
 @include-section["license.scrbl"]
 
 @index-section[]

@@ -142,3 +142,15 @@
 (check-equal? (remove-ext* (->path ".foo.txt")) (->path ".foo.txt"))
 (check-not-equal? (remove-ext* foo.bar.txt-path) foo.bar-path) ; removes more than one ext
 (check-equal? (remove-ext* foo.bar.txt-path) foo-path)
+
+
+(check-true (starts-with? "foobar" "foo"))
+(check-true (starts-with? "foobar" "foobar"))
+(check-false (starts-with? "foobar" "zam"))
+(check-false (starts-with? "foobar" "foobars"))
+(check-true (ends-with? "foobar" "bar"))
+(check-false (ends-with? "foobar" "zam"))
+(check-true (ends-with? "foobar" "foobar"))
+(check-false (ends-with? "foobar" "foobars"))
+(check-true (capitalized? "Brennan"))
+(check-false (capitalized? "foobar"))
