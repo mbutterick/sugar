@@ -1,4 +1,5 @@
 #lang racket/base
+(require (for-syntax racket/base))
 (require racket/list racket/set)
 (require "define.rkt" "len.rkt" "coerce.rkt")
 
@@ -59,3 +60,13 @@
                                   "item isn’t"
                                   "items aren’t") " unique:") duplicate-keys))
       result))
+
+
+;; for use inside quasiquote
+;; instead of ,(when ...) use ,@(when/splice ...)
+;; to avoid voids
+(provide when/splice)
+(define-syntax (when/splice stx)
+  (syntax-case stx ()
+    [(_ test body)
+      #'(if test (list body) '())]))

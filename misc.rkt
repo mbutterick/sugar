@@ -21,11 +21,3 @@
     [else (format "~a bytes" bytecount)]))
 
 
-;; for use inside quasiquote
-;; instead of ,(when ...) use ,@(when/splice ...)
-;; to avoid voids
-(provide when/splice)
-(define-syntax (when/splice stx)
-  (syntax-case stx ()
-    [(_ test body)
-      #'(if test (list body) '())]))
