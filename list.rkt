@@ -2,9 +2,9 @@
 (require racket/list)
 (require "define.rkt" "len.rkt" "coerce.rkt")
 
-(define+provide/contract (trim items test-proc)
+(define+provide/contract (trimf xs test-proc)
   (list? procedure? . -> . list?)
-  (dropf-right (dropf items test-proc) test-proc))
+  (dropf-right (dropf xs test-proc) test-proc))
 
 
 (define+provide/contract (list->slices xs len)
@@ -17,7 +17,7 @@
 
 (define+provide/contract (splitf-at* xs split-test)
   (list? predicate/c . -> . (listof list?))
-  (let loop ([xs (trim xs split-test)] [acc '()]) 
+  (let loop ([xs (trimf xs split-test)] [acc '()]) 
     (if (empty? xs) 
         (reverse acc)  ; because accumulation is happening backward 
         (let-values ([(item rest) 
