@@ -15,7 +15,7 @@
     [else (cons (take xs len) (list->slices (drop xs len) len))]))
 
 
-(define+provide/contract (splitf-at* xs split-test)
+(define+provide/contract (filter-split xs split-test)
   (list? predicate/c . -> . (listof list?))
   (let loop ([xs (trimf xs split-test)] [acc '()]) 
     (if (empty? xs) 
