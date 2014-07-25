@@ -24,6 +24,8 @@ A collection of small functions to help make Racket code simpler & more readable
 
 @include-section["debug.scrbl"]
 
+@include-section["file.scrbl"]
+
 @include-section["len.scrbl"]
 
 @include-section["license.scrbl"]

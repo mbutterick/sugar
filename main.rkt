@@ -10,7 +10,6 @@
   "misc.rkt"
   "string.rkt"
   "len.rkt"
-  "exception.rkt"
   "tree.rkt"
   "values.rkt")
 
@@ -25,6 +24,5 @@
   "misc.rkt"
   "string.rkt"
   "len.rkt"
-  "exception.rkt"
   "tree.rkt"
   "values.rkt"))

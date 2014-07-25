@@ -1,17 +1,15 @@
 #lang racket/base
 (require "define.rkt" "coerce.rkt" "string.rkt" racket/path)
 
-
-
 (define+provide/contract (get-enclosing-dir p)
   (coerce/path? . -> . path?)
   (simplify-path (build-path p 'up)))
 
 ;; does path have a certain extension
 (define+provide/contract (has-ext? x ext)
-  (coerce/path? coerce/symbol? . -> . coerce/boolean?)
+  (coerce/path? coerce/string? . -> . coerce/boolean?)
   (define ext-of-path (filename-extension x))
-  (and ext-of-path (equal? (string-downcase (bytes->string/utf-8 ext-of-path)) (string-downcase (symbol->string ext)))))
+  (and ext-of-path (equal? (string-downcase (bytes->string/utf-8 ext-of-path)) (string-downcase ext))))
 
 ;; get file extension as a string, or return #f 
 ;; (consistent with filename-extension behavior)
@@ -29,8 +27,6 @@
   (coerce/path? . -> . coerce/boolean?)
   (ormap (λ(ext) (has-ext? x ext)) binary-extensions))
 
-
-
 ;; put extension on path
 ;; use local contract here because this function is used within module
 (define/contract+provide (add-ext x ext)
@@ -47,7 +43,7 @@
 
 
 ;; take all extensions off path
-(define+provide/contract (remove-all-ext x)
+(define+provide/contract (remove-ext* x)
   (coerce/path? . -> . path?)
   ;; pass through hidden files (those starting with a dot)
   (if (x . starts-with? . ".")
@@ -55,5 +51,5 @@
       (let ([path-with-removed-ext (remove-ext x)])
         (if (equal? x path-with-removed-ext)
             x
-            (remove-all-ext path-with-removed-ext)))))
+            (remove-ext* path-with-removed-ext)))))
 

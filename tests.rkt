@@ -109,3 +109,36 @@
 
 (check-equal? (map-tree (λ(i) (if (number? i) (* 2 i) i)) '(p 1 2 3 (em 4 5))) '(p 2 4 6 (em 8 10)))
 (check-equal? (map-tree (λ(i) (if (symbol? i) 'foo i)) '(p 1 2 3 (em 4 5))) '(foo 1 2 3 (foo 4 5)))
+
+
+(define foo-path-strings '("foo" "foo.txt" "foo.bar" "foo.bar.txt"))
+(define-values (foo-path foo.txt-path foo.bar-path foo.bar.txt-path) 
+  (apply values (map ->path foo-path-strings)))
+;; test the sample paths before using them for other tests
+(define foo-paths (list foo-path foo.txt-path foo.bar-path foo.bar.txt-path))
+(for-each check-equal? (map ->string foo-paths) foo-path-strings)
+
+
+(check-false (has-ext? foo-path 'txt)) 
+(check-true (foo.txt-path . has-ext? . 'txt))
+(check-true ((->path "foo.TXT") . has-ext? . 'txt))
+(check-true (has-ext? foo.bar.txt-path 'txt))
+(check-false (foo.bar.txt-path . has-ext? . 'doc)) ; wrong extension
+
+
+(check-equal? (get-ext (->path "foo.txt")) "txt")
+(check-false (get-ext "foo"))
+
+(check-equal? (add-ext (string->path "foo") "txt") (string->path "foo.txt"))
+(check-equal? (remove-ext foo-path) foo-path)
+(check-equal? (remove-ext (->path ".foo.txt")) (->path ".foo.txt"))
+(check-equal? (remove-ext foo.txt-path) foo-path)
+(check-equal? (remove-ext foo.bar.txt-path) foo.bar-path)
+(check-not-equal? (remove-ext foo.bar.txt-path) foo-path) ; does not remove all extensions
+
+
+(check-equal? (remove-ext* foo-path) foo-path)
+(check-equal? (remove-ext* foo.txt-path) foo-path)
+(check-equal? (remove-ext* (->path ".foo.txt")) (->path ".foo.txt"))
+(check-not-equal? (remove-ext* foo.bar.txt-path) foo.bar-path) ; removes more than one ext
+(check-equal? (remove-ext* foo.bar.txt-path) foo-path)
