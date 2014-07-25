@@ -39,7 +39,7 @@ For other @racket[_container] types — which are all sequence-like — retrieve
 (get 'purple 2 4)
 ]
 
-When @racket[_container] is a path, it's treated as a list of exploded path elements, not as a stringlike value.
+When @racket[_container] is a path, it's treated as a list of path elements (created by @racket[explode-path]), not as a stringlike value.
 
 @examples[#:eval my-eval
 (get (string->path "/root/foo/bar/file.txt") 1)

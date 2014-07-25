@@ -2,7 +2,7 @@
 
 (provide report)
 
-(define-syntax-rule (report var)
+(define-syntax-rule (report expr)
   (begin 
-    (displayln (format "~a = ~v" 'var var) (current-error-port)) 
-    var))
+    (displayln (format "~a = ~v" 'expr expr) (current-error-port)) 
+    expr))
