@@ -1,5 +1,5 @@
 #lang racket/base
-(require racket/list)
+(require racket/list racket/set)
 (require "define.rkt" "len.rkt" "coerce.rkt")
 
 (define+provide/contract (trimf xs test-proc)
@@ -28,7 +28,7 @@
           (loop rest (cons item acc))))))
 
 
-(define+provide/contract (count-incidence x)
+(define+provide/contract (frequency-hash x)
   (list? . -> . hash?)
   (define counter (make-hash))
   (for ([item (flatten x)]) 
@@ -36,22 +36,26 @@
   counter)
 
 
+
+
+
 (define+provide/contract (members-unique? x)
-  (any/c . -> . boolean?)
+  ((or/c list? vector? string?) . -> . boolean?)  
   (cond 
-    [(list? x) (= (len (remove-duplicates x)) (len x))]
-    [(vector? x) (members-unique? (vector->list x))]
-    [(string? x) (members-unique? (string->list x))]
-    [else (error (format "members-unique cannot be determined for ~a" x))]))
+      [(list? x) (= (len (remove-duplicates x)) (len x))]
+      [(vector? x) (->list x)]
+      [(string? x) (string->list x)]
+      [else (error (format "members-unique? cannot be determined for ~a" x))]))
+
 
 
 (define+provide/contract (members-unique?/error x)
   (any/c . -> . boolean?)
   (define result (members-unique? x))
   (if (not result)
-      (let* ([duplicate-keys (filter-not empty? (hash-map (count-incidence x) 
+      (let* ([duplicate-keys (filter-not empty? (hash-map (frequency-hash x) 
                                                           (λ(k v) (if (> v 1) k '()))))])
-        (error (string-append (if (= (len duplicate-keys) 1) 
+        (error (string-append "members-unique? failed because " (if (= (len duplicate-keys) 1) 
                                   "item isn’t"
                                   "items aren’t") " unique:") duplicate-keys))
       result))

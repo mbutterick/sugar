@@ -93,9 +93,9 @@
 (check-false ("foobar" . ends-with? . "foo"))
 
 ;  (check-equal? (trim (list "\n" " " 1 2 3 "\n") whitespace?) '(1 2 3))
-(check-equal? (trim (list 1 3 2 4 5 6 8 9 13) odd?) '(2 4 5 6 8))
-;(check-equal? (splitf-at* '("foo" " " "bar" "\n" "\n" "ino") whitespace?) '(("foo")("bar")("ino")))
-(check-equal? (splitf-at* '(1 2 3 4 5 6) even?) '((1)(3)(5)))
+(check-equal? (trimf (list 1 3 2 4 5 6 8 9 13) odd?) '(2 4 5 6 8))
+;(check-equal? (filter-split '("foo" " " "bar" "\n" "\n" "ino") whitespace?) '(("foo")("bar")("ino")))
+(check-equal? (filter-split '(1 2 3 4 5 6) even?) '((1)(3)(5)))
 
 
 (check-equal? (filter-tree string? '(p)) null)
