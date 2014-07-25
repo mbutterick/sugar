@@ -98,19 +98,6 @@
 (check-equal? (filter-split '(1 2 3 4 5 6) even?) '((1)(3)(5)))
 
 
-(check-equal? (filter-tree string? '(p)) null)
-(check-equal? (filter-tree string? '(p "foo" "bar")) '("foo" "bar"))
-(check-equal? (filter-tree string? '(p "foo" (p "bar"))) '("foo" ("bar")))
-(check-equal? (filter-tree (λ(i) (and (string? i) (equal? i "\n"))) '("\n" (foo "bar") "\n")) '("\n" "\n"))
-(check-equal? (filter-not-tree string? '(p)) '(p))
-(check-equal? (filter-not-tree string? '(p "foo" "bar")) '(p))
-(check-equal? (filter-not-tree string? '(p "foo" (p "bar"))) '(p (p)))
-;(check-equal? (filter-tree (λ(i) (and (tagged-xexpr? i) (equal? 'em (car i)))) '(p "foo" (em "bar"))) '(p "foo"))
-
-(check-equal? (map-tree (λ(i) (if (number? i) (* 2 i) i)) '(p 1 2 3 (em 4 5))) '(p 2 4 6 (em 8 10)))
-(check-equal? (map-tree (λ(i) (if (symbol? i) 'foo i)) '(p 1 2 3 (em 4 5))) '(foo 1 2 3 (foo 4 5)))
-
-
 (define foo-path-strings '("foo" "foo.txt" "foo.bar" "foo.bar.txt"))
 (define-values (foo-path foo.txt-path foo.bar-path foo.bar.txt-path) 
   (apply values (map ->path foo-path-strings)))

@@ -10,7 +10,6 @@
   "misc.rkt"
   "string.rkt"
   "len.rkt"
-  "tree.rkt"
   "values.rkt")
 
 (provide 
@@ -24,5 +23,4 @@
   "misc.rkt"
   "string.rkt"
   "len.rkt"
-  "tree.rkt"
   "values.rkt"))
