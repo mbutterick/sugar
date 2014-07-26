@@ -65,6 +65,7 @@
 (check-equal? (get (string->path "/root/foo/bar/file.txt") 0 3)
               (map string->path '("/" "root" "foo")))
 
+(check-equal? (get (make-hash '((a . 1) (b . 2) (c  . 3))) 'b) 2)
 
 (check-true (2 . in? . '(1 2 3)))
 (check-false (4 . in? . '(1 2 3)))

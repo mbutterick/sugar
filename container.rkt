@@ -27,7 +27,8 @@
           [else (error)]))))
   
   ;; don't return single-item results inside a list
-  (if (and (= (len result) 1) (sliceable-container? container))
+  ;; check for integer because integers don't have length
+  (if (and (not (integer? result)) (= (len result) 1) (sliceable-container? container))
       (car (->list result))
       result))
 
