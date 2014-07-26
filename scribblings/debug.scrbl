@@ -42,7 +42,7 @@ You can also add standalone calls to @racket[report] as a debugging aid at point
 @racketerror{x = 42
 @(linebreak)(first-condition? x) = #t}
 
-But don't do this, because the result of the @racket[if] expression will be skipped in favor of the last expression, which will be the value of @racket[_x]:
+But be careful — in the example below, the result of the @racket[if] expression will be skipped in favor of the last expression, which will be the value of @racket[_x]:
 
 @racketblock[
 (if (and (report (first-condition? x)) (second-condition? x))
