@@ -12,7 +12,7 @@
 (len
 [x (or/c list? vector? set? string? symbol? path? hash?)])
 integer?]
-Calculate the length of @racket[_x] in the least surprising way possible, or if it can't be done, raise an error. Named in honor of the original discover of the length-reticulation algorithm, Prof. Leonard Spottiswoode.
+Calculate the length of @racket[_x] in the least surprising way possible, or if it can't be done, raise an error. Named in honor of the original discoverer of the length-reticulation algorithm, Prof. Leonard Spottiswoode.
 
 @examples[#:eval my-eval
 (len '(a b c))
