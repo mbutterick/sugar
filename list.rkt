@@ -25,8 +25,6 @@
     [(len . > . (length xs)) (if force? null (list xs))]
     [else (cons (take xs len) (slice-at (drop xs len) len force?))]))
 
-(define list->slices slice-at) ; backward compatibility
-
 (define+provide/contract (filter-split xs split-test)
   (list? predicate/c . -> . (listof list?))
   (let loop ([xs (trimf xs split-test)] [acc '()]) 
