@@ -36,6 +36,37 @@ Like @racket[string-split], but for lists. Drop elements from anywhere in @racke
 (filter-split '(a b c 1 2 3 d e f) integer?)
 (filter-split '(a b c 1 2 3 d e f) (compose not integer?))]
 
+@defproc[
+(slice-at
+[lst list?]
+[len (and/c integer? positive?)]
+[force? boolean? #f])
+(listof list?)]
+Divide @racket[_lst] into sublists of length @racket[_len]. If @racket[_lst] cannot be divided evenly by @racket[_len], the last sublist will be shorter. If this displeases you, set @racket[_force?] to @racket[#t] and a stumpy final sublist will be ignored.
+
+@examples[#:eval my-eval
+(slice-at (range 5) 1)
+(slice-at (range 5) 2)
+(slice-at (range 5) 2 #t)
+(slice-at (range 5) 3)
+(slice-at (range 5) 5)
+(slice-at (range 5) 5 #t)
+(slice-at (range 5) 100000)
+(slice-at (range 5) 100000 #t)]
+
+@defproc[
+(slicef-at
+[lst list?]
+[pred procedure?]
+[force? boolean? #f])
+(listof list?)]
+Divide @racket[_lst] into sublists starting with elements matching @racket[_pred]. The first element of the first sublist may not match @racket[_pred]. Or, if you really & truly want only the sublists starting with an element matching @racket[_pred], set @racket[_force?] to @racket[#t].
+
+@examples[#:eval my-eval
+(slicef-at (range 5) even?)
+(slicef-at (range 5) odd?)
+(slicef-at (range 5) odd? #t)]
+
 
 @defproc[
 (frequency-hash

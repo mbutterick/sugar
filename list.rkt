@@ -7,14 +7,25 @@
   (list? procedure? . -> . list?)
   (dropf-right (dropf xs test-proc) test-proc))
 
+(define+provide/contract (slicef-at xs pred [force? #f])
+  ((list? procedure?) (boolean?) . ->* . (listof list?))
+  (cond
+    [(null? xs) null]
+    [force? (slicef-at (dropf xs (compose1 not pred)) pred)]
+    [else
+     (define-values (car-match others) (splitf-at xs pred))
+     (define-values (head tail) (splitf-at others (compose1 not pred)))
+     (cons (append (or car-match null) head) (slicef-at tail pred force?))]))
 
-(define+provide/contract (list->slices xs len)
-  (list? integer? . -> . (listof list?))
+(require sugar/debug)
+(define+provide/contract (slice-at xs len [force? #f])
+  ((list? (and/c integer? positive?)) (boolean?) . ->* . (listof list?))
   (cond
     [(equal? xs null) null]
-    [(len . > . (length xs)) (list xs)]
-    [else (cons (take xs len) (list->slices (drop xs len) len))]))
+    [(len . > . (length xs)) (if force? null (list xs))]
+    [else (cons (take xs len) (slice-at (drop xs len) len force?))]))
 
+(define list->slices slice-at) ; backward compatibility
 
 (define+provide/contract (filter-split xs split-test)
   (list? predicate/c . -> . (listof list?))
@@ -43,10 +54,10 @@
 (define+provide/contract (members-unique? x)
   ((or/c list? vector? string?) . -> . boolean?)  
   (cond 
-      [(list? x) (= (len (remove-duplicates x)) (len x))]
-      [(vector? x) (->list x)]
-      [(string? x) (string->list x)]
-      [else (error (format "members-unique? cannot be determined for ~a" x))]))
+    [(list? x) (= (len (remove-duplicates x)) (len x))]
+    [(vector? x) (->list x)]
+    [(string? x) (string->list x)]
+    [else (error (format "members-unique? cannot be determined for ~a" x))]))
 
 
 
@@ -57,8 +68,8 @@
       (let* ([duplicate-keys (filter-not empty? (hash-map (frequency-hash x) 
                                                           (λ(k v) (if (> v 1) k '()))))])
         (error (string-append "members-unique? failed because " (if (= (len duplicate-keys) 1) 
-                                  "item isn’t"
-                                  "items aren’t") " unique:") duplicate-keys))
+                                                                    "item isn’t"
+                                                                    "items aren’t") " unique:") duplicate-keys))
       result))
 
 
@@ -69,7 +80,7 @@
 (define-syntax (when/splice stx)
   (syntax-case stx ()
     [(_ test body)
-      #'(if test (list body) '())]))
+     #'(if test (list body) '())]))
 
 
 (provide values->list)

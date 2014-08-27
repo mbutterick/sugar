@@ -1,6 +1,6 @@
 #lang racket/base
 
-(require rackunit net/url racket/set)
+(require rackunit net/url racket/set racket/list)
 (require "main.rkt")
 
 (check-equal? (->string "foo") "foo")
@@ -142,3 +142,16 @@
 (check-false (ends-with? "foobar" "foobars"))
 (check-true (capitalized? "Brennan"))
 (check-false (capitalized? "foobar"))
+
+(check-equal? (slice-at (range 5) 1) '((0) (1) (2) (3) (4)))
+(check-equal? (slice-at (range 5) 2) '((0 1) (2 3) (4)))
+(check-equal? (slice-at (range 5) 2 #t) '((0 1) (2 3)))
+(check-equal? (slice-at (range 5) 3) '((0 1 2) (3 4)))
+(check-equal? (slice-at (range 5) 3 #t) '((0 1 2)))
+(check-exn exn:fail:contract? (λ() (slice-at (range 5) 0)))
+
+(check-equal? (slicef-at (range 5) even?) '((0 1) (2 3) (4)))
+(check-equal? (slicef-at (range 5) odd?) '((0) (1 2) (3 4)))
+(check-equal? (slicef-at (range 5) odd? #t) '((1 2) (3 4)))
+(check-equal? (slicef-at (range 5) procedure?) '((0 1 2 3 4)))
+(check-exn exn:fail:contract? (λ() (slicef-at (range 5) 3)))
