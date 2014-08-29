@@ -21,7 +21,7 @@
 
 ;; todo: add extensions
 (define binary-extensions
-  '(gif jpg jpeg mp3 png zip pdf ico tar ai eps exe))
+  (map ->string '(gif jpg jpeg mp3 png zip pdf ico tar ai eps exe)))
 
 (define+provide/contract (has-binary-ext? x)
   (coerce/path? . -> . coerce/boolean?)
