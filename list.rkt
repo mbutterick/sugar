@@ -41,7 +41,7 @@
 (define+provide/contract (frequency-hash x)
   (list? . -> . hash?)
   (define counter (make-hash))
-  (for ([item (flatten x)]) 
+  (for ([item (in-list (flatten x))]) 
     (hash-set! counter item (add1 (hash-ref counter item 0))))
   counter)
 

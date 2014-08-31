@@ -17,8 +17,8 @@
     (with-handlers ([exn:fail? (λ(exn) (error (format "get: couldn’t retrieve ~a from ~a" (if end (format "items ~a through ~a" start end) (format "item ~a" start)) container)))])
     (let ([end (if (and (equal? end #f) (sliceable-container? container)) (add1 start) end)])
         (cond
-          [(list? container) (for/list ([i (range start end)]) (list-ref container i))]
-          [(vector? container) (for/vector ([i (range start end)]) (vector-ref container i))]
+          [(list? container) (for/list ([i (in-range start end)]) (list-ref container i))]
+          [(vector? container) (for/vector ([i (in-range start end)]) (vector-ref container i))]
           [(string? container) (substring container start end)]
           [(symbol? container) (->symbol (get (->string container) start end))] 
           [(path? container) (get (explode-path container) start end)] 
