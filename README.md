@@ -11,4 +11,4 @@ And update like so:
 
     raco pkg update sugar
 
-You can [read the docs here](http://mbutterick.github.io/sugar/doc/).
+You can [read the docs here](http://pkg-build.racket-lang.org/doc/sugar).
