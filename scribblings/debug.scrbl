@@ -10,8 +10,8 @@
 
 Debugging utilities.
 
-@defform[(report expr)]
-Print the name and value of @racket[_expr] to @racket[current-error-port], but also return the evaluated result of @racket[_expr] as usual. This lets you see the value of an expression or variable at runtime without disrupting any of the surrounding code.
+@defform*[((report expr) (report expr maybe-name))]
+Print the name and value of @racket[_expr] to @racket[current-error-port], but also return the evaluated result of @racket[_expr] as usual. This lets you see the value of an expression or variable at runtime without disrupting any of the surrounding code. Optionally, you can use @racket[_maybe-name] to change the name shown in @racket[current-error-port].
 
 For instance, suppose you wanted to see how @racket[first-condition?] was being evaluted in this expression:
 
@@ -34,12 +34,12 @@ This code will run the same way as before. But when it reaches @racket[first-con
 You can also add standalone calls to @racket[report] as a debugging aid at points where the return value will be irrelevant, for instance:
 
 @racketblock[
-(report x)
+(report x x-before-function)
 (if (and (report (first-condition? x)) (second-condition? x))
   (one-thing)
   (other-thing))]
 
-@racketerror{x = 42
+@racketerror{x-before-function = 42
 @(linebreak)(first-condition? x) = #t}
 
 But be careful — in the example below, the result of the @racket[if] expression will be skipped in favor of the last expression, which will be the value of @racket[_x]:
@@ -49,3 +49,5 @@ But be careful — in the example below, the result of the @racket[if] expressi
   (one-thing)
   (other-thing))
   (report x)]
+
+
