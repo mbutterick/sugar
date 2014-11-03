@@ -5,6 +5,7 @@
 
 (check-equal? (->string "foo") "foo")
 (check-equal? (->string '()) "")
+(check-equal? (->string (void)) "")
 (check-equal? (->string 'foo) "foo")
 (check-equal? (->string 123) "123")
 ;(check-equal? (->string (string->url "foo/bar.html")) "foo/bar.html")

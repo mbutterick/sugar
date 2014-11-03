@@ -1,9 +1,7 @@
 #lang racket/base
 (require (for-syntax racket/base racket/syntax))
-(require net/url xml racket/set racket/contract racket/sequence racket/stream racket/dict)
+(require net/url racket/set racket/contract racket/sequence racket/stream racket/dict)
 (require "len.rkt" "define.rkt")
-
-
 
 (define (make-coercion-error-handler target-format x)
   (λ(e) (error (format "Can’t convert ~a to ~a" x target-format))))
@@ -26,7 +24,7 @@
       x ; fast exit for strings
       (with-handlers ([exn:fail? (make-coercion-error-handler 'string (format "~a (result of ~a" x 'x))])
         (cond
-          [(equal? '() x) ""]
+          [(or (equal? '() x) (void? x)) ""]
           [(symbol? x) (symbol->string x)]
           [(number? x) (number->string x)]
           [(path? x) (path->string x)]
@@ -38,7 +36,7 @@
       x ; fast exit for strings
       (with-handlers ([exn:fail? (make-coercion-error-handler 'string x)])
         (cond
-          [(equal? '() x) ""]
+          [(or (equal? '() x) (void? x)) ""]
           [(symbol? x) (symbol->string x)]
           [(number? x) (number->string x)]
           [(path? x) (path->string x)]
