@@ -85,3 +85,11 @@
 (define-syntax (values->list stx)
   (syntax-case stx ()
     [(_ values-expr) #'(call-with-values (λ () values-expr) list)]))
+
+
+(define+provide/contract (sublist xs i j)
+  (list? (and/c integer? (not/c negative?)) (and/c integer? (not/c negative?)) . -> . list?)
+  (cond
+    [(> j (length xs)) (error 'sublist (format "ending index ~a exceeds length of list" j))]
+    [(>= j i) (take (drop xs i) (- j i))]
+    [else (error 'sublist (format "starting index ~a is larger than ending index ~a" i j))]))
