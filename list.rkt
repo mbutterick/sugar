@@ -93,3 +93,17 @@
     [(> j (length xs)) (error 'sublist (format "ending index ~a exceeds length of list" j))]
     [(>= j i) (take (drop xs i) (- j i))]
     [else (error 'sublist (format "starting index ~a is larger than ending index ~a" i j))]))
+
+(define increasing-positive? (λ(xs) (apply < 0 xs)))
+(define increasing-positive-list? (and/c list? increasing-positive?))
+
+(define+provide/contract (break-at xs bps)
+  (list? (and/c coerce/list? increasing-positive-list?) . -> . (listof list?))
+  (when (ormap (λ(bp) (>= bp (length xs))) bps)
+    (error 'break-at (format "breakpoint in ~v is greater than or equal to input list length = ~a" bps (length xs))))
+  ;; easier to do back to front, because then the list index for each item won't change during the recursion
+  (reverse (let loop ([xs xs][bps (reverse bps)])
+             (if (empty? bps)
+                 (cons xs null) ; return whatever's left, because no more splits are possible
+                 (let-values ([(head tail) (split-at xs (car bps))])
+                   (cons tail (loop head (cdr bps))))))))
