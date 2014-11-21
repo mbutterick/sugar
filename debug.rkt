@@ -1,7 +1,7 @@
 #lang racket/base
 (require (for-syntax racket/base racket/syntax))
 
-(provide report report*)
+(provide (all-defined-out))
 
 (define-syntax (report stx)
   (syntax-case stx ()
