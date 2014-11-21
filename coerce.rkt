@@ -80,6 +80,7 @@
           [(set? x) (set->list x)]
           ;; location relevant because hash or dict are also sequences
           [(dict? x) (dict->list x)] 
+          [(integer? x) (list x)] ; because an integer tests #t for sequence?
           [(sequence? x) (sequence->list x)]
           [(stream? x) (stream->list x)]
           [else (list x)]))))
@@ -151,4 +152,5 @@
 (define+provide-coercion-contract symbol)
 (define+provide-coercion-contract path)
 (define+provide-coercion-contract boolean)
+(define+provide-coercion-contract list)
 
