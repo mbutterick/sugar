@@ -11,6 +11,15 @@
          (displayln (format "~a = ~v" 'name expr) (current-error-port)) 
          expr)]))
 
+
 (define-syntax (report* stx)
   (syntax-case stx ()
     [(_ expr ...) (datum->syntax stx `(begin ,@(map (λ(arg) `(report ,arg)) (syntax->datum #'(expr ...)))))]))
+
+
+(define-syntax-rule (repeat num expr)
+  (for/last ([i (in-range num)])
+    expr))
+
+(define-syntax-rule (time-repeat num expr)
+  (time (repeat num expr)))
