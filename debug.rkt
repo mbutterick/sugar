@@ -17,9 +17,17 @@
     [(_ expr ...) (datum->syntax stx `(begin ,@(map (λ(arg) `(report ,arg)) (syntax->datum #'(expr ...)))))]))
 
 
-(define-syntax-rule (repeat num expr)
+(define-syntax-rule (repeat num expr ...)
   (for/last ([i (in-range num)])
-    expr))
+    expr ...))
 
-(define-syntax-rule (time-repeat num expr)
-  (time (repeat num expr)))
+
+(define-syntax-rule (time-repeat num expr ...)
+  (time (repeat num expr ...)))
+
+
+(define-syntax (time-repeat* stx)
+  (syntax-case stx ()
+    [(_ num expr ...) 
+     (let ([num (syntax->datum #'num)])
+     (datum->syntax stx `(values ,@(map (λ(arg) `(time-repeat ,num ,arg)) (syntax->datum #'(expr ...))))))]))
