@@ -52,10 +52,10 @@ But be careful — in the example below, the result of the @racket[if] expressi
 
 
 @defform[(report* expr ...)]
-Applies @racket[report] separately to each @racket[_expr] in the list.
+Apply @racket[report] separately to each @racket[_expr] in the list.
 
 @defform[(repeat num expr ...)]
-Evaluates @racket[_expr] repeatedly — @racket[_num] times, in fact — and returns the last value.
+Evaluate @racket[_expr] repeatedly — @racket[_num] times, in fact — and return the last value.
 
 @examples[#:eval my-eval
 (repeat 1000 
@@ -64,7 +64,7 @@ Evaluates @racket[_expr] repeatedly — @racket[_num] times, in fact — and r
 
 
 @defform[(time-repeat num expr ...)]
-Shorthand for using @racket[time] with @racket[repeat]. Repeats the whole list of expressions, prints the total time, and returns the last value.
+Shorthand for using @racket[time] with @racket[repeat]. Repeat the whole list of expressions, print the total time, and return the last value.
 
 @examples[#:eval my-eval
 (time-repeat 1000 
@@ -73,7 +73,7 @@ Shorthand for using @racket[time] with @racket[repeat]. Repeats the whole list o
 ]
 
 @defform[(time-repeat* num expr ...)]
-Applies @racket[time-repeat] to each @racket[_expr] individually.
+Apply @racket[time-repeat] to each @racket[_expr] individually.
 
 @examples[#:eval my-eval
 (time-repeat* 1000 
