@@ -80,3 +80,15 @@ Apply @racket[time-repeat] to each @racket[_expr] individually.
 (for/product ([i (in-range 1000)]) i)
 (for/sum ([i (in-range 1000)]) i))
 ]
+
+@defform[(compare expr id id-alt ...)]
+Evaluate @racket[_expr] first using @racket[_id], and then again substituting @racket[_id-alt] in place of @racket[_id], and then again for every other @racket[_id-alt] in the list. This is useful for comparing the performance of multiple versions of a function.
+
+@examples[#:eval my-eval
+(define (fib x) 
+  (if (< x 2) 1 (+ (fib (- x 1)) (fib (- x 2)))))
+(define/caching (fib-fast x) 
+  (if (< x 2) 1 (+ (fib-fast (- x 1)) (fib-fast (- x 2)))))
+(compare (time (fib 34)) fib fib-fast)
+]
+

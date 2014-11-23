@@ -30,4 +30,12 @@
   (syntax-case stx ()
     [(_ num expr ...) 
      (let ([num (syntax->datum #'num)])
-     (datum->syntax stx `(values ,@(map (λ(arg) `(time-repeat ,num ,arg)) (syntax->datum #'(expr ...))))))]))
+       (datum->syntax stx `(values ,@(map (λ(arg) `(time-repeat ,num ,arg)) (syntax->datum #'(expr ...))))))]))
+
+
+(define-syntax (compare stx)
+  (syntax-case stx ()
+    [(_ expr id id-alts ...) 
+     (let ([expr (syntax->datum #'expr)]
+           [id (syntax->datum #'id)])
+       (datum->syntax stx `(values ,expr ,@(map (λ(id-alt) `(let ([,id ,id-alt]) ,expr)) (syntax->datum #'(id-alts ...))))))]))

@@ -27,5 +27,20 @@ In the example below, notice that both invocations of @racketfont{slow-op} take 
 (time (fast-op 42))
 ]
 
+Keep in mind that the cache is only available to external callers of the resulting function. So if @racket[_proc] calls itself recursively, these calls are @italic{not} accelerated by the cache. If that's the behavior you need, use @racket[define/caching] to create a new recursive function.
+
 @defform[(define/caching (name arg ... . rest-arg) body ...)]
-Like @racket[define], but automatically uses @racket[make-caching-proc] to define a caching version of the function.
+Like @racket[define], but automatically uses @racket[make-caching-proc] to define a caching version of the function. If the function is recursive, the cache will be used for the recursive calls.
+
+In the example below, @racketfont{fib} is a recursive function. Notice that simply wrapping the function in @racket[make-caching-proc] doesn't work in this case, because @racketfont{fib}'s recursive calls to itself bypass the cache. But @racketfont{fib-fast} is rewritten to recur on the caching function, and the caching works as expected.
+
+@examples[#:eval my-eval
+(define (fib x) 
+  (if (< x 2) 1 (+ (fib (- x 1)) (fib (- x 2)))))
+(define fibber (make-caching-proc fib))
+(define/caching (fib-fast x) 
+  (if (< x 2) 1 (+ (fib-fast (- x 1)) (fib-fast (- x 2)))))
+(time (fib 32))
+(time (fibber 32))
+(time (fib-fast 32))
+]
