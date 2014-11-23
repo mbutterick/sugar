@@ -1,8 +1,9 @@
 #lang racket/base
-(require (for-syntax racket/base))
+(require (for-syntax racket/base) racket/contract)
 (provide (all-defined-out))
 
-(define (make-caching-proc base-proc) 
+(define/contract (make-caching-proc base-proc) 
+  (procedure? . -> . procedure?)
   (let ([cache (make-hash)])
     (λ args
       (hash-ref! cache args (λ () (apply base-proc args))))))
