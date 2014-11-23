@@ -18,6 +18,8 @@ A collection of small functions to help make Racket code simpler & more readable
 
 @include-section["installation.scrbl"]
 
+@include-section["cache.scrbl"]
+
 @include-section["coerce.scrbl"]
 
 @include-section["container.scrbl"]
