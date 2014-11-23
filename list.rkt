@@ -17,7 +17,6 @@
      (define-values (head tail) (splitf-at others (compose1 not pred)))
      (cons (append (or car-match null) head) (slicef-at tail pred force?))]))
 
-(require sugar/debug)
 (define+provide/contract (slice-at xs len [force? #f])
   ((list? (and/c integer? positive?)) (boolean?) . ->* . (listof list?))
   (cond
@@ -44,9 +43,6 @@
   (for ([item (in-list (flatten x))]) 
     (hash-set! counter item (add1 (hash-ref counter item 0))))
   counter)
-
-
-
 
 
 (define+provide/contract (members-unique? x)
