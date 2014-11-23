@@ -145,7 +145,7 @@ Return a sublist of the @racket[_lst] starting with item @racket[_start-idx] and
 [lst list?]
 [indexes (or/c integer? (listof? integer?))])
 (listof list?)]
-Break @racket[_lst] into smaller lists at the index positions in @racket[_indexes]. If a single integer value is given for @racket[_indexes], it's treated as a one-element list. Error if a breakpoint index exceeds the length of the list, or if the breakpoints are not increasing.
+Break @racket[_lst] into smaller lists at the index positions in @racket[_indexes]. If a single integer value is given for @racket[_indexes], it's treated as a one-element list. Errors will arise if a breakpoint index exceeds the length of the list, or if the breakpoints are not increasing.
 
 @examples[#:eval my-eval
 (break-at '(0 1 2 3 4 5 6 7 8) 3)
