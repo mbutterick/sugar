@@ -183,6 +183,7 @@ Predicates that report whether @racket[_v] can be coerced to the specified type.
 @defproc[(coerce/symbol? [v any/c]) symbol?]
 @defproc[(coerce/path? [v any/c]) path?]
 @defproc[(coerce/boolean? [v any/c]) boolean?]
+@defproc[(coerce/list? [v any/c]) list?]
 )]
 If @racket[_v] can be coerced to the specified type, change it to that type, then return it. If not, raise the usual contract error. These contracts can be used with input or output values. 
 

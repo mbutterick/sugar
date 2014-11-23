@@ -121,3 +121,37 @@ Convert @racket[_values] to a simple list.
 (split-at '(a b c d e f) 3)
 (values->list (split-at '(a b c d e f) 3))
 ]
+
+
+@defproc[
+(sublist
+[lst list?]
+[start-idx (and/c integer? (not/c negative?))]
+[end-idx (and/c integer? (not/c negative?))])
+list?]
+Return a sublist of the @racket[_lst] starting with item @racket[_start-idx] and ending one item @bold{before} item @racket[_end-idx]. (Similar to how list slices are denominated in Python.) Thus the maximum value for @racket[_end-idx] is @racketfont{(length @racket[_lst])}. Errors will be triggered by nonsensical values for @racket[_end-idx].
+
+@examples[#:eval my-eval
+(sublist '(0 1 2 3 4 5 6 7 8) 0 8)
+(sublist '(0 1 2 3 4 5 6 7 8) 8 9)
+(sublist '(0 1 2 3 4 5 6 7 8) 2 5)
+(sublist '(0 1 2 3 4 5 6 7 8) 5 2)
+(sublist '(0 1 2 3 4 5 6 7 8) 2 10)
+]
+
+
+@defproc[
+(break-at
+[lst list?]
+[indexes (or/c integer? (listof? integer?))])
+(listof list?)]
+Break @racket[_lst] into smaller lists at the index positions in @racket[_indexes]. If a single integer value is given for @racket[_indexes], it's treated as a one-element list. Error if a breakpoint index exceeds the length of the list, or if the breakpoints are not increasing.
+
+@examples[#:eval my-eval
+(break-at '(0 1 2 3 4 5 6 7 8) 3)
+(break-at '(0 1 2 3 4 5 6 7 8) '(3))
+(break-at '(0 1 2 3 4 5 6 7 8) '(3 6))
+(break-at '(0 1 2 3 4 5 6 7 8) '(3 6 8))
+(break-at '(0 1 2 3 4 5 6 7 8) '(3 6 8 10))
+
+]
