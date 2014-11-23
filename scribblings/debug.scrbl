@@ -64,7 +64,7 @@ Evaluates @racket[_expr] repeatedly — @racket[_num] times, in fact — and r
 
 
 @defform[(time-repeat num expr ...)]
-Shorthand for using @racket[time] with @racket[repeat]. Repeats the whole list of expressions and returns the total time.
+Shorthand for using @racket[time] with @racket[repeat]. Repeats the whole list of expressions, prints the total time, and returns the last value.
 
 @examples[#:eval my-eval
 (time-repeat 1000 

@@ -16,7 +16,7 @@ If, like Ricky Bobby and me, you want to go fast, then try using more caches. Th
 procedure?]
 Make a caching version of @racket[_proc]. This means a hash table will be attached to @racket[_proc], and result values will automatically be saved & retrieved. The arguments to the procedure are used as the hash key.
 
-In the example below, notice that both invocations of @racketfont{slow-op} take approximately the same time, whereas the second invocation of @racketfont{fast-op} uses the cache instead and thus is nearly instantaneous.
+In the example below, notice that both invocations of @racketfont{slow-op} take approximately the same time, whereas the second invocation of @racketfont{fast-op} gets its value from the cache, and is thus nearly instantaneous.
 
 @examples[#:eval my-eval
 (define (slow-op x) (for/sum ([i (in-range 100000000)]) i))
