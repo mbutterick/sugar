@@ -94,7 +94,7 @@
 (define increasing-positive-list? (and/c list? increasing-positive?))
 
 (define+provide/contract (break-at xs bps)
-  (list? (and/c coerce/list? increasing-positive-list?) . -> . (listof list?))
+  (list? (and/c coerce/list? (or/c empty? increasing-positive-list?)) . -> . (listof list?))
   (when (ormap (λ(bp) (>= bp (length xs))) bps)
     (error 'break-at (format "breakpoint in ~v is greater than or equal to input list length = ~a" bps (length xs))))
   ;; easier to do back to front, because then the list index for each item won't change during the recursion

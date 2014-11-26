@@ -162,6 +162,8 @@
 (check-equal? (sublist (range 5) 0 1) '(0))
 (check-equal? (sublist (range 5) 0 5) '(0 1 2 3 4))
 
+(check-equal? (break-at '(5 6 7 8) '()) '((5 6 7 8)))
 (check-equal? (break-at '(5 6 7 8) '(1 2 3)) '((5) (6) (7) (8)))
 (check-equal? (break-at '(5 6 7 8) '(1 3)) '((5) (6 7) (8)))
 (check-equal? (break-at '(5 6 7 8) '(1)) (break-at '(5 6 7 8) 1))
+ 
