@@ -11,6 +11,20 @@
          (displayln (format "~a = ~v" 'name expr) (current-error-port)) 
          expr)]))
 
+(define-syntax-rule (report-apply proc expr) 
+  (begin 
+    (report (apply proc expr)) 
+    expr))
+
+#|
+(define-syntax (verbalize stx)
+  (syntax-case stx ()
+    [(_ proc args ...)
+     (with-syntax ([proc-input (format-id stx "args to ~a" #'proc)])
+     #'(begin
+         (let () (report (list args ...) proc-input) (void))
+         (report (proc args ...))))]))
+|#
 
 (define-syntax (report* stx)
   (syntax-case stx ()
