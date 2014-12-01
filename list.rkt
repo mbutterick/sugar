@@ -90,16 +90,18 @@
     [(>= j i) (take (drop xs i) (- j i))]
     [else (error 'sublist (format "starting index ~a is larger than ending index ~a" i j))]))
 
-(define increasing-positive? (λ(xs) (apply < 0 xs)))
-(define increasing-positive-list? (and/c list? increasing-positive?))
+(define increasing-nonnegative? (λ(xs) (apply < -1 xs)))
+(define increasing-nonnegative-list? (and/c list? increasing-nonnegative?))
 
 (define+provide/contract (break-at xs bps)
-  (list? (and/c coerce/list? (or/c empty? increasing-positive-list?)) . -> . (listof list?))
+  (list? (and/c coerce/list? (or/c empty? increasing-nonnegative-list?)) . -> . (listof list?))
   (when (ormap (λ(bp) (>= bp (length xs))) bps)
     (error 'break-at (format "breakpoint in ~v is greater than or equal to input list length = ~a" bps (length xs))))
   ;; easier to do back to front, because then the list index for each item won't change during the recursion
-  (reverse (let loop ([xs xs][bps (reverse bps)])
-             (if (empty? bps)
+  ;; cons a zero onto bps (which may already start with zero) and then use that as the terminating condition
+  ;; because breaking at zero means we've reached the start of the list
+  (reverse (let loop ([xs xs][bps (reverse (cons 0 bps))])
+             (if (= (car bps) 0)
                  (cons xs null) ; return whatever's left, because no more splits are possible
                  (let-values ([(head tail) (split-at xs (car bps))])
                    (cons tail (loop head (cdr bps))))))))
