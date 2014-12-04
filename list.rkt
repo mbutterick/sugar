@@ -7,8 +7,10 @@
   (list? procedure? . -> . list?)
   (dropf-right (dropf xs test-proc) test-proc))
 
+(define (list-of-lists? xs) (and (list? xs) (andmap list? xs)))
+
 (define+provide/contract (slicef-at xs pred [force? #f])
-  ((list? procedure?) (boolean?) . ->* . (listof list?))
+  ((list? procedure?) (boolean?) . ->* . list-of-lists?)
   (cond
     [(null? xs) null]
     [force? (slicef-at (dropf xs (compose1 not pred)) pred)]
@@ -18,14 +20,14 @@
      (cons (append (or car-match null) head) (slicef-at tail pred force?))]))
 
 (define+provide/contract (slice-at xs len [force? #f])
-  ((list? (and/c integer? positive?)) (boolean?) . ->* . (listof list?))
+  ((list? (and/c integer? positive?)) (boolean?) . ->* . list-of-lists?)
   (cond
     [(equal? xs null) null]
     [(len . > . (length xs)) (if force? null (list xs))]
     [else (cons (take xs len) (slice-at (drop xs len) len force?))]))
 
 (define+provide/contract (filter-split xs split-test)
-  (list? predicate/c . -> . (listof list?))
+  (list? predicate/c . -> . list-of-lists?)
   (let loop ([xs (trimf xs split-test)] [acc '()]) 
     (if (empty? xs) 
         (reverse acc)  ; because accumulation is happening backward 
@@ -94,7 +96,7 @@
 (define increasing-nonnegative-list? (and/c list? increasing-nonnegative?))
 
 (define+provide/contract (break-at xs bps)
-  (list? (and/c coerce/list? (or/c empty? increasing-nonnegative-list?)) . -> . (listof list?))
+  (list? (and/c coerce/list? (or/c empty? increasing-nonnegative-list?)) . -> . list-of-lists?)
   (when (ormap (λ(bp) (>= bp (length xs))) bps)
     (error 'break-at (format "breakpoint in ~v is greater than or equal to input list length = ~a" bps (length xs))))
   ;; easier to do back to front, because then the list index for each item won't change during the recursion
