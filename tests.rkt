@@ -167,4 +167,11 @@
 (check-equal? (break-at '(5 6 7 8) '(1 2 3)) '((5) (6) (7) (8)))
 (check-equal? (break-at '(5 6 7 8) '(1 3)) '((5) (6 7) (8)))
 (check-equal? (break-at '(5 6 7 8) '(1)) (break-at '(5 6 7 8) 1))
- 
+
+(define xs (range 5))
+(check-equal? (map (λ(a b c) (list a b c)) (shift xs -1) (shift xs 0) (shift xs 1)) '((1 0 #f) (2 1 0) (3 2 1) (4 3 2) (#f 4 3)))
+(check-equal? (shift xs '(-1 0 1) 'boing)  `((1 2 3 4 boing) ,xs (boing 0 1 2 3)))
+(check-equal? (shift xs 5 0) (make-list 5 0))
+(check-exn exn:fail? (λ() (shift xs -10)))
+
+(check-equal? (values->list (shift/values xs '(-1 0 1) 'boing)) `((1 2 3 4 boing) ,xs (boing 0 1 2 3)))

@@ -1,6 +1,6 @@
 #lang racket/base
 (require (for-syntax racket/base))
-(require racket/list racket/set)
+(require racket/list racket/set racket/function)
 (require "define.rkt" "len.rkt" "coerce.rkt")
 
 (define+provide/contract (trimf xs test-proc)
@@ -107,3 +107,33 @@
                  (cons xs null) ; return whatever's left, because no more splits are possible
                  (let-values ([(head tail) (split-at xs (car bps))])
                    (cons tail (loop head (cdr bps))))))))
+
+
+(define (integers? x)
+  (and (list? x) (andmap integer? x)))
+
+(define+provide/contract (shift xs shift-amount-or-amounts [fill-item #f] [cycle? #f])
+  ((list? (or/c integer? integers?)) (any/c boolean?) . ->* . list?)
+  
+  (define (do-shift xs how-far)
+    (define abs-how-far (abs how-far))
+    (cond 
+      [(> abs-how-far (length xs)) (error 'shift "index is too large for list\nindex: ~a\nlist: ~v" how-far xs)]
+      [(= how-far 0) xs]
+      [(positive? how-far) (append (make-list abs-how-far fill-item) (drop-right xs abs-how-far))]
+      ;; otherwise how-far is negative
+      [else (append (drop xs abs-how-far) (make-list abs-how-far fill-item))]))
+  
+  (if (list? shift-amount-or-amounts)
+      (map (curry do-shift xs) shift-amount-or-amounts)
+      (do-shift xs shift-amount-or-amounts)))
+
+
+(define+provide/contract (shift/values xs shift-amount-or-amounts [fill-item #f])
+  ((list? (or/c integer? integers?)) (any/c) . ->* . any)
+  (apply (if (list? shift-amount-or-amounts) 
+             values
+             (λ xs xs)) 
+         (shift xs shift-amount-or-amounts fill-item)))
+
+

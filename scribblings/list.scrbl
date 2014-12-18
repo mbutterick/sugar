@@ -143,7 +143,7 @@ Return a sublist of the @racket[_lst] starting with item @racket[_start-idx] and
 @defproc[
 (break-at
 [lst list?]
-[indexes (or/c integer? (listof? integer?))])
+[indexes (or/c integer? (listof integer?))])
 (listof list?)]
 Break @racket[_lst] into smaller lists at the index positions in @racket[_indexes]. If a single integer value is given for @racket[_indexes], it's treated as a one-element list. Errors will arise if a breakpoint index exceeds the length of the list, or if the breakpoints are not increasing.
 
@@ -153,5 +153,36 @@ Break @racket[_lst] into smaller lists at the index positions in @racket[_indexe
 (break-at '(0 1 2 3 4 5 6 7 8) '(3 6))
 (break-at '(0 1 2 3 4 5 6 7 8) '(3 6 8))
 (break-at '(0 1 2 3 4 5 6 7 8) '(3 6 8 10))
-
 ]
+
+@defproc[
+(shift
+[lst list?]
+[how-far (or/c integer? (listof integer?))]
+[fill-item any/c #f])
+(or/c list? (listof list?))]
+Move the items in @racket[_lst] to the right (if @racket[_how-far] is positive) or left (if negative). Vacated spaces in the list are filled with @racket[_fill-item], so the result list is always the same length as the input list. (If you don't care about the lengths being the same, you probably want @racket[take] or @racket[drop] instead.) If @racket[_how-far] is a list rather than a single value, return a list of lists shifted by the designated amounts. If @racket[_how-far] is 0, return the original list. If @racket[_how-far] is bigger than the length of @racket[_lst], raise an error.
+
+@examples[#:eval my-eval
+(define xs (range 5))
+(shift xs 2)
+(shift xs -2 0)
+(shift xs '(-1 0 1) 'boing)
+(shift xs 0)
+(shift xs 42)
+]
+
+@defproc[
+(shift/values
+[lst list?]
+[how-far (or/c integer? (listof integer?))]
+[fill-item any/c #f])
+any]
+Same as @racket[shift], except that when @racket[_how-far] is a list, the resulting lists are returned as multiple values rather than as a list of lists.
+
+@examples[#:eval my-eval
+(define xs (range 5))
+(shift xs '(-1 0 1))
+(shift/values xs '(-1 0 1))
+]
+
