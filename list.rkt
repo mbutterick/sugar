@@ -22,10 +22,14 @@
 
 (define+provide/contract (slice-at xs len [force? #f])
   ((list? (and/c integer? positive?)) (boolean?) . ->* . list-of-lists?)
-  (cond
-    [(equal? xs null) null]
-    [(len . > . (length xs)) (if force? null (list xs))]
-    [else (cons (take xs len) (slice-at (drop xs len) len force?))]))
+  (define-values (last-list list-of-lists)
+    (for/fold ([current-list empty][list-of-lists empty])([(x i) (in-indexed xs)])
+      (if (= (modulo (add1 i) len) 0)
+          (values empty (cons (reverse (cons x current-list)) list-of-lists))
+          (values (cons x current-list) list-of-lists))))
+  (reverse (if (or (empty? last-list) (and force? (not (= len (length last-list)))))
+               list-of-lists
+               (cons (reverse last-list) list-of-lists))))
 
 
 (define+provide/contract (filter-split xs split-test)
