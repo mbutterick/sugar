@@ -11,14 +11,19 @@
 
 (define+provide/contract (slicef-at xs pred [force? #f])
   ((list? procedure?) (boolean?) . ->* . list-of-lists?)
-  (cond
-    [(null? xs) null]
-    [force? (slicef-at (dropf xs (compose1 not pred)) pred)]
-    [else
-     (define-values (car-match others) (splitf-at xs pred))
-     (define-values (head tail) (splitf-at others (compose1 not pred)))
-     (cons (append (or car-match null) head) (slicef-at tail pred force?))]))
-
+  (define-values (last-list list-of-lists)
+    (for/fold ([current-list empty][list-of-lists empty])([x (in-list xs)])
+      (if (pred x)
+          (values (cons x null) (if (not (empty? current-list))
+                                    (cons (reverse current-list) list-of-lists)
+                                    list-of-lists))
+          (values (cons x current-list) list-of-lists))))
+  (let ([list-of-lists (reverse (if (empty? last-list)
+                                    list-of-lists
+                                    (cons (reverse last-list) list-of-lists)))])
+    (if (and force? (not (empty? list-of-lists)) (not (pred (caar list-of-lists))))
+        (cdr list-of-lists)
+        list-of-lists)))
 
 (define+provide/contract (slice-at xs len [force? #f])
   ((list? (and/c integer? positive?)) (boolean?) . ->* . list-of-lists?)
@@ -31,13 +36,16 @@
                list-of-lists
                (cons (reverse last-list) list-of-lists))))
 
-
-(define+provide/contract (filter-split xs split-test)
+;; this function could possibly be implemented as a post-processing step on slicef-at:
+;; every list after the first list starts with an element matching pred.
+;; so drop the first element from all lists except the first.
+;; (cons (car xs) (map cdr (cdr xs)))
+(define+provide/contract (filter-split xs pred)
   (list? predicate/c . -> . list-of-lists?)
   (define-values (last-list list-of-lists)
     (for/fold ([current-list empty][list-of-lists empty])
               ([x (in-list xs)])
-      (if (split-test x)
+      (if (pred x)
           (values empty (if (not (empty? current-list))
                             (cons (reverse current-list) list-of-lists)
                             list-of-lists))
