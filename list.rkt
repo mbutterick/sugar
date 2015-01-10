@@ -19,6 +19,7 @@
      (define-values (head tail) (splitf-at others (compose1 not pred)))
      (cons (append (or car-match null) head) (slicef-at tail pred force?))]))
 
+
 (define+provide/contract (slice-at xs len [force? #f])
   ((list? (and/c integer? positive?)) (boolean?) . ->* . list-of-lists?)
   (cond
@@ -26,17 +27,20 @@
     [(len . > . (length xs)) (if force? null (list xs))]
     [else (cons (take xs len) (slice-at (drop xs len) len force?))]))
 
+
 (define+provide/contract (filter-split xs split-test)
   (list? predicate/c . -> . list-of-lists?)
-  (let loop ([xs (trimf xs split-test)] [acc '()]) 
-    (if (empty? xs) 
-        (reverse acc)  ; because accumulation is happening backward 
-        (let-values ([(item rest) 
-                      ;; drop matching elements from front
-                      ;; then split on nonmatching 
-                      ;; = nonmatching item + other elements (which will start with matching)
-                      (splitf-at (dropf xs split-test) (compose1 not split-test))])
-          (loop rest (cons item acc))))))
+  (define-values (last-list list-of-lists)
+    (for/fold ([current-list empty][list-of-lists empty])
+              ([x (in-list xs)])
+      (if (split-test x)
+          (values empty (if (not (empty? current-list))
+                            (cons (reverse current-list) list-of-lists)
+                            list-of-lists))
+          (values (cons x current-list) list-of-lists))))
+  (reverse (if (not (empty? last-list))
+               (cons (reverse last-list) list-of-lists)
+               list-of-lists)))
 
 
 (define+provide/contract (frequency-hash x)
