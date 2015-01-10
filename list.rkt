@@ -9,6 +9,7 @@
 
 (define (list-of-lists? xs) (and (list? xs) (andmap list? xs)))
 
+
 (define+provide/contract (slicef-at xs pred [force? #f])
   ((list? procedure?) (boolean?) . ->* . list-of-lists?)
   (define-values (last-list list-of-lists)
@@ -25,6 +26,19 @@
         (cdr list-of-lists)
         list-of-lists)))
 
+
+(define+provide/contract (slicef-after xs pred)
+  (list? procedure? . -> . list-of-lists?)
+  (define-values (last-list list-of-lists)
+    (for/fold ([current-list empty][list-of-lists empty])([x (in-list xs)])
+      (if (pred x)
+          (values empty (cons (reverse (cons x current-list)) list-of-lists))
+          (values (cons x current-list) list-of-lists))))
+  (reverse (if (empty? last-list)
+               list-of-lists
+               (cons (reverse last-list) list-of-lists))))
+
+
 (define+provide/contract (slice-at xs len [force? #f])
   ((list? (and/c integer? positive?)) (boolean?) . ->* . list-of-lists?)
   (define-values (last-list list-of-lists)
@@ -36,10 +50,7 @@
                list-of-lists
                (cons (reverse last-list) list-of-lists))))
 
-;; this function could possibly be implemented as a post-processing step on slicef-at:
-;; every list after the first list starts with an element matching pred.
-;; so drop the first element from all lists except the first.
-;; (cons (car xs) (map cdr (cdr xs)))
+
 (define+provide/contract (filter-split xs pred)
   (list? predicate/c . -> . list-of-lists?)
   (define-values (last-list list-of-lists)
@@ -70,7 +81,6 @@
     [(vector? x) (->list x)]
     [(string? x) (string->list x)]
     [else (error (format "members-unique? cannot be determined for ~a" x))]))
-
 
 
 (define+provide/contract (members-unique?/error x)

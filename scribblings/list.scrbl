@@ -65,8 +65,21 @@ Divide @racket[_lst] into sublists starting with elements matching @racket[_pred
 @examples[#:eval my-eval
 (slicef-at (range 5) even?)
 (slicef-at '(1 2 2 1 2) even?)
+(slicef-at '(1 2 2 1 2) even? #t)
 (slicef-at (range 5) odd?)
 (slicef-at (range 5) odd? #t)]
+
+@defproc[
+(slicef-after
+[lst list?]
+[pred procedure?])
+(listof list?)]
+Divide @racket[_lst] into sublists ending with elements matching @racket[_pred]. (Distinct from @racket[slicef-at], which gives you sublists that @italic{start} with elements matching @racket[_pred].) If none of the elements match @racket[_pred], there is no slice to be made, and the result is the whole input list.
+
+@examples[#:eval my-eval
+(slicef-after '(1 2 2 1 2) even?)
+(slicef-after (range 5) odd?)
+(slicef-after (range 5) string?)]
 
 
 @defproc[
@@ -131,6 +144,8 @@ Convert @racket[_values] to a simple list.
 [end-idx (and/c integer? (not/c negative?))])
 list?]
 Return a sublist of the @racket[_lst] starting with item @racket[_start-idx] and ending one item @bold{before} item @racket[_end-idx]. (Similar to how list slices are denominated in Python.) Thus the maximum value for @racket[_end-idx] is @racketfont{(length @racket[_lst])}. Errors will be triggered by nonsensical values for @racket[_end-idx].
+
+Bear in mind that @racket[sublist] is built for convenience, not performance. If you need to do a lot of random access into the middle of an ordered sequence of items, you'd be better off putting them into a @racket[vector] and using @racket[vector-copy].
 
 @examples[#:eval my-eval
 (sublist '(0 1 2 3 4 5 6 7 8) 0 8)
