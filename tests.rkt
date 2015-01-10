@@ -157,7 +157,8 @@
 (check-equal? (slicef-at (range 5) procedure?) '((0 1 2 3 4)))
 (check-exn exn:fail:contract? (λ() (slicef-at (range 5) 3)))
 
-(check-equal? (slicef-at '(1 2) integer?) '((1 2)))
+(check-equal? (slicef-at '(1 2 2 1 2) even?) '((1) (2) (2 1) (2)))
+(check-equal? (slicef-at '(1 2 2 1 2) even? #t) '((2) (2 1) (2)))
 
 (check-equal? (sublist (range 5) 0 0) '())
 (check-equal? (sublist (range 5) 0 1) '(0))

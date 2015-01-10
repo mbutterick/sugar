@@ -64,6 +64,7 @@ Divide @racket[_lst] into sublists starting with elements matching @racket[_pred
 
 @examples[#:eval my-eval
 (slicef-at (range 5) even?)
+(slicef-at '(1 2 2 1 2) even?)
 (slicef-at (range 5) odd?)
 (slicef-at (range 5) odd? #t)]
 
