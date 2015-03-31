@@ -34,6 +34,8 @@ A collection of small functions to help make Racket code simpler & more readable
 
 @include-section["string.scrbl"]
 
+@include-section["xml.scrbl"]
+
 @include-section["license.scrbl"]
 
 @;index-section[]

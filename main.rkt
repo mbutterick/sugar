@@ -10,7 +10,8 @@
   "list.rkt"
   "misc.rkt"
   "string.rkt"
-  "len.rkt")
+  "len.rkt"
+  "xml.rkt")
 
 (provide 
  (all-from-out
@@ -23,4 +24,5 @@
   "list.rkt"
   "misc.rkt"
   "string.rkt"
-  "len.rkt"))
+  "len.rkt"
+  "xml.rkt"))
