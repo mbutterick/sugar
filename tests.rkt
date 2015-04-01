@@ -185,3 +185,12 @@
 (check-equal? str-prolog (prolog (list (p-i (location 1 0 1) (location 1 38 39) 'xml "version=\"1.0\" encoding=\"utf-8\"")) #f null))
 (check-equal? str-doc '(root () "hello world"))
 (check-equal? (xexprs->xml-string str-prolog str-doc) str)
+
+
+(module include-test racket/base
+  (require sugar/include)
+  (include-without-lang-line "test/source.rkt")
+  (provide included-symbol))
+
+(require 'include-test)
+(check-equal? included-symbol 'bar)
