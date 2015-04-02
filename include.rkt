@@ -3,7 +3,8 @@
 (require (for-syntax racket/base
                      syntax/path-spec
                      racket/private/increader
-                     compiler/cm-accomplice))
+                     compiler/cm-accomplice
+                     racket/match racket/function))
 
 (provide include-without-lang-line)
 
@@ -99,10 +100,9 @@
                     ;; the guts are the (expr ...). To get them, we want the cdr of the fourth element. 
                     (define fourth cadddr) ; we don't have `fourth` in the syntax environment.
                     ;; get the guts and package them back into a syntax object using the saved content-syntax as context.
-                    (local-require racket/match racket/function)
                     (define guts-data (match (map syntax->datum content)
-                                   [(list (list 'module modname lang (list '#%module-begin exprs ...))) exprs]
-                                   [(list exprs ...) exprs]))
+                                        [(list (list 'module modname lang (list '#%module-begin exprs ...))) exprs]
+                                        [(list exprs ...) exprs]))
                     (map (curry datum->syntax content-syntax) guts-data)]
                    [else null]))
                (close-input-port p)
