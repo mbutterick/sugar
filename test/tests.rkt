@@ -197,7 +197,7 @@
 
 (module no-lang-line-include-test racket/base
   (require sugar/include)
-  (include-without-lang-line "no-lang-line-source.rkt")
+  (include-without-lang-line "no-lang-line-source.txt")
   (provide no-lang-symbol))
 
 (require 'no-lang-line-include-test)
