@@ -194,3 +194,11 @@
 
 (require 'include-test)
 (check-equal? included-symbol 'bar)
+
+(module no-lang-line-include-test racket/base
+  (require sugar/include)
+  (include-without-lang-line "test/no-lang-line-source.rkt")
+  (provide no-lang-symbol))
+
+(require 'no-lang-line-include-test)
+(check-equal? no-lang-symbol 'bar)

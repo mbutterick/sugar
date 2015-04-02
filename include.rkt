@@ -84,17 +84,27 @@
                             (cons r (loop)))))])
                
                ;; Here's where we'll separate the content of the file from the #lang line.
-               ;; 'content' is a one-member list with the file as a syntax object.
-               (define content-syntax (car content)) ; save the syntax object (its context will be needed momentarily)
-               ;; peel the wrapper off the file. it will come in like so
-               ;; (module foo whatever/lang (#%module-begin expr ...))
-               ;; the guts are the (expr ...). To get them, we want the cdr of the fourth element. 
-               (define fourth cadddr) ; we don't have `fourth` in the syntax environment.
-               ;; get the guts and package them back into a syntax object using the saved content-syntax as context.
-               (local-require racket/match)
-               (define guts (match (syntax->datum content-syntax)
-                              [(list 'module modname lang (list '#%module-begin exprs ...)) exprs]))
-               (define content-guts (datum->syntax content-syntax guts))               
+               ;; the resulting material will be stored in 'content-guts'.
+               ;; 'content' is a list of syntax objects from the source file.
+               ;; Each object corresponds to a top-level expression in the file, converted to syntax.
+               ;; If the file has a #lang line, there's only one expression (because the #lang expands to a single `module` form).
+               ;; If it doesn't, then there are an indefinite number of expressions.
+               ;; So we'll handle both types with a match.
+               (define content-guts
+                 (cond
+                   [(not (null? content))
+                    (define content-syntax (car content)) ; save the first syntax object (its context will be needed momentarily)
+                    ;; peel the wrapper off the file. it will come in like so
+                    ;; (module foo whatever/lang (#%module-begin expr ...))
+                    ;; the guts are the (expr ...). To get them, we want the cdr of the fourth element. 
+                    (define fourth cadddr) ; we don't have `fourth` in the syntax environment.
+                    ;; get the guts and package them back into a syntax object using the saved content-syntax as context.
+                    (local-require racket/match racket/function)
+                    (define guts-data (match (map syntax->datum content)
+                                   [(list (list 'module modname lang (list '#%module-begin exprs ...))) exprs]
+                                   [(list exprs ...) exprs]))
+                    (map (curry datum->syntax content-syntax) guts-data)]
+                   [else null]))
                (close-input-port p)
                ;; Preserve src info for content, but set its
                ;; lexical context to be that of the include expression
