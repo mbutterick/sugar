@@ -1,5 +1,5 @@
 #lang typed/racket/base
-(require typed/sugar/define typed/sugar/coerce)
+(require typed/sugar/define "coerce.rkt")
 
 (define/typed+provide (starts-with? str starter)
   (Stringish Stringish -> Boolean)

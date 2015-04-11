@@ -1,5 +1,5 @@
 #lang typed/racket/base
-(require typed/sugar/define typed/sugar/coerce typed/sugar/string racket/path)
+(require typed/sugar/define "coerce.rkt" "string.rkt" racket/path)
 
 (define/typed+provide (get-enclosing-dir p)
   (Pathish -> Path)
