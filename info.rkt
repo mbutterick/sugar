@@ -3,4 +3,4 @@
 (define deps '("base"
                "typed-racket-lib"
                "typed-racket-more"))
-(define build-deps '("scribble-lib"))
+(define build-deps '("scribble-lib" "rackunit-lib"))
