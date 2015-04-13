@@ -1,6 +1,6 @@
 #lang scribble/manual
 
-@(require scribble/eval (for-label racket sugar))
+@(require scribble/eval (for-label racket sugar (only-in typed/racket require/typed)))
 
 @(define my-eval (make-base-eval))
 @(my-eval `(require sugar))
