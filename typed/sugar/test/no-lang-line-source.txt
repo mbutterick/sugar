@@ -1,0 +1,1 @@
+(define no-lang-symbol 'bar)
