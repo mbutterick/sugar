@@ -1,13 +1,13 @@
-#lang racket/base
-(require (for-syntax racket/base racket/syntax))
+#lang racket
+(require (for-syntax racket/syntax))
 
 (define-syntax (eval-as-untyped stx)
   (syntax-case stx ()
     [(_ exprs ...)
      (with-syntax ([sym (generate-temporary)]) 
        #'(begin
-           (module sym racket/base
-             (require rackunit sugar net/url racket/list racket/set racket/match)
+           (module sym racket
+             (require rackunit sugar net/url)
              exprs ...)
            (require 'sym)))]))
 
@@ -16,8 +16,8 @@
     [(_ exprs ...)
      (with-syntax ([sym (generate-temporary)]) 
        #'(begin
-           (module sym typed/racket/base
-             (require typed/rackunit typed/sugar typed/net/url racket/list racket/list racket/set racket/match)
+           (module sym typed/racket
+             (require typed/rackunit typed/sugar typed/net/url)
              exprs ...)
            (require 'sym)))]))
 
