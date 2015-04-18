@@ -5,13 +5,13 @@
 (require "len.rkt") ; want relative path-spec for bilingual conversion
 
 (define-syntax-rule (make-coercion-error-handler target-format x)
-  (λ(e) (error (format "Can’t convert ~s to ~a" x target-format))))
+  (λ(e) (error (string->symbol (format "->~a" target-format)) (format "Can’t convert ~s to ~a" x target-format))))
 
 
-(define-type Intable (U Lengthable Number String Symbol Char Path))
+(define-type Intable (U Number String Symbol Char Path Lengthable))
 (define/typed+provide (->int x)
   (Intable -> Integer)
-  (with-handlers ([exn:fail? (make-coercion-error-handler 'integer x)])
+  (with-handlers ([exn:fail? (make-coercion-error-handler 'int x)])
     (cond
       [(or (integer? x) (real? x)) (assert (inexact->exact (floor x)) integer?)]
       [(complex? x) (->int (real-part x))]
