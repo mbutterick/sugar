@@ -26,7 +26,7 @@
     (eval-as-typed exprs ...)
     (eval-as-untyped exprs ...)))
 
-;; begin shared typed / untyped tests
+
 (eval-as-typed-and-untyped
  (check-equal? (->int 42) 42)
  (check-equal? (->int 42.1) 42)
@@ -64,7 +64,6 @@
  (check-true (->boolean '()))
  (check-true (->boolean '(1 2 3)))
  
- 
  (check-equal? (len '(1 2 3)) 3)
  (check-not-equal? (len '(1 2)) 3) ; len 2
  (check-equal? (len "foo") 3)
@@ -78,10 +77,6 @@
  (check-equal? (len (make-hash '((a . 1) (b . 2) (c . 3)))) 3)
  (check-not-equal? (len (make-hash '((a . 1) (b . 2)))) 3) ; len 2
  
- 
- 
- 
- 
  (check-true ("foobar" . starts-with? . "foo"))
  (check-true ("foobar" . starts-with? . "f"))
  (check-true ("foobar" . starts-with? . "foobar"))
@@ -92,7 +87,6 @@
  (check-true ("foobar" . ends-with? . "foobar"))
  (check-false ("foobar" . ends-with? . "foo"))
  
- 
  (check-true (members-unique? '(a b c)))
  (check-false (members-unique? '(a b c c)))
  (check-true (members-unique? "zoey"))
@@ -100,9 +94,7 @@
  
  (check-equal? (trimf (list 4 1 2 3 4) even?) '(1 2 3))
  (check-equal? (trimf (list 1 3 2 4 5 6 8 9 13) odd?) '(2 4 5 6 8))
- ;(check-equal? (filter-split '("foo" " " "bar" "\n" "\n" "ino") (λ(x) (< (string-length x) 3))) '(("foo")("bar")("ino")))
  (check-equal? (filter-split '(1 2 3 4 5 6) even?) '((1)(3)(5)))
- 
  
  (define foo-path-strings '("foo" "foo.txt" "foo.bar" "foo.bar.txt"))
  (match-define (list foo-path foo.txt-path foo.bar-path foo.bar.txt-path) (map ->path foo-path-strings))
@@ -110,13 +102,11 @@
  (define foo-paths (list foo-path foo.txt-path foo.bar-path foo.bar.txt-path))
  (for-each check-equal? (map ->string foo-paths) foo-path-strings)
  
- 
  (check-false (has-ext? foo-path 'txt)) 
  (check-true (foo.txt-path . has-ext? . 'txt))
  (check-true ((->path "foo.TXT") . has-ext? . 'txt))
  (check-true (has-ext? foo.bar.txt-path 'txt))
  (check-false (foo.bar.txt-path . has-ext? . 'doc)) ; wrong extension
- 
  
  (check-equal? (get-ext (->path "foo.txt")) "txt")
  (check-false (get-ext "foo"))
@@ -128,13 +118,11 @@
  (check-equal? (remove-ext foo.bar.txt-path) foo.bar-path)
  (check-not-equal? (remove-ext foo.bar.txt-path) foo-path) ; does not remove all extensions
  
- 
  (check-equal? (remove-ext* foo-path) foo-path)
  (check-equal? (remove-ext* foo.txt-path) foo-path)
  (check-equal? (remove-ext* (->path ".foo.txt")) (->path ".foo.txt"))
  (check-not-equal? (remove-ext* foo.bar.txt-path) foo.bar-path) ; removes more than one ext
- (check-equal? (remove-ext* foo.bar.txt-path) foo-path)
- 
+ (check-equal? (remove-ext* foo.bar.txt-path) foo-path) 
  
  (check-true (starts-with? "foobar" "foo"))
  (check-true (starts-with? "foobar" "foobar"))
@@ -175,13 +163,12 @@
  (check-equal? (map (λ(a b c) (list a b c)) (shift xs -1) (shift xs 0) (shift xs 1)) '((1 0 #f) (2 1 0) (3 2 1) (4 3 2) (#f 4 3)))
  (check-equal? (shift xs '(-1 0 1) 'boing)  `((1 2 3 4 boing) ,xs (boing 0 1 2 3)))
  (check-equal? (shift xs 5 0) (make-list 5 0))
- (check-exn exn:fail? (λ() (shift xs -10)))
- 
- ;;;;; end common tests
- )
+ (check-exn exn:fail? (λ() (shift xs -10))))
 
 
 (eval-as-untyped
+  (check-equal? (filter-split '("foo" " " "bar" "\n" "\n" "ino") (λ(x) (< (string-length x) 3))) '(("foo")("bar")("ino")))
+  
  (check-exn exn:fail? (λ _ (slice-at (range 5) 0))) ; needs a positive integer as second arg
  (check-exn exn:fail? (λ _ (slicef-at (range 5) 3))) ; needs a procedure as second arg
  
@@ -223,8 +210,7 @@
  
  (define xs (range 5))
  (define ys (range 5))
- (check-equal? (values->list (shift/values ys '(-1 0 1) 'boing)) `((1 2 3 4 boing) ,xs (boing 0 1 2 3)))
- 
+ (check-equal? (values->list (shift/values ys '(-1 0 1) 'boing)) `((1 2 3 4 boing) ,xs (boing 0 1 2 3))) 
  
  (require xml)
  (define str "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<root>hello world</root>")
@@ -232,7 +218,6 @@
  (check-equal? str-prolog (prolog (list (p-i (location 1 0 1) (location 1 38 39) 'xml "version=\"1.0\" encoding=\"utf-8\"")) #f null))
  (check-equal? str-doc '(root () "hello world"))
  (check-equal? (xexprs->xml-string str-prolog str-doc) str)
- 
  
  (module include-test racket/base
    (require sugar/include)
