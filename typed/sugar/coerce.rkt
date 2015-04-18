@@ -23,7 +23,7 @@
 
 
 (provide Stringish)
-(define-type Stringish (U String Symbol Number Path Char Null Void))
+(define-type Stringish (U String Symbol Number Path Char Null Void SugarURL))
 
 
 (define/typed+provide (->string x)
@@ -37,6 +37,7 @@
           [(number? x) (number->string x)]
           [(path? x) (path->string x)]
           [(char? x) (format "~a" x)]
+          [(url? x) (url->string x)]
           [else (error 'bad-type)]))))
 
 
