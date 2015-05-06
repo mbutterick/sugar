@@ -141,6 +141,11 @@
  (check-equal? (slice-at (range 5) 3) '((0 1 2) (3 4)))
  (check-equal? (slice-at (range 5) 3 #t) '((0 1 2)))
  
+ (check-equal? (slicef '(1 2 2 1 1 1 2) odd?) '((1) (2 2) (1 1 1) (2)))
+ (check-equal? (slicef '(1 2 2 1 1 1 2) even?) (slicef '(1 2 2 1 1 1 2) odd?))
+ (check-equal? (slicef '(1 (1) (1) 1 1 1 (1)) list?) '((1) ((1) (1)) (1 1 1) ((1))))
+ (check-equal? (slicef '(1 2 3 4 5) list?) '((1 2 3 4 5)))
+ 
  (check-equal? (slicef-at (range 5) even?) '((0 1) (2 3) (4)))
  (check-equal? (slicef-at (range 5) odd?) '((0) (1 2) (3 4)))
  (check-equal? (slicef-at (range 5) odd? #t) '((1 2) (3 4)))
@@ -167,8 +172,8 @@
 
 
 (eval-as-untyped
-  (check-equal? (filter-split '("foo" " " "bar" "\n" "\n" "ino") (λ(x) (< (string-length x) 3))) '(("foo")("bar")("ino")))
-  
+ (check-equal? (filter-split '("foo" " " "bar" "\n" "\n" "ino") (λ(x) (< (string-length x) 3))) '(("foo")("bar")("ino")))
+ 
  (check-exn exn:fail? (λ _ (slice-at (range 5) 0))) ; needs a positive integer as second arg
  (check-exn exn:fail? (λ _ (slicef-at (range 5) 3))) ; needs a procedure as second arg
  

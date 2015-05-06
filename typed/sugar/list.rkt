@@ -1,5 +1,5 @@
 #lang typed/racket/base
-(require (for-syntax racket/base racket/syntax))
+(require (for-syntax racket/base racket/syntax) racket/function)
 (require (except-in racket/list flatten dropf dropf-right) typed/sugar/define "coerce.rkt" "len.rkt")
 (require/typed racket/list [dropf (All (A) (Listof A) (A -> Boolean) -> (Listof A))]
                [dropf-right (All (A) (Listof A) (A -> Boolean) -> (Listof A))])
@@ -11,6 +11,14 @@
   (All (A) ((Listof A) (A -> Boolean) -> (Listof A)))
   (dropf-right (dropf xs test-proc) test-proc))
 
+(define/typed+provide (slicef xs pred)
+  (All (A) ((Listof A) (A -> Boolean) -> (Listof (Listof A))))
+  (let loop ([xs xs][acc : (Listof (Listof A)) empty])
+    (if (empty? xs)
+        (reverse acc)
+        (let-values ([(cdr-matches rest) (splitf-at (cdr xs) (if (pred (car xs)) pred (λ([x : A]) (not (pred x)))))])
+          (loop rest (cons (cons (car xs) cdr-matches) acc))))))
+
 (define/typed+provide slicef-at
   ;; with polymorphic function, use cased typing to simulate optional position arguments 
   (All (A) (case-> ((Listof A) (A -> Boolean) -> (Listof (Listof A)))
@@ -21,8 +29,8 @@
     [(xs pred force?)
      (define-values (last-list list-of-lists)
        (for/fold:
-           ([current-list : (Listof A) empty][list-of-lists : (Listof (Listof A)) empty])
-         ([x (in-list xs)])
+        ([current-list : (Listof A) empty][list-of-lists : (Listof (Listof A)) empty])
+        ([x (in-list xs)])
          (if (pred x)
              (values (cons x null) (if (not (empty? current-list))
                                        (cons (reverse current-list) list-of-lists)
@@ -39,7 +47,7 @@
   (All (A) ((Listof A) (A -> Boolean) -> (Listof (Listof A))))
   (define-values (last-list list-of-lists)
     (for/fold: ([current-list : (Listof A) empty][list-of-lists : (Listof (Listof A)) empty])
-      ([x (in-list xs)])
+               ([x (in-list xs)])
       (if (pred x)
           (values empty (cons (reverse (cons x current-list)) list-of-lists))
           (values (cons x current-list) list-of-lists))))
@@ -58,7 +66,7 @@
     [(xs len force?)
      (define-values (last-list list-of-lists)
        (for/fold: ([current-list : (Listof A) empty][list-of-lists : (Listof (Listof A)) empty])
-         ([x (in-list xs)][i (in-naturals)])
+                  ([x (in-list xs)][i (in-naturals)])
          (if (= (modulo (add1 i) len) 0)
              (values empty (cons (reverse (cons x current-list)) list-of-lists))
              (values (cons x current-list) list-of-lists))))
@@ -71,7 +79,7 @@
   (All (A) ((Listof A) (A -> Boolean) -> (Listof (Listof A))))
   (define-values (last-list list-of-lists)
     (for/fold: ([current-list : (Listof A) empty][list-of-lists : (Listof (Listof A)) empty])
-      ([x (in-list xs)])
+               ([x (in-list xs)])
       (if (pred x)
           (values empty (if (not (empty? current-list))
                             (cons (reverse current-list) list-of-lists)

@@ -56,6 +56,19 @@ Divide @racket[_lst] into sublists of length @racket[_len]. If @racket[_lst] can
 (slice-at (range 5) 100000 #t)]
 
 @defproc[
+(slicef
+[lst list?]
+[pred procedure?])
+(listof list?)]
+Divide @racket[_lst] into sublists that are homogeneously @racket[_pred] or not @racket[_pred]. If none of the elements match @racket[_pred], there is no slice to be made, and the result is the whole input list.
+
+@examples[#:eval my-eval
+(slicef '(1 2 2 1 2) even?)
+(slicef (range 5) odd?)
+(slicef (range 5) string?)]
+
+
+@defproc[
 (slicef-at
 [lst list?]
 [pred procedure?]

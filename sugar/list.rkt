@@ -14,6 +14,7 @@
 (define (integers? x) (and (list? x) (andmap integer? x)))
 
 (provide+safe [trimf (list? procedure? . -> . list?)]
+              [slicef (list? procedure? . -> . list-of-lists?)]
               [slicef-at ((list? procedure?) (boolean?) . ->* . list-of-lists?)]
               [slicef-after (list? procedure? . -> . list-of-lists?)]
               [slice-at ((list? (and/c integer? positive?)) (boolean?) . ->* . list-of-lists?)]
