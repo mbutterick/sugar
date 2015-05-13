@@ -188,18 +188,37 @@ Break @racket[_lst] into smaller lists at the index positions in @racket[_indexe
 @defproc[
 (shift
 [lst list?]
-[how-far (or/c integer? (listof integer?))]
-[fill-item any/c #f])
-(or/c list? (listof list?))]
-Move the items in @racket[_lst] to the right (if @racket[_how-far] is positive) or left (if negative). Vacated spaces in the list are filled with @racket[_fill-item], so the result list is always the same length as the input list. (If you don't care about the lengths being the same, you probably want @racket[take] or @racket[drop] instead.) If @racket[_how-far] is a list rather than a single value, return a list of lists shifted by the designated amounts. If @racket[_how-far] is 0, return the original list. If @racket[_how-far] is bigger than the length of @racket[_lst], raise an error.
+[how-far integer?]
+[fill-item any/c #f]
+[cycle? boolean? #f])
+list?]
+Move the items in @racket[_lst] to the right (if @racket[_how-far] is positive) or left (if @racket[_how-far] is negative). By default, vacated spaces in the list are filled with @racket[_fill-item]. But if @racket[_cycle?] is true, elements of the list wrap around (and @racket[_fill-item] is ignored). Either way, the result list is always the same length as the input list. (If you don't care about the lengths being the same, you probably want @racket[take] or @racket[drop] instead.) If @racket[_how-far] is 0, return the original list. If @racket[_how-far] is bigger than the length of @racket[_lst], raise an error.
 
 @examples[#:eval my-eval
 (define xs (range 5))
 (shift xs 2)
 (shift xs -2 0)
-(shift xs '(-1 0 1) 'boing)
+(shift xs 2 'boing)
+(shift xs 2 'boing #t)
 (shift xs 0)
 (shift xs 42)
+]
+
+@defproc[
+(shifts
+[lst list?]
+[how-far (listof integer?)]
+[fill-item any/c #f]
+[cycle? boolean? #f])
+(listof list?)]
+Same as @racket[shift], but @racket[_how-far] is a list of integers rather than a single integer, and the result is a list of lists rather than a single list.
+
+@examples[#:eval my-eval
+(define xs (range 5))
+(shifts xs '(-2 2))
+(shifts xs '(-2 2) 0)
+(shifts xs '(-2 2) 'boing)
+(shifts xs '(-2 2) 'boing #t)
 ]
 
 @defproc[
@@ -208,11 +227,13 @@ Move the items in @racket[_lst] to the right (if @racket[_how-far] is positive) 
 [how-far (or/c integer? (listof integer?))]
 [fill-item any/c #f])
 any]
-@bold{Untyped only.} Same as @racket[shift], except that when @racket[_how-far] is a list, the resulting lists are returned as multiple values rather than as a list of lists.
+@bold{Untyped only.} When @racket[_how-far] is a single integer, same as @racket[shift], but the resulting list is returned as values. When @racket[_how-far] is a list of integers, same as @racket[shifts], but the resulting lists are returned as multiple values rather than as a list of lists.
 
 @examples[#:eval my-eval
 (define xs (range 5))
-(shift xs '(-1 0 1))
+(shift xs 1)
+(shift/values xs 1)
+(shifts xs '(-1 0 1))
 (shift/values xs '(-1 0 1))
 ]
 

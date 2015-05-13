@@ -166,25 +166,39 @@
 
 
 (define/typed+provide shift
-  (All (A) (case-> ((Listof (Option A)) (U Integer (Listof Integer)) -> (U (Listof (Option A)) (Listof (Listof (Option A)))))
-                   ((Listof (Option A)) (U Integer (Listof Integer)) (Option A) -> (U (Listof (Option A)) (Listof (Listof (Option A)))))
-                   ((Listof (Option A)) (U Integer (Listof Integer)) (Option A) Boolean -> (U (Listof (Option A)) (Listof (Listof (Option A)))))))  
+  (All (A) (case-> ((Listof (Option A)) Integer -> (Listof (Option A)))
+                   ((Listof (Option A)) Integer (Option A) -> (Listof (Option A)))
+                   ((Listof (Option A)) Integer (Option A) Boolean -> (Listof (Option A)))))  
   (case-lambda
-    [(xs shift-amount-or-amounts)
-     (shift xs shift-amount-or-amounts #f #f)]
-    [(xs shift-amount-or-amounts fill-item)
-     (shift xs shift-amount-or-amounts fill-item #f)]
-    [(xs shift-amount-or-amounts fill-item cycle)
-     (define/typed (do-shift xs fill-item how-far)
-       (All (A2) ((Listof (Option A2)) (Option A2) Integer -> (Listof (Option A2))))
-       (define abs-how-far (abs how-far))
-       (cond 
-         [(> abs-how-far (length xs)) (error 'shift "index is too large for list\nindex: ~a\nlist: ~v" how-far xs)]
-         [(= how-far 0) xs]
-         [(positive? how-far)
-          ((inst append (Option A2)) ((inst make-list (Option A2)) abs-how-far fill-item) (drop-right xs abs-how-far))]
-         ;; otherwise how-far is negative
-         [else  (append (drop xs abs-how-far) (make-list abs-how-far fill-item))]))
-     (if (list? shift-amount-or-amounts)
-         ((inst map (Listof (Option A)) Integer) (λ:([amount : Integer]) (do-shift xs fill-item amount)) shift-amount-or-amounts)
-         (do-shift xs fill-item shift-amount-or-amounts))]))
+    [(xs how-far)
+     (shift xs how-far #f #f)]
+    [(xs how-far fill-item)
+     (shift xs how-far fill-item #f)]
+    [(xs how-far fill-item cycle)
+     (define abs-how-far (abs how-far))
+     (cond 
+       [(> abs-how-far (length xs)) (error 'shift "index is too large for list\nindex: ~a\nlist: ~v" how-far xs)]
+       [(= how-far 0) xs]
+       [(positive? how-far)
+        (define filler (if cycle
+                           (take-right xs abs-how-far)
+                           (make-list abs-how-far fill-item)))            
+        (append filler (drop-right xs abs-how-far))]
+       [else ; how-far is negative
+        (define filler (if cycle
+                           (take xs abs-how-far)
+                           (make-list abs-how-far fill-item)))
+        (append (drop xs abs-how-far) filler)])]))
+
+(define/typed+provide shifts
+  (All (A) (case-> ((Listof (Option A)) (Listof Integer) -> (Listof (Listof (Option A))))
+                   ((Listof (Option A)) (Listof Integer) (Option A) -> (Listof (Listof (Option A))))
+                   ((Listof (Option A)) (Listof Integer) (Option A) Boolean -> (Listof (Listof (Option A))))))
+  (case-lambda
+    [(xs how-fars)
+     (shifts xs how-fars #f #f)]
+    [(xs how-fars fill-item)
+     (shifts xs how-fars fill-item #f)]
+    [(xs how-fars fill-item cycle)
+     (map (λ:([how-far : Integer]) (shift xs how-far fill-item cycle)) how-fars)]))
+

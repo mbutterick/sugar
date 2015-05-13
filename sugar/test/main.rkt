@@ -166,9 +166,13 @@
  
  (define xs (range 5))
  (check-equal? (map (λ(a b c) (list a b c)) (shift xs -1) (shift xs 0) (shift xs 1)) '((1 0 #f) (2 1 0) (3 2 1) (4 3 2) (#f 4 3)))
- (check-equal? (shift xs '(-1 0 1) 'boing)  `((1 2 3 4 boing) ,xs (boing 0 1 2 3)))
- (check-equal? (shift xs 5 0) (make-list 5 0))
+ (check-equal? (map (λ(a b c) (list a b c)) (shift xs -1 'ignored #t) (shift xs 0 'ignored #t) (shift xs 1 'ignored #t)) '((1 0 4) (2 1 0) (3 2 1) (4 3 2) (0 4 3)))
+ (check-equal? (shifts xs '(-1 0 1) 'boing)  `((1 2 3 4 boing) ,xs (boing 0 1 2 3)))
+(check-equal? (shifts xs '(-1 0 1) 'boing #t)  `((1 2 3 4 0) ,xs (4 0 1 2 3)))
+(check-equal? (shift xs 5 0) (make-list 5 0))
  (check-exn exn:fail? (λ() (shift xs -10))))
+
+
 
 
 (eval-as-untyped
@@ -215,6 +219,7 @@
  
  (define xs (range 5))
  (define ys (range 5))
+ (check-equal? (values->list (shift/values ys -1 'boing)) '(1 2 3 4 boing)) 
  (check-equal? (values->list (shift/values ys '(-1 0 1) 'boing)) `((1 2 3 4 boing) ,xs (boing 0 1 2 3))) 
  
  (require xml)
