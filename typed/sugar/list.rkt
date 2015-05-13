@@ -17,7 +17,7 @@
     (for/fold: ([current-list : (Listof A) empty]
                 [list-of-lists : (Listof (Listof A)) empty]
                 [negating? : Boolean #f])
-      ([x (in-list xs)])
+               ([x (in-list xs)])
       (define current-pred (if negating? (λ: ([x : A]) (not (pred x))) pred))
       (if (current-pred x)
           (values (cons x current-list) list-of-lists negating?)
@@ -37,8 +37,8 @@
     [(xs pred force?)
      (define-values (last-list list-of-lists)
        (for/fold:
-           ([current-list : (Listof A) empty][list-of-lists : (Listof (Listof A)) empty])
-         ([x (in-list xs)])
+        ([current-list : (Listof A) empty][list-of-lists : (Listof (Listof A)) empty])
+        ([x (in-list xs)])
          (if (pred x)
              (values (cons x null) (if (not (empty? current-list))
                                        (cons (reverse current-list) list-of-lists)
@@ -55,7 +55,7 @@
   (All (A) ((Listof A) (A -> Boolean) -> (Listof (Listof A))))
   (define-values (last-list list-of-lists)
     (for/fold: ([current-list : (Listof A) empty][list-of-lists : (Listof (Listof A)) empty])
-      ([x (in-list xs)])
+               ([x (in-list xs)])
       (if (pred x)
           (values empty (cons (reverse (cons x current-list)) list-of-lists))
           (values (cons x current-list) list-of-lists))))
@@ -74,7 +74,7 @@
     [(xs len force?)
      (define-values (last-list list-of-lists)
        (for/fold: ([current-list : (Listof A) empty][list-of-lists : (Listof (Listof A)) empty])
-         ([x (in-list xs)][i (in-naturals)])
+                  ([x (in-list xs)][i (in-naturals)])
          (if (= (modulo (add1 i) len) 0)
              (values empty (cons (reverse (cons x current-list)) list-of-lists))
              (values (cons x current-list) list-of-lists))))
@@ -87,7 +87,7 @@
   (All (A) ((Listof A) (A -> Boolean) -> (Listof (Listof A))))
   (define-values (last-list list-of-lists)
     (for/fold: ([current-list : (Listof A) empty][list-of-lists : (Listof (Listof A)) empty])
-      ([x (in-list xs)])
+               ([x (in-list xs)])
       (if (pred x)
           (values empty (if (not (empty? current-list))
                             (cons (reverse current-list) list-of-lists)
@@ -166,25 +166,25 @@
 
 
 (define/typed+provide shift
-  (case-> ((Listof Any) (U Integer (Listof Integer)) -> (Listof Any))
-          ((Listof Any) (U Integer (Listof Integer)) Any -> (Listof Any))
-          ((Listof Any) (U Integer (Listof Integer)) Any Boolean -> (Listof Any)))  
+  (All (A) (case-> ((Listof (Option A)) (U Integer (Listof Integer)) -> (U (Listof (Option A)) (Listof (Listof (Option A)))))
+                   ((Listof (Option A)) (U Integer (Listof Integer)) (Option A) -> (U (Listof (Option A)) (Listof (Listof (Option A)))))
+                   ((Listof (Option A)) (U Integer (Listof Integer)) (Option A) Boolean -> (U (Listof (Option A)) (Listof (Listof (Option A)))))))  
   (case-lambda
     [(xs shift-amount-or-amounts)
      (shift xs shift-amount-or-amounts #f #f)]
     [(xs shift-amount-or-amounts fill-item)
      (shift xs shift-amount-or-amounts fill-item #f)]
     [(xs shift-amount-or-amounts fill-item cycle)
-     (define/typed (do-shift xs how-far)
-       ((Listof Any) Integer -> (Listof Any))
+     (define/typed (do-shift xs fill-item how-far)
+       (All (A2) ((Listof (Option A2)) (Option A2) Integer -> (Listof (Option A2))))
        (define abs-how-far (abs how-far))
        (cond 
          [(> abs-how-far (length xs)) (error 'shift "index is too large for list\nindex: ~a\nlist: ~v" how-far xs)]
          [(= how-far 0) xs]
          [(positive? how-far)
-          (append  (make-list abs-how-far fill-item) (drop-right xs abs-how-far))]
+          ((inst append (Option A2)) ((inst make-list (Option A2)) abs-how-far fill-item) (drop-right xs abs-how-far))]
          ;; otherwise how-far is negative
          [else  (append (drop xs abs-how-far) (make-list abs-how-far fill-item))]))
      (if (list? shift-amount-or-amounts)
-         (map (λ:([amount : Integer]) (do-shift xs amount)) shift-amount-or-amounts)
-         (do-shift xs shift-amount-or-amounts))]))
+         ((inst map (Listof (Option A)) Integer) (λ:([amount : Integer]) (do-shift xs fill-item amount)) shift-amount-or-amounts)
+         (do-shift xs fill-item shift-amount-or-amounts))]))
