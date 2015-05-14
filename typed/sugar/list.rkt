@@ -151,9 +151,9 @@
 
 
 (define/typed+provide (break-at xs bps)
-  (All (A) ((Listof A) (U Index (Listof Index)) -> (Listof (Listof A))))
+  (All (A) ((Listof A) (U Nonnegative-Integer (Listof Nonnegative-Integer)) -> (Listof (Listof A))))
   (let ([bps (if (list? bps) bps (list bps))]) ; coerce bps to list
-    (when (ormap (λ:([bp : Index]) (>= bp (length xs))) bps)
+    (when (ormap (λ:([bp : Nonnegative-Integer]) (>= bp (length xs))) bps)
       (error 'break-at (format "breakpoint in ~v is greater than or equal to input list length = ~a" bps (length xs))))
     ;; easier to do back to front, because then the list index for each item won't change during the recursion
     ;; cons a zero onto bps (which may already start with zero) and then use that as the terminating condition
