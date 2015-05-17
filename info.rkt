@@ -4,4 +4,4 @@
                "typed-racket-lib"
                "typed-racket-more"
                "rackunit-lib"))
-(define build-deps '("scribble-lib" "racket-doc"))
+(define build-deps '("scribble-lib" "racket-doc" "typed-racket-doc"))
