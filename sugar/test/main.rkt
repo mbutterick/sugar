@@ -4,22 +4,17 @@
 (define-syntax (eval-as-untyped stx)
   (syntax-case stx ()
     [(_ exprs ...)
-     (with-syntax ([sym (generate-temporary)]) 
+     (with-syntax ([sym (generate-temporary)]
+                   [sym2 (generate-temporary)]) 
        #'(begin
            (module sym racket
              (require rackunit "../main.rkt" net/url)
              exprs ...)
-           (require 'sym)))]))
-
-(define-syntax (eval-as-untyped-safe stx)
-  (syntax-case stx ()
-    [(_ exprs ...)
-     (with-syntax ([sym (generate-temporary)]) 
-       #'(begin
-           (module sym racket
+           (require 'sym)
+           (module sym2 racket
              (require rackunit (submod "../main.rkt" safe) net/url)
              exprs ...)
-           (require 'sym)))]))
+           (require 'sym2)))]))
 
 (define-syntax (eval-as-typed stx)
   (syntax-case stx ()
@@ -34,7 +29,6 @@
 (define-syntax-rule (eval-as-typed-and-untyped exprs ...)
   (begin
     (eval-as-untyped exprs ...)
-    (eval-as-untyped-safe exprs ...)
     (eval-as-typed exprs ...)))
 
 
@@ -179,8 +173,8 @@
  (check-equal? (map (λ(a b c) (list a b c)) (shift xs -1) (shift xs 0) (shift xs 1)) '((1 0 #f) (2 1 0) (3 2 1) (4 3 2) (#f 4 3)))
  (check-equal? (map (λ(a b c) (list a b c)) (shift xs -1 'ignored #t) (shift xs 0 'ignored #t) (shift xs 1 'ignored #t)) '((1 0 4) (2 1 0) (3 2 1) (4 3 2) (0 4 3)))
  (check-equal? (shifts xs '(-1 0 1) 'boing)  `((1 2 3 4 boing) ,xs (boing 0 1 2 3)))
-(check-equal? (shifts xs '(-1 0 1) 'boing #t)  `((1 2 3 4 0) ,xs (4 0 1 2 3)))
-(check-equal? (shift xs 5 0) (make-list 5 0))
+ (check-equal? (shifts xs '(-1 0 1) 'boing #t)  `((1 2 3 4 0) ,xs (4 0 1 2 3)))
+ (check-equal? (shift xs 5 0) (make-list 5 0))
  (check-exn exn:fail? (λ() (shift xs -10))))
 
 
