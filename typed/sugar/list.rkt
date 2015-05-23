@@ -17,7 +17,7 @@
     (for/fold: ([current-list : (Listof A) empty]
                 [list-of-lists : (Listof (Listof A)) empty]
                 [negating? : Boolean #f])
-               ([x (in-list xs)])
+      ([x (in-list xs)])
       (define current-pred (if negating? (λ: ([x : A]) (not (pred x))) pred))
       (if (current-pred x)
           (values (cons x current-list) list-of-lists negating?)
@@ -27,35 +27,31 @@
   (reverse (cons (reverse last-list) list-of-lists)))
 
 
-(define/typed+provide slicef-at
+(define/typed+provide (slicef-at xs pred [force? #f])
   ;; with polymorphic function, use cased typing to simulate optional position arguments 
   (All (A) (case-> ((Listof A) (A -> Boolean) -> (Listof (Listof A)))
                    ((Listof A) (A -> Boolean) Boolean -> (Listof (Listof A)))))
-  (case-lambda
-    [(xs pred)
-     (slicef-at xs pred #f)]
-    [(xs pred force?)
-     (define-values (last-list list-of-lists)
-       (for/fold:
+  (define-values (last-list list-of-lists)
+    (for/fold:
         ([current-list : (Listof A) empty][list-of-lists : (Listof (Listof A)) empty])
-        ([x (in-list xs)])
-         (if (pred x)
-             (values (cons x null) (if (not (empty? current-list))
-                                       (cons (reverse current-list) list-of-lists)
-                                       list-of-lists))
-             (values (cons x current-list) list-of-lists))))
-     (let ([list-of-lists (reverse (if (empty? last-list)
-                                       list-of-lists
-                                       (cons (reverse last-list) list-of-lists)))])
-       (if (and force? (not (empty? list-of-lists)) (not (pred (caar list-of-lists))))
-           (cdr list-of-lists)
-           list-of-lists))]))
+      ([x (in-list xs)])
+      (if (pred x)
+          (values (cons x null) (if (not (empty? current-list))
+                                    (cons (reverse current-list) list-of-lists)
+                                    list-of-lists))
+          (values (cons x current-list) list-of-lists))))
+  (let ([list-of-lists (reverse (if (empty? last-list)
+                                    list-of-lists
+                                    (cons (reverse last-list) list-of-lists)))])
+    (if (and force? (not (empty? list-of-lists)) (not (pred (caar list-of-lists))))
+        (cdr list-of-lists)
+        list-of-lists)))
 
 (define/typed+provide (slicef-after xs pred)
   (All (A) ((Listof A) (A -> Boolean) -> (Listof (Listof A))))
   (define-values (last-list list-of-lists)
     (for/fold: ([current-list : (Listof A) empty][list-of-lists : (Listof (Listof A)) empty])
-               ([x (in-list xs)])
+      ([x (in-list xs)])
       (if (pred x)
           (values empty (cons (reverse (cons x current-list)) list-of-lists))
           (values (cons x current-list) list-of-lists))))
@@ -64,30 +60,26 @@
                (cons (reverse last-list) list-of-lists))))
 
 
-(define/typed+provide slice-at
+(define/typed+provide (slice-at xs len [force? #f])
   ;; with polymorphic function, use cased typing to simulate optional position arguments 
   (All (A) (case-> ((Listof A) Positive-Integer -> (Listof (Listof A)))
                    ((Listof A) Positive-Integer Boolean -> (Listof (Listof A)))))
-  (case-lambda
-    [(xs len)
-     (slice-at xs len #f)]
-    [(xs len force?)
-     (define-values (last-list list-of-lists)
-       (for/fold: ([current-list : (Listof A) empty][list-of-lists : (Listof (Listof A)) empty])
-                  ([x (in-list xs)][i (in-naturals)])
-         (if (= (modulo (add1 i) len) 0)
-             (values empty (cons (reverse (cons x current-list)) list-of-lists))
-             (values (cons x current-list) list-of-lists))))
-     (reverse (if (or (empty? last-list) (and force? (not (= len (length last-list)))))
-                  list-of-lists
-                  (cons (reverse last-list) list-of-lists)))]))
+  (define-values (last-list list-of-lists)
+    (for/fold: ([current-list : (Listof A) empty][list-of-lists : (Listof (Listof A)) empty])
+      ([x (in-list xs)][i (in-naturals)])
+      (if (= (modulo (add1 i) len) 0)
+          (values empty (cons (reverse (cons x current-list)) list-of-lists))
+          (values (cons x current-list) list-of-lists))))
+  (reverse (if (or (empty? last-list) (and force? (not (= len (length last-list)))))
+               list-of-lists
+               (cons (reverse last-list) list-of-lists))))
 
 
 (define/typed+provide (filter-split xs pred)
   (All (A) ((Listof A) (A -> Boolean) -> (Listof (Listof A))))
   (define-values (last-list list-of-lists)
     (for/fold: ([current-list : (Listof A) empty][list-of-lists : (Listof (Listof A)) empty])
-               ([x (in-list xs)])
+      ([x (in-list xs)])
       (if (pred x)
           (values empty (if (not (empty? current-list))
                             (cons (reverse current-list) list-of-lists)
@@ -165,17 +157,11 @@
                      (cons tail (loop head (cdr bps)))))))))
 
 
-(define/typed+provide shift
+(define/typed+provide (shift xs how-far [fill-item #f] [cycle #f])
   (All (A) (case-> ((Listof (Option A)) Integer -> (Listof (Option A)))
                    ((Listof (Option A)) Integer (Option A) -> (Listof (Option A)))
                    ((Listof (Option A)) Integer (Option A) Boolean -> (Listof (Option A)))))  
-  (case-lambda
-    [(xs how-far)
-     (shift xs how-far #f #f)]
-    [(xs how-far fill-item)
-     (shift xs how-far fill-item #f)]
-    [(xs how-far fill-item cycle)
-     (define abs-how-far (abs how-far))
+  (define abs-how-far (abs how-far))
      (cond 
        [(> abs-how-far (length xs)) (error 'shift "index is too large for list\nindex: ~a\nlist: ~v" how-far xs)]
        [(= how-far 0) xs]
@@ -188,17 +174,11 @@
         (define filler (if cycle
                            (take xs abs-how-far)
                            (make-list abs-how-far fill-item)))
-        (append (drop xs abs-how-far) filler)])]))
+        (append (drop xs abs-how-far) filler)]))
 
-(define/typed+provide shifts
+(define/typed+provide (shifts xs how-fars [fill-item #f] [cycle #f])
   (All (A) (case-> ((Listof (Option A)) (Listof Integer) -> (Listof (Listof (Option A))))
                    ((Listof (Option A)) (Listof Integer) (Option A) -> (Listof (Listof (Option A))))
                    ((Listof (Option A)) (Listof Integer) (Option A) Boolean -> (Listof (Listof (Option A))))))
-  (case-lambda
-    [(xs how-fars)
-     (shifts xs how-fars #f #f)]
-    [(xs how-fars fill-item)
-     (shifts xs how-fars fill-item #f)]
-    [(xs how-fars fill-item cycle)
-     (map (λ:([how-far : Integer]) (shift xs how-far fill-item cycle)) how-fars)]))
+  (map (λ:([how-far : Integer]) (shift xs how-far fill-item cycle)) how-fars))
 
