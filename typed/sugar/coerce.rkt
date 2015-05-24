@@ -1,8 +1,7 @@
 #lang typed/racket/base
-(require (for-syntax typed/racket/base racket/syntax))
-(require typed/net/url racket/set racket/sequence)
-(require typed/sugar/define)
-(require "len.rkt") ; want relative path-spec for bilingual conversion
+(require (for-syntax typed/racket/base racket/syntax) sugar/include)
+(include-without-lang-line "coerce-helper.rkt")
+(require typed/sugar/define racket/set racket/sequence "len.rkt") ; want relative path-spec for bilingual conversion
 
 (define-syntax-rule (make-coercion-error-handler target-format x)
   (λ(e) (error (string->symbol (format "->~a" target-format)) (format "Can’t convert ~s to ~a" x target-format))))

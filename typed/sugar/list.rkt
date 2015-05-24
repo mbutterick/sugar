@@ -1,8 +1,7 @@
 #lang typed/racket/base
-(require (for-syntax racket/base racket/syntax) racket/function)
-(require (except-in racket/list flatten dropf dropf-right) typed/sugar/define "coerce.rkt" "len.rkt")
-(require/typed racket/list [dropf (All (A) (Listof A) (A -> Boolean) -> (Listof A))]
-               [dropf-right (All (A) (Listof A) (A -> Boolean) -> (Listof A))])
+(require (for-syntax racket/base racket/syntax) racket/function sugar/include)
+(require (except-in racket/list dropf dropf-right) typed/sugar/define "coerce.rkt" "len.rkt")
+(include-without-lang-line "list-helper.rkt")
 ;; use fully-qualified paths in require,
 ;; so they'll work when this file is included elsewhere
 (provide (all-defined-out))

@@ -1,8 +1,6 @@
 #lang racket/base
 (require (for-syntax racket/base racket/syntax) sugar/define net/url)
-
 (require-via-wormhole "../typed/sugar/coerce.rkt")
-
 
 (provide+safe [->int (any/c . -> . integer?)]
               [->string (any/c . -> . string?)]
@@ -13,7 +11,6 @@
               [->list (any/c . -> . list?)]
               [->vector (any/c . -> . vector?)]
               [->boolean (any/c . -> . boolean?)])
-
 
 ;; coercion contracts & *ish predicates
 ;; only make sense in untyped code
