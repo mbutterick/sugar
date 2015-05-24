@@ -20,7 +20,7 @@ A few functions are only available as untyped or typed. These exceptions are not
 
 The typed version of Sugar is implemented ``natively'' in the sense that it is compiled separately with type annotations. It is not a @racket[require/typed] wrapper around the untyped code. This avoids the contract barrier that is otherwise automatically imposed between typed and untyped code. 
 
-@margin-note{This cross-compiling technique relies on @racket[include-without-lang-line] in this library.}
+@margin-note{I explain more about this cross-compiling technique in @link["http://unitscale.com/mb/technique/dual-typed-untyped-library.html"]{Making a dual typed / untyped Racket library}.}
 
 @;local-table-of-contents[]
 
