@@ -19,4 +19,5 @@
 (r+p "list.rkt")
 (r+p "misc.rkt")
 (r+p "string.rkt")
+(r+p "test.rkt")
 (r+p "xml.rkt")

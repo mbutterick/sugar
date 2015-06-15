@@ -1,7 +1,7 @@
 #lang racket/base
 (require (for-syntax racket/base))
-(provide (all-defined-out))
-
+(require sugar/define)
+(provide+safe module-test-external module-test-internal module-test-internal+external)
 
 ;; tests using module-boundary contracts
 (define-syntax (module-test-external stx)
