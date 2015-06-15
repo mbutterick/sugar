@@ -1,5 +1,5 @@
 #lang racket/base
-(require (for-syntax racket/base))
+(require (for-syntax racket/base racket/syntax))
 (require sugar/define)
 (provide+safe module-test-external module-test-internal module-test-internal+external)
 
@@ -7,13 +7,14 @@
 (define-syntax (module-test-external stx)
   (syntax-case stx ()
     [(_ expr ...)
+     (with-syntax ([mod-name (generate-temporary)])
      #'(begin
-         (module* test-external racket/base
+         (module* mod-name racket/base
            (require (submod ".."))
            (require rackunit)
            expr ...)
          (module+ test
-           (require (submod ".." test-external))))]))
+           (require (submod ".." mod-name)))))]))
 
 
 (define-syntax (module-test-internal stx)
