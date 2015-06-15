@@ -127,7 +127,13 @@
  (check-equal? (remove-ext* foo.txt-path) foo-path)
  (check-equal? (remove-ext* (->path ".foo.txt")) (->path ".foo.txt"))
  (check-not-equal? (remove-ext* foo.bar.txt-path) foo.bar-path) ; removes more than one ext
- (check-equal? (remove-ext* foo.bar.txt-path) foo-path) 
+ (check-equal? (remove-ext* foo.bar.txt-path) foo-path)
+ 
+ (check-equal? (get-enclosing-dir "/Users/MB/foo.txt") (->path "/Users/MB/"))
+ (check-equal? (get-enclosing-dir "/Users/MB/foo/") (->path "/Users/MB/"))
+ 
+ (check-true (has-binary-ext? "foo.MP3"))
+ (check-false (has-binary-ext? "foo.py"))
  
  (check-true (starts-with? "foobar" "foo"))
  (check-true (starts-with? "foobar" "foobar"))
@@ -181,6 +187,15 @@
 
 
 (eval-as-untyped
+ 
+ (check-true (urlish? (->path "/Users/MB/home.html")))
+ (check-true (urlish? "/Users/MB/home.html?foo=bar"))
+ (check-true (urlish? (->symbol "/Users/MB/home")))
+ 
+ (check-true (pathish? (->path "/Users/MB/home")))
+ (check-true (pathish? "/Users/MB/home"))
+ (check-true (pathish? (->symbol "/Users/MB/home")))
+ 
  (check-equal? (filter-split '("foo" " " "bar" "\n" "\n" "ino") (λ(x) (< (string-length x) 3))) '(("foo")("bar")("ino")))
  
  (check-exn exn:fail? (λ _ (slice-at (range 5) 0))) ; needs a positive integer as second arg
