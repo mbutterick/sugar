@@ -6,15 +6,29 @@
 (define-syntax (report stx)
   (syntax-case stx ()
     [(_ expr) #'(report expr expr)]
+    [(_ expr #:line) #'(report expr expr #:line)]
     [(_ expr name)
      #'(let ([x expr]) 
-         (displayln (format "~a = ~v" 'name x) (current-error-port)) 
-         x)]))
+         (eprintf "~a = ~v\n" 'name x)
+         x)]
+    [(_ expr name #:line)
+     (with-syntax ([line (syntax-line #'expr)])
+       #'(let ([x expr])
+           (eprintf "~a = ~v on line ~v\n" 'name x line)
+           x))]
+    ))
 
-(define-syntax-rule (report-apply proc expr) 
-  (let ([lst expr])
-    (report (apply proc lst) (apply proc expr)) 
-    lst))
+(define-syntax report-apply
+  (syntax-rules ()
+    [(report-apply proc expr) 
+     (let ([lst expr])
+       (report (apply proc lst) (apply proc expr)) 
+       lst)]
+    [(report-apply proc expr #:line)
+     (let ([lst expr])
+       (report (apply proc lst) (apply proc expr) #:line)
+       lst)]
+    ))
 
 #|
 (define-syntax (verbalize stx)
