@@ -51,8 +51,18 @@ But be careful — in the example below, the result of the @racket[if] expressi
   (report x)]
 
 
+@defform*[((report/line expr) (report/line expr maybe-name))]
+Same as @racket[report], but also shows the line number of @racket[_expr].
+
+@defform*[((report/file expr) (report/file expr maybe-name))]
+Same as @racket[report], but also shows the line number and source-file name of @racket[_expr].
+
+@deftogether[(
 @defform[(report* expr ...)]
-Apply @racket[report] separately to each @racket[_expr] in the list.
+@defform[(report*/line expr ...)]
+@defform[(report*/file expr ...)]
+)]
+Apply the relevant @racket[report] macro separately to each @racket[_expr] in the list.
 
 @defform[(repeat num expr ...)]
 Evaluate @racket[_expr] repeatedly — @racket[_num] times, in fact — and return the last value.
