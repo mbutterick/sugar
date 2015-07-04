@@ -1,0 +1,10 @@
+#lang sugar/debug/lang racket
+(require sugar/debug rackunit)
+(let ([out (open-output-string)])
+  (parameterize ([current-error-port out])
+    #^5)
+  (check-equal? (get-output-string out) "5 = 5\n"))
+(let ([out (open-output-string)])
+  (parameterize ([current-error-port out])
+    #^^5)
+  (check-equal? (get-output-string out) "5 = 5 on line 9\n"))
