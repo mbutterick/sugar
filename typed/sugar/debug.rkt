@@ -7,14 +7,14 @@
   (syntax-case stx ()
     [(_ expr) #'(report expr expr)]
     [(_ expr name)
-     #'(begin 
-         (displayln (format "~a = ~v" 'name expr) (current-error-port)) 
-         expr)]))
+     #'(let ([x expr]) 
+         (displayln (format "~a = ~v" 'name x) (current-error-port)) 
+         x)]))
 
 (define-syntax-rule (report-apply proc expr) 
-  (begin 
-    (report (apply proc expr)) 
-    expr))
+  (let ([lst expr])
+    (report (apply proc lst) (apply proc expr)) 
+    lst))
 
 #|
 (define-syntax (verbalize stx)
@@ -28,7 +28,7 @@
 
 (define-syntax (report* stx)
   (syntax-case stx ()
-    [(_ expr ...) (datum->syntax stx `(begin ,@(map (λ(arg) `(report ,arg)) (syntax->datum #'(expr ...)))))]))
+    [(_ expr ...) #'(begin (report expr) ...)]))
 
 
 (define-syntax-rule (repeat num expr ...)
@@ -43,13 +43,11 @@
 (define-syntax (time-repeat* stx)
   (syntax-case stx ()
     [(_ num expr ...) 
-     (let ([num (syntax->datum #'num)])
-       (datum->syntax stx `(values ,@(map (λ(arg) `(time-repeat ,num ,arg)) (syntax->datum #'(expr ...))))))]))
+     #'(let ([n num])
+         (values (time-repeat n expr) ...))]))
 
 
 (define-syntax (compare stx)
   (syntax-case stx ()
-    [(_ expr id id-alts ...) 
-     (let ([expr (syntax->datum #'expr)]
-           [id (syntax->datum #'id)])
-       (datum->syntax stx `(values ,expr ,@(map (λ(id-alt) `(let ([,id ,id-alt]) ,expr)) (syntax->datum #'(id-alts ...))))))]))
+    [(_ expr id id-alt ...) 
+     #'(values expr (let ([id id-alt]) expr) ...)]))
