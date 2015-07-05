@@ -1,4 +1,4 @@
-#lang sugar/debug/lang racket
+#lang sugar/debug racket
 (require sugar/debug rackunit)
 (let ([out (open-output-string)])
   (parameterize ([current-error-port out])
