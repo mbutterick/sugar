@@ -9,22 +9,34 @@
     #\^ 'dispatch-macro report-proc
     ))
 
-(define/with-syntax report (datum->syntax #f 'report))
-(define/with-syntax report/line (datum->syntax #f 'report/line))
+(define current-syntax-introducer
+  (make-parameter (λ (x) x)))
 
 (define (report-proc c in src ln col pos)
   (define c2 (peek-char in))
+  (define intro (current-syntax-introducer))
   (cond [(char=? c2 #\^)
          (read-char in)
-         (define stx (read-syntax/recursive src in))
-         #`(report/line #,stx)]
+         (define/with-syntax stx (intro (read-syntax/recursive src in)))
+         (intro
+          #'(let ()
+              (local-require (only-in sugar/debug [report/line report/line]))
+              (report/line stx)))]
         [else
-         (define stx (read-syntax/recursive src in))
-         #`(report #,stx)]))
+         (define/with-syntax stx (intro (read-syntax/recursive src in)))
+         (intro
+          #'(let ()
+              (local-require (only-in sugar/debug [report report]))
+              (report stx)))]))
 
 (define (wrap-reader reader)
   (define (rd . args)
-    (parameterize ([current-readtable (make-debug-readtable (current-readtable))])
-      (apply reader args)))
+    (define intro (make-syntax-introducer))
+    (parameterize ([current-readtable (make-debug-readtable (current-readtable))]
+                   [current-syntax-introducer intro])
+      (define stx (apply reader args))
+      (if (syntax? stx)
+          (intro stx)
+          stx)))
   rd)
 
