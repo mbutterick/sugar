@@ -29,7 +29,7 @@
      (with-syntax ([file (syntax-source #'expr)]
                    [line (syntax-line #'expr)])
        #'(let ([expr-result expr])
-           (eprintf "~a = ~v on line ~v in \"~a\"\n" 'name expr-result line file)
+           (eprintf "~a = ~v on line ~v in \"~a\"\n" 'name expr-result line 'file)
            expr-result))]))
 
 
