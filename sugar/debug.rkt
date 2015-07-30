@@ -64,7 +64,7 @@
   
   (define-values (debug-read debug-read-syntax debug-get-info)
     (make-meta-reader
-     'sugar/debug/lang
+     'sugar/debug
      "language path"
      (lambda (bstr)
        (let* ([str (bytes->string/latin-1 bstr)]
