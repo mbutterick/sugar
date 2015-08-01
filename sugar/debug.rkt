@@ -16,7 +16,7 @@
   
   (define (make-debug-readtable [rt (current-readtable)])
     (make-readtable rt
-                    #\^ 'non-terminating-macro report-proc))
+                    #\^ 'dispatch-macro report-proc))
 
   
   (define (wrap-reader reader)
