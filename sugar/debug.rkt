@@ -13,10 +13,11 @@
   (provide (rename-out [debug-read read]
                        [debug-read-syntax read-syntax]
                        [debug-get-info get-info]))
+
+  (define report-char #\R)
   
   (define (make-debug-readtable [rt (current-readtable)])
-    (make-readtable rt
-                    #\^ 'dispatch-macro report-proc))
+    (make-readtable rt report-char 'dispatch-macro report-proc))
 
   
   (define (wrap-reader reader)
@@ -39,7 +40,7 @@
     (define c2 (peek-char in))
     (define c3 (peek-char in 1))
     (define intro (current-syntax-introducer))
-    (cond [(and (char=? c3 #\^) (char=? c2 #\^))
+    (cond [(and (char=? c3 report-char) (char=? c2 report-char))
            (read-char in)
            (read-char in)
            (define/with-syntax stx (intro (read-syntax/recursive src in)))
@@ -47,7 +48,7 @@
             #'(let ()
                 (local-require (only-in sugar/debug [report/file report/file]))
                 (report/file stx)))]
-          [(char=? c2 #\^)
+          [(char=? c2 report-char)
            (read-char in)
            (define/with-syntax stx (intro (read-syntax/recursive src in)))
            (intro
