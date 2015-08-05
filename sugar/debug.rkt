@@ -9,7 +9,7 @@
 
 
 (module reader racket/base
-  (require syntax/module-reader racket/syntax)  
+  (require syntax/module-reader racket/syntax version/utils)  
   (provide (rename-out [debug-read read]
                        [debug-read-syntax read-syntax]
                        [debug-get-info get-info]))
@@ -26,7 +26,7 @@
       (parameterize ([current-readtable (make-debug-readtable (current-readtable))]
                      [current-syntax-introducer intro])
         (define stx (apply reader args))
-        (if (syntax? stx)
+        (if (and (syntax? stx) (version<=? "6.2.900.4" (version)))
             (intro stx)
             stx)))
     rd)
