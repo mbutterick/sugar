@@ -4,27 +4,31 @@
 (define-syntax (eval-as-untyped stx)
   (syntax-case stx ()
     [(_ exprs ...)
-     (with-syntax ([sym (generate-temporary)]
-                   [sym2 (generate-temporary)]) 
-       #'(begin
-           (module sym racket
-             (require rackunit "../main.rkt" net/url)
-             exprs ...)
-           (require 'sym)
-           (module sym2 racket
-             (require rackunit (submod "../main.rkt" safe) net/url)
-             exprs ...)
-           (require 'sym2)))]))
+     (let ([sym (generate-temporary)]
+           [sym2 (generate-temporary)])
+       (datum->syntax
+        stx
+        `(begin
+          (module ,sym racket
+            (require rackunit "../main.rkt" net/url)
+            ,@(syntax->datum #'(exprs ...)))
+          (require ',sym)
+          (module ,sym2 racket
+            (require rackunit (submod "../main.rkt" safe) net/url)
+            ,@(syntax->datum #'(exprs ...)))
+          (require ',sym2))))]))
 
 (define-syntax (eval-as-typed stx)
   (syntax-case stx ()
     [(_ exprs ...)
-     (with-syntax ([sym (generate-temporary)]) 
-       #'(begin
-           (module sym typed/racket
-             (require typed/rackunit "../../typed/sugar.rkt" typed/net/url)
-             exprs ...)
-           (require 'sym)))]))
+     (let ([sym (syntax-e (generate-temporary))])
+       (datum->syntax stx
+                      `(begin
+                        (module ,sym typed/racket
+                          (require typed/rackunit "../../typed/sugar.rkt" typed/net/url)
+                          ,@(syntax->datum #'(exprs ...)))
+                        (require ',sym))
+                      stx))]))
 
 (define-syntax-rule (eval-as-typed-and-untyped exprs ...)
   (begin

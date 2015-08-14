@@ -7,15 +7,16 @@
 (define-syntax (module-test-external stx)
   (syntax-case stx ()
     [(_ expr ...)
-     (with-syntax ([mod-name (generate-temporary)])
-     #'(begin
-         (module* mod-name racket/base
-           (require (submod ".."))
-           (require rackunit)
-           expr ...)
-         (module+ test
-           (require (submod ".." mod-name)))))]))
-
+     (let ([mod-name (syntax-e (generate-temporary))])
+       (datum->syntax stx
+                      `(begin
+                         (module* ,mod-name racket/base
+                           (require (submod ".."))
+                           (require rackunit)
+                           ,@(syntax->datum #'(expr ...)))
+                         (module+ test
+                           (require (submod ".." ,mod-name))))
+                      stx))]))
 
 (define-syntax (module-test-internal stx)
   (syntax-case stx ()
