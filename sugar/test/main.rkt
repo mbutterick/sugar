@@ -21,7 +21,7 @@
 (define-syntax (eval-as-typed stx)
   (syntax-case stx ()
     [(_ exprs ...)
-     (let ([sym (syntax-e (generate-temporary))])
+     (let ([sym (generate-temporary)])
        (datum->syntax stx
                       `(begin
                         (module ,sym typed/racket
@@ -63,7 +63,7 @@
 
  (check-equal? (->list '(1 2 3)) '(1 2 3))
  (check-equal? (->list (list->vector '(1 2 3))) '(1 2 3))
- (check-equal? (->list (set 1 2 3)) '(2 3 1))
+ (check-not-false (andmap (lambda (e) (member e '(1 2 3))) (->list (set 1 2 3))))
  (check-equal? (->list "foo") (list "foo"))
 
  (check-true (->boolean #t))
