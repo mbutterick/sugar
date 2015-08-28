@@ -16,4 +16,4 @@
     [(hash? x) (len (hash-keys x))]
     [(set? x) (len (set->list x))]
     [(and (sequence? x) (not (integer? x))) (len (sequence->list x))]
-    [else (error "len: can’t calculate length of" x)]))
+    [else (error "len: can't calculate length of" x)]))

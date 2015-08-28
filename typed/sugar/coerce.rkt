@@ -4,7 +4,7 @@
 (require typed/sugar/define racket/set racket/sequence "len.rkt") ; want relative path-spec for bilingual conversion
 
 (define-syntax-rule (make-coercion-error-handler target-format x)
-  (λ(e) (error (string->symbol (format "->~a" target-format)) (format "Can’t convert ~s to ~a" x target-format))))
+  (λ(e) (error (string->symbol (format "->~a" target-format)) (format "Can't convert ~s to ~a" x target-format))))
 
 
 (define-type Intable (U Number String Symbol Char Path Lengthable))
