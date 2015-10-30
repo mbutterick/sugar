@@ -15,8 +15,4 @@ In safe mode (with contracts):
 
     (require (submod sugar safe))
 
-Or in typed mode:
-
-    (require typed/sugar)
-
 You can [read the docs here](http://pkg-build.racket-lang.org/doc/sugar).

@@ -1,7 +1,6 @@
 #lang info
-(define collection 'multi)
-(define deps '("base"
-               "typed-racket-lib"
-               "typed-racket-more"
-               "rackunit-lib"))
-(define build-deps '("scribble-lib" "racket-doc" "typed-racket-doc"))
+(define collection "sugar")
+(define deps '("base" "rackunit-lib"))
+(define build-deps '("scribble-lib" "racket-doc"))
+(define scribblings '(("scribblings/sugar.scrbl" ())))
+(define compile-omit-paths '("test"))
