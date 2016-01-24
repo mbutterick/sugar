@@ -13,7 +13,7 @@
   
   (define result 
     ;; use handler to capture error & print localized error message
-    (with-handlers ([exn:fail? (λ(exn) (error (format "get: couldn’t retrieve ~a from ~a" (if end (format "items ~a through ~a" start end) (format "item ~a" start)) container)))])
+    (with-handlers ([exn:fail? (λ(exn) (error (format "get: couldn't retrieve ~a from ~a" (if end (format "items ~a through ~a" start end) (format "item ~a" start)) container)))])
     (let ([end (if (and (equal? end #f) (sliceable-container? container)) (add1 start) end)])
         (cond
           [(list? container) (for/list ([i (in-range start end)]) (list-ref container i))]

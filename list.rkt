@@ -118,8 +118,8 @@
       (let* ([duplicate-keys (filter-not empty? (hash-map (frequency-hash (->list x)) 
                                                           (λ(element freq) (if (> freq 1) element '()))))])
         (error (string-append "members-unique? failed because " (if (= (len duplicate-keys) 1) 
-                                                                    "item isn’t"
-                                                                    "items aren’t") " unique:") duplicate-keys))
+                                                                    "item isn't"
+                                                                    "items aren't") " unique:") duplicate-keys))
       result))
 
 
