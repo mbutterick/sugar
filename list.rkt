@@ -123,16 +123,6 @@
       result))
 
 
-;; for use inside quasiquote
-;; instead of ,(when ...) use ,@(when/splice ...)
-;; to avoid voids
-(provide+safe  when/splice)
-(define-syntax (when/splice stx)
-  (syntax-case stx ()
-    [(_ test body)
-     #'(if test (list body) '())]))
-
-
 (provide+safe values->list)
 (define-syntax (values->list stx)
   (syntax-case stx ()

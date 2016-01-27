@@ -132,15 +132,6 @@ Same as @racket[members-unique?], but if the members are not unique, raises a de
 (members-unique?/error '(a b c d e f a b))
 ]
 
-@defform[(when/splice test expr)]
-A special version of @racket[when] that you can use inside @racket[quasiquote] to suppress @racket[void] values when @racket[_test] is @racket[#f]. As the name suggests, it works in conjunction with the @litchar["@"] splicing operator.
-
-@examples[#:eval my-eval
-`(,(when (even? 2) "hooray"))
-`(,(when (even? 3) "hooray"))
-`(,@(when/splice (even? 2) "hooray"))
-`(,@(when/splice (even? 3) "hooray"))
-]
 
 @defform[(values->list values)]
 Convert @racket[_values] to a simple list.
