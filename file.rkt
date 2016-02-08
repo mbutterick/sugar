@@ -2,11 +2,6 @@
 (require "define.rkt" racket/set "coerce.rkt" racket/path "unstable/string.rkt")
 
 
-(define+provide+safe (get-enclosing-dir p)
-  (coerce/path? . -> . path?)
-  (simplify-path (build-path (->path p) 'up)))
-
-
 ;; does path have a certain extension
 (define+provide+safe (has-ext? x ext)
   (coerce/path? coerce/string? . -> . coerce/boolean?)

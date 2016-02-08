@@ -5,10 +5,10 @@
 @(define my-eval (make-base-eval))
 @(my-eval `(require sugar))
 
-@title{File}
+@title{File extensions}
 @defmodule[#:multi (sugar/file (submod sugar/file safe))]
 
-File utilities, mostly in the realm of file extensions. These functions don't access the filesystem. 
+These functions don't access the filesystem. 
 
 Arguments that are @racket[pathish?] can take either a string or a path. For clarity below, I've used strings.
 
@@ -72,18 +72,3 @@ Return a new @racket[_file-path] with @racket[_ext] appended. Note that this doe
 (add-ext "foo" "txt")
 (add-ext "foo.txt" "jpg")
 (add-ext (remove-ext "foo.txt") "jpg")]
-
-
-@defproc[
-(get-enclosing-dir
-[path pathish?])
-path?]
-Return the enclosing directory of @racket[_path]. Does not consult the filesystem about whether @racket[_path] is valid. If you reach the @racket[_root] directory, then @racket[(get-enclosing-dir _root)] will just return @racket[_root] again.
-
-@examples[#:eval my-eval
-(define bin (string->path "/usr/bin"))
-bin
-(get-enclosing-dir bin)
-(get-enclosing-dir (get-enclosing-dir bin))
-(get-enclosing-dir (get-enclosing-dir (get-enclosing-dir bin)))
-]

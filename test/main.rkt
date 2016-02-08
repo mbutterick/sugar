@@ -94,9 +94,6 @@
  (check-not-equal? (remove-ext* foo.bar.txt-path) foo.bar-path) ; removes more than one ext
  (check-equal? (remove-ext* foo.bar.txt-path) foo-path)
 
- (check-equal? (get-enclosing-dir "/Users/MB/foo.txt") (->path "/Users/MB/"))
- (check-equal? (get-enclosing-dir "/Users/MB/foo/") (->path "/Users/MB/"))
-
  (check-true (has-binary-ext? "foo.MP3"))
  (check-false (has-binary-ext? "foo.py"))
 

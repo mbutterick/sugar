@@ -5,7 +5,7 @@
 @(define my-eval (make-base-eval))
 @(my-eval `(require sugar racket/list))
 
-@title{List}
+@title{Lists}
 @defmodule[#:multi (sugar/list (submod sugar/list safe))]
 
 

@@ -27,7 +27,7 @@ Sugar can be invoked two ways: as an ordinary library, or as a library with cont
 
 @include-section["debug.scrbl"]
 
-@include-section["file.scrbl"]
+@include-section["file-extensions.scrbl"]
 
 @include-section["list.scrbl"]
 
