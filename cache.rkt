@@ -4,8 +4,9 @@
 (define+provide+safe (make-caching-proc base-proc) 
   (procedure? . -> . procedure?)
   (let ([cache (make-hash)])
-    (λ args
-      (hash-ref! cache args (λ () (apply base-proc args))))))
+    (make-keyword-procedure
+     (λ (kws kw-args . args)
+       (hash-ref! cache args (λ () (keyword-apply base-proc kws kw-args args)))))))
 
 (provide+safe define/caching)
 (define-syntax (define/caching stx)

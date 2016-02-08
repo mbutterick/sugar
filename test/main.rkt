@@ -30,6 +30,7 @@
  (check-equal? (->int (make-list 42 null)) 42)
 
  (check-equal? (->string "foo") "foo")
+ (check-equal? (->string #"foo") "foo")
  (check-equal? (->string '()) "")
  (check-equal? (->string (void)) "")
  (check-equal? (->string 'foo) "foo")
@@ -40,6 +41,7 @@
  (check-equal? (->string #\¶) "¶")
 
  (check-equal? (->path "foo") (string->path "foo"))
+ (check-equal? (->path #"foo") (string->path "foo"))
  (check-equal? (->path 'foo) (string->path "foo"))
  (check-equal? (->path 123) (string->path "123"))
  (check-equal? (->path (string->url "foo/bar.html")) (string->path "foo/bar.html"))
@@ -55,30 +57,6 @@
  (check-true (->boolean "foo"))
  (check-true (->boolean '()))
  (check-true (->boolean '(1 2 3)))
-
- (check-equal? (len '(1 2 3)) 3)
- (check-not-equal? (len '(1 2)) 3) ; len 2
- (check-equal? (len "foo") 3)
- (check-not-equal? (len "fo") 3) ; len 2
- (check-equal? (len 'foo) 3)
- (check-not-equal? (len 'fo) 3) ; len 2
- (check-equal? (len (list->vector '(1 2 3))) 3)
- (check-not-equal? (len (list->vector '(1 2))) 3) ; len 2
- (check-equal? (len (set 1 2 3)) 3)
- (check-not-equal? (len (set 1 2)) 3) ; len 2
- (check-equal? (len (make-hash '((a . 1) (b . 2) (c . 3)))) 3)
- (check-not-equal? (len (make-hash '((a . 1) (b . 2)))) 3) ; len 2
-
- (check-true ("foobar" . starts-with? . "foo"))
- (check-true ("foobar" . starts-with? . "f"))
- (check-true ("foobar" . starts-with? . "foobar"))
- (check-false ("foobar" . starts-with? . "bar"))
- (check-false ("foobar" . starts-with? . "."))
- (check-true ("foobar" . ends-with? . "bar"))
- (check-true ("foobar" . ends-with? . "r"))
- (check-true ("foobar" . ends-with? . "foobar"))
- (check-false ("foobar" . ends-with? . "foo"))
-
  (check-true (members-unique? '(a b c)))
  (check-false (members-unique? '(a b c c)))
  (check-true (members-unique? "zoey"))
@@ -116,22 +94,8 @@
  (check-not-equal? (remove-ext* foo.bar.txt-path) foo.bar-path) ; removes more than one ext
  (check-equal? (remove-ext* foo.bar.txt-path) foo-path)
 
- (check-equal? (get-enclosing-dir "/Users/MB/foo.txt") (->path "/Users/MB/"))
- (check-equal? (get-enclosing-dir "/Users/MB/foo/") (->path "/Users/MB/"))
-
  (check-true (has-binary-ext? "foo.MP3"))
  (check-false (has-binary-ext? "foo.py"))
-
- (check-true (starts-with? "foobar" "foo"))
- (check-true (starts-with? "foobar" "foobar"))
- (check-false (starts-with? "foobar" "zam"))
- (check-false (starts-with? "foobar" "foobars"))
- (check-true (ends-with? "foobar" "bar"))
- (check-false (ends-with? "foobar" "zam"))
- (check-true (ends-with? "foobar" "foobar"))
- (check-false (ends-with? "foobar" "foobars"))
- (check-true (capitalized? "Brennan"))
- (check-false (capitalized? "foobar"))
 
  (check-equal? (slice-at (range 5) 1) '((0) (1) (2) (3) (4)))
  (check-equal? (slice-at (range 5) 2) '((0 1) (2 3) (4)))
@@ -183,68 +147,10 @@
  (check-exn exn:fail? (λ _ (slice-at (range 5) 0))) ; needs a positive integer as second arg
  (check-exn exn:fail? (λ _ (slicef-at (range 5) 3))) ; needs a procedure as second arg
 
- (check-equal? (get '(0 1 2 3 4 5) 2) 2)
- (check-exn exn:fail? (λ() (get '(0 1 2 3 4 5) 100))) ; index too big
- (check-equal? (get `(0 1 ,(list 2) 3 4 5) 2) (list 2))
- (check-equal? (get '(0 1 2 3 4 5) 0 2) '(0 1))
- (check-equal? (get (list->vector '(0 1 2 3 4 5)) 2) 2)
- (check-equal? (get (list->vector'(0 1 2 3 4 5)) 0 2) (list->vector '(0 1)))
- (check-equal? (get "purple" 2) "r")
- (check-equal? (get "purple" 0 2) "pu")
- (check-equal? (get 'purple 2) 'r)
- (check-equal? (get 'purple 0 2) 'pu)
- (check-equal? (get (string->path "/root/foo/bar/file.txt") 2) (string->path "foo"))
- (check-equal? (get (string->path "/root/foo/bar/file.txt") 0 2) (list (string->path "/") (string->path "root")))
- (check-equal? (get (make-hash `((a . ,(list 1)) (b . ,(list 2)) (c  . ,(list 3)))) 'a) (list 1))
- (check-exn exn:fail? (λ() (get (make-hash `((a . ,(list 1)) (b . ,(list 2)) (c  . ,(list 3)))) 'z))) ; nonexistent key
-
- (check-equal? (get (string->path "/root/foo/bar/file.txt") 1) (string->path "root"))
- (check-equal? (get (string->path "/root/foo/bar/file.txt") 0 3)
-               (map string->path '("/" "root" "foo")))
-
- (check-equal? (get (make-hash '((a . 1) (b . 2) (c  . 3))) 'b) 2)
-
- (check-true (2 . in? . '(1 2 3)))
- (check-false (4 . in? . '(1 2 3)))
- (check-true (2 . in? . (list->vector '(1 2 3))))
- (check-false (4 . in? . (list->vector '(1 2 3))))
- (check-true ('a . in? . (make-hash '((a . 1) (b . 2) (c  . 3)))))
- (check-false ('x . in? . (make-hash '((a . 1) (b . 2) (c  . 3)))))
- (check-true ("o" . in? . "foobar"))
- (check-false ("z" . in? . "foobar"))
- (check-true ('o . in? . 'foobar))
- (check-false ('z . in? . 'foobar))
- (check-true ("F" . in? . #\F))
-
- (check-true (in? "foo" (string->path "/root/foo/bar/file.txt")))
- (check-false (in? "zam" (string->path "/root/foo/bar/file.txt")))
 
  (define ys (range 5))
  (check-equal? (values->list (shift/values ys -1 'boing)) '(1 2 3 4 boing))
- (check-equal? (values->list (shift/values ys '(-1 0 1) 'boing)) `((1 2 3 4 boing) ,xs (boing 0 1 2 3)))
-
- (require xml)
- (define str "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<root>hello world</root>")
- (define-values (str-prolog str-doc) (xml-string->xexprs str))
- (check-equal? str-prolog (prolog (list (p-i (location 1 0 1) (location 1 38 39) 'xml "version=\"1.0\" encoding=\"utf-8\"")) #f null))
- (check-equal? str-doc '(root () "hello world"))
- (check-equal? (xexprs->xml-string str-prolog str-doc) str)
-
- (module include-test racket/base
-   (require sugar/include)
-   (include-without-lang-line "source.rkt")
-   (provide included-symbol))
-
- (require 'include-test)
- (check-equal? included-symbol 'bar)
-
- (module no-lang-line-include-test racket/base
-   (require sugar/include)
-   (include-without-lang-line "no-lang-line-source.txt")
-   (provide no-lang-symbol))
-
- (require 'no-lang-line-include-test)
- (check-equal? no-lang-symbol 'bar))
+ (check-equal? (values->list (shift/values ys '(-1 0 1) 'boing)) `((1 2 3 4 boing) ,xs (boing 0 1 2 3))))
 
 
 

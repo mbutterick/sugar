@@ -1,10 +1,5 @@
 #lang racket/base
-(require "define.rkt" racket/set "coerce.rkt" racket/path "string.rkt")
-
-
-(define+provide+safe (get-enclosing-dir p)
-  (coerce/path? . -> . path?)
-  (simplify-path (build-path (->path p) 'up)))
+(require "define.rkt" racket/set "coerce.rkt" racket/path "unstable/string.rkt")
 
 
 ;; does path have a certain extension
@@ -45,7 +40,7 @@
   (coerce/path? . -> . path?)
   ;; pass through hidden files (those starting with a dot)
   (let ([x (->path x)])
-    (if (x . starts-with? . ".")
+    (if ((->string x) . starts-with? . ".")
         x
         (path-replace-suffix x ""))))
 
@@ -55,7 +50,7 @@
   (coerce/path? . -> . path?)
   ;; pass through hidden files (those starting with a dot)
   (let ([x (->path x)])
-    (if (x . starts-with? . ".")
+    (if ((->string x) . starts-with? . ".")
         x
         (let ([path-with-removed-ext (remove-ext x)])
           (if (equal? x path-with-removed-ext)

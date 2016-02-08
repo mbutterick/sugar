@@ -1,5 +1,5 @@
 #lang racket/base
-(require "define.rkt" racket/set "coerce.rkt")
+(require "../define.rkt" racket/set "../coerce.rkt")
 
 
 (define+provide+safe (bytecount->string bytecount)

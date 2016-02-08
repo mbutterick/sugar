@@ -9,7 +9,7 @@
 @defmodule[#:multi (sugar/xml (submod sugar/xml safe))]
 
 
-Making it easier to do the simplest kind of round-trip with XML: convert an XML string to X-expressions, manipulate, and then convert these X-expressions back to an XML string. @bold{This submodule is untyped only.}
+Making it easier to do the simplest kind of round-trip with XML: convert an XML string to X-expressions, manipulate, and then convert these X-expressions back to an XML string.
 
 @defproc[
 (xml-string->xexprs

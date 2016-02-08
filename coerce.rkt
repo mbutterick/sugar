@@ -1,6 +1,6 @@
 #lang racket/base
 (require (for-syntax racket/base racket/syntax))
-(require net/url racket/set racket/sequence "len.rkt" "define.rkt")
+(require net/url racket/set racket/sequence "unstable/len.rkt" "define.rkt")
 
 (define-syntax-rule (make-coercion-error-handler target-format x)
   (λ(e) (error (string->symbol (format "->~a" target-format)) (format "Can't convert ~s to ~a" x target-format))))
@@ -14,7 +14,7 @@
       [(complex? x) (->int (real-part x))]
       [(string? x) (let ([strnum (string->number x)])
                      (if (real? strnum) (->int strnum) (error 'ineligible-string)))]
-      [(or (symbol? x) (path? x)) (->int (->string x))]
+      [(or (symbol? x) (path? x) (bytes? x)) (->int (->string x))]
       [(char? x) (char->integer x)]
       [else (len x)]))) ; covers Lengthable types
 
@@ -29,7 +29,7 @@
           [(symbol? x) (symbol->string x)]
           [(number? x) (number->string x)]
           [(path? x) (path->string x)]
-          [(char? x) (format "~a" x)]
+          [(or (char? x) (bytes? x)) (format "~a" x)]
           [(url? x) (url->string x)]
           [else (error 'bad-type)]))))
 

@@ -4,7 +4,7 @@
                      racket/private/increader
                      compiler/cm-accomplice
                      racket/match racket/function)
-         "define.rkt")
+         "../define.rkt")
 
 (provide+safe include-without-lang-line)
 

@@ -13,7 +13,7 @@
        ;; need to use stx as context to get correct require behavior
        (datum->syntax stx `(begin
                              (module mod-name typed/racket/base/no-check
-                               (require sugar/include)
+                               (require sugar/unstable/include)
                                (include-without-lang-line ,(syntax->datum #'path-spec)))
                              (require (quote mod-name)))))]))
 
