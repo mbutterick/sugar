@@ -1,6 +1,6 @@
 #lang racket/base
 (require (for-syntax racket/base) racket/list racket/set racket/function)
-(require "len.rkt" "coerce.rkt" "define.rkt")
+(require "unstable/len.rkt" "coerce.rkt" "define.rkt")
 
 (define (list-of-lists? xs) (and (list? xs) (andmap list? xs)))
 (define (index? x) (and (integer? x) (not (negative? x))))

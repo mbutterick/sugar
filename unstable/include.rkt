@@ -4,7 +4,25 @@
                      racket/private/increader
                      compiler/cm-accomplice
                      racket/match racket/function)
-         "define.rkt")
+         "../define.rkt")
+
+(module+ test
+  (require rackunit)
+  (module include-test racket/base
+   (require sugar/include)
+   (include-without-lang-line "source.rkt")
+   (provide included-symbol))
+
+ (require 'include-test)
+ (check-equal? included-symbol 'bar)
+
+ (module no-lang-line-include-test racket/base
+   (require sugar/include)
+   (include-without-lang-line "no-lang-line-source.txt")
+   (provide no-lang-symbol))
+
+ (require 'no-lang-line-include-test)
+ (check-equal? no-lang-symbol 'bar))
 
 (provide+safe include-without-lang-line)
 
