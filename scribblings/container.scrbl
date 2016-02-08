@@ -8,7 +8,7 @@
 @title{Container}
 @defmodule[#:multi (sugar/container (submod sugar/container safe))]
 
-Type-neutral functions for getting elements out of a container, or testing membership. @bold{This submodule is untyped only.}
+Type-neutral functions for getting elements out of a container, or testing membership.
 
 
 @defproc[

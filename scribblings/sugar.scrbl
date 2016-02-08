@@ -31,6 +31,8 @@ Sugar can be invoked two ways: as an ordinary library, or as a library with cont
 
 @include-section["list.scrbl"]
 
+@include-section["xml.scrbl"]
+
 @include-section["license.scrbl"]
 
 @;index-section[]

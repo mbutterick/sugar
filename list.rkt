@@ -33,7 +33,6 @@
 
 
 (define+provide+safe (slicef-at xs pred [force? #f])
-  ;; with polymorphic function, use cased typing to simulate optional position arguments 
   ((list? procedure?) (boolean?) . ->* . list-of-lists?)
   (define-values (last-list list-of-lists)
     (for/fold
