@@ -15,3 +15,4 @@
 (r+p "file.rkt")
 (r+p "list.rkt")
 (r+p "test.rkt")
+(r+p "xml.rkt")
