@@ -4,12 +4,15 @@
 
 (define+provide+safe (xml-string->xexprs str)
   (string? . -> . (values xexpr? xexpr?))
-  (define xml-doc (with-input-from-string str (λ _ (permissive-xexprs #t) (read-xml))))
+  (define xml-doc (with-input-from-string str
+                                          (λ () (permissive-xexprs #t) (read-xml))))
   (values (xml->xexpr (document-prolog xml-doc)) (xml->xexpr (document-element xml-doc))))
+
 
 (define+provide+safe (xexprs->xml-string prolog-xexpr root-xexpr)
   (xexpr? xexpr? . -> . string?)
-  (with-output-to-string (λ _ (write-xml (document (xexpr->xml prolog-xexpr) (xexpr->xml root-xexpr) null)))))
+  (with-output-to-string (λ () (write-xml (document (xexpr->xml prolog-xexpr) (xexpr->xml root-xexpr) null)))))
+
 
 (module+ test
   (require rackunit)

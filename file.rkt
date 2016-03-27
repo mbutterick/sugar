@@ -1,10 +1,10 @@
 #lang racket/base
-(require "define.rkt" racket/set "coerce.rkt" racket/path "unstable/string.rkt")
+(require "define.rkt" "coerce/base.rkt" racket/path)
 
 
 ;; does path have a certain extension
 (define+provide+safe (has-ext? x ext)
-  (coerce/path? coerce/string? . -> . coerce/boolean?)
+  (pathish? stringish? . -> . boolean?)
   (define ext-of-path (filename-extension (->path x)))
   (->boolean (and ext-of-path (equal? (string-downcase (bytes->string/utf-8 ext-of-path)) (string-downcase (->string ext))))))
 
@@ -12,7 +12,7 @@
 ;; get file extension as a string, or return #f 
 ;; (consistent with filename-extension behavior)
 (define+provide+safe (get-ext x)
-  (coerce/path? . -> . (or/c #f string?))
+  (pathish? . -> . (or/c #f string?))
   (let ([fe-result (filename-extension (->path x))])
     (and fe-result (bytes->string/utf-8 fe-result))))
 
@@ -24,20 +24,26 @@
 
 
 (define+provide+safe (has-binary-ext? x)
-  (coerce/path? . -> . coerce/boolean?)
+  (pathish? . -> . boolean?)
   (let ([x (->path x)])
-    (ormap (λ(ext) (has-ext? x ext)) binary-extensions)))
+    (and (ormap (λ(ext) (has-ext? x ext)) binary-extensions) #t)))
 
 
 ;; put extension on path
 ;; use local contract here because this function is used within module
 (define+provide+safe (add-ext x ext)
-  (coerce/string? coerce/string? . -> . coerce/path?)
+  (stringish? stringish? . -> . pathish?)
   (->path (string-append (->string x) "." (->string ext))))
+
+
+(define (starts-with? str starter)
+  (define pat (regexp (format "^~a" (regexp-quote starter))))
+  (and (regexp-match pat str) #t))
+
 
 ;; take one extension off path
 (define+provide+safe (remove-ext x)
-  (coerce/path? . -> . path?)
+  (pathish? . -> . path?)
   ;; pass through hidden files (those starting with a dot)
   (let ([x (->path x)])
     (if ((->string x) . starts-with? . ".")
@@ -47,7 +53,7 @@
 
 ;; take all extensions off path
 (define+provide+safe (remove-ext* x)
-  (coerce/path? . -> . path?)
+  (pathish? . -> . path?)
   ;; pass through hidden files (those starting with a dot)
   (let ([x (->path x)])
     (if ((->string x) . starts-with? . ".")

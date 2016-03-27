@@ -1,12 +1,11 @@
 #lang racket/base
-(require (for-syntax racket/base) racket/list racket/set racket/function)
-(require "unstable/len.rkt" "coerce.rkt" "define.rkt")
+(require (for-syntax racket/base) racket/list "define.rkt")
 
 (define (list-of-lists? xs) (and (list? xs) (andmap list? xs)))
 (define (index? x) (and (integer? x) (not (negative? x))))
 
-(define increasing-nonnegative? (λ(xs) (apply < -1 xs)))
-(define increasing-nonnegative-list? (and/c list? increasing-nonnegative?))
+(define increasing-nonnegative-list? (λ(x) (and (list? x) (or (empty? x)
+                                                              (apply < -1 x)))))
 
 (define (integers? x) (and (list? x) (andmap integer? x)))
 
@@ -65,7 +64,6 @@
 
 
 (define+provide+safe (slice-at xs len [force? #f])
-  ;; with polymorphic function, use cased typing to simulate optional position arguments 
   ((list? (and/c integer? positive?)) (boolean?) . ->* . list-of-lists?)
   (define-values (last-list list-of-lists)
     (for/fold ([current-list empty][list-of-lists empty])
@@ -100,14 +98,20 @@
        (hash-update! counter item (λ(v) (add1 v)) (λ _ 0)))
   counter)
 
+(define (->list x)
+  (cond
+    [(list? x) x]
+    [(vector? x) (vector->list x)]
+    [(string? x) (string->list x)]
+    [else (error '->list)]))
+
 
 (define+provide+safe (members-unique? x)
-  ((or/c list? vector? string?) . -> . boolean?)  
-  (cond 
-    [(list? x) (= (len (remove-duplicates x)) (len x))]
-    [(vector? x) (members-unique? (->list x))]
-    [(string? x) (members-unique? (string->list x))]
-    [else (error (format "members-unique? cannot be determined for ~a" x))]))
+  ((or/c list? vector? string?) . -> . boolean?)
+  (let ([x (->list x)])
+    (cond 
+      [(list? x) (= (length (remove-duplicates x)) (length x))]
+      [else (error (format "members-unique? cannot be determined for ~a" x))])))
 
 
 (define+provide+safe (members-unique?/error x)
@@ -116,7 +120,7 @@
   (if (not result)
       (let* ([duplicate-keys (filter-not empty? (hash-map (frequency-hash (->list x)) 
                                                           (λ(element freq) (if (> freq 1) element '()))))])
-        (error (string-append "members-unique? failed because " (if (= (len duplicate-keys) 1) 
+        (error (string-append "members-unique? failed because " (if (= (length duplicate-keys) 1) 
                                                                     "item isn't"
                                                                     "items aren't") " unique:") duplicate-keys))
       result))
@@ -137,10 +141,12 @@
 
 
 (define+provide+safe (break-at xs bps)
-  (list? (and/c coerce/list? (or/c empty? increasing-nonnegative-list?)) . -> . list-of-lists?)
+  (list? any/c . -> . list-of-lists?)
   (let ([bps (if (list? bps) bps (list bps))]) ; coerce bps to list
     (when (ormap (λ(bp) (>= bp (length xs))) bps)
       (error 'break-at (format "breakpoint in ~v is greater than or equal to input list length = ~a" bps (length xs))))
+    (when (not (increasing-nonnegative-list? bps))
+      (raise-argument-error 'break-at "increasing-nonnegative-list?" bps))
     ;; easier to do back to front, because then the list index for each item won't change during the recursion
     ;; cons a zero onto bps (which may already start with zero) and then use that as the terminating condition
     ;; because breaking at zero means we've reached the start of the list
