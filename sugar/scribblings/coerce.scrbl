@@ -3,7 +3,7 @@
 @(require scribble/eval (for-label racket sugar))
 
 @(define my-eval (make-base-eval))
-@(my-eval `(require sugar))
+@(my-eval `(require sugar racket/contract))
 
 @title{Coercion}
 @defmodule[#:multi (sugar/coerce (submod sugar/coerce safe))]
