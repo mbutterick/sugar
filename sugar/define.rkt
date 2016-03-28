@@ -1,5 +1,6 @@
 #lang racket/base
-(require (for-syntax racket/base racket/syntax syntax/strip-context) racket/contract)
+(require (for-syntax racket/base racket/syntax syntax/strip-context "private/syntax-utils.rkt")
+         racket/contract)
 
 
 (define-syntax (make-safe-module stx)
@@ -14,23 +15,6 @@
      #'(module+ safe
          (provide id))]))
 
-
-;; convert calling pattern to form (id contract body-exp)
-(define-for-syntax (lambdafy-with-contract stx)
-  (syntax-case stx ()
-    [(_ (id arg ... . rest-arg) contract body ...)
-     (replace-context #'id  #'(id contract (λ (arg ... . rest-arg) body ...)))]
-    [(_ id contract lambda-exp)
-     (replace-context #'id #'(id contract lambda-exp))]))
-
-
-;; convert calling pattern to form (id body-exp)
-(define-for-syntax (lambdafy stx)
-  (syntax-case stx ()
-    [(_ (id arg ... . rest-arg) body ...)
-     (replace-context #'id #'(id (λ (arg ... . rest-arg) body ...)))]
-    [(_ id lambda-exp)
-     (replace-context #'id #'(id lambda-exp))]))
 
 
 (define-syntax (define+provide+safe stx)
