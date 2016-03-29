@@ -16,8 +16,8 @@
 ;; convert calling pattern to form (id contract body-exp)
 (define-syntax-rule (lambdafy-with-contract stx)
   (syntax-case stx ()
-    [(_ (id arg (... ...) . rest-arg) contract body (... ...))
-     (replace-context #'id  #'(id contract (λ (arg (... ...) . rest-arg) body (... ...))))]
+    [(_ (id arg (... ...) . rest-arg) contract body0 body (... ...))
+     (replace-context #'id  #'(id contract (λ (arg (... ...) . rest-arg) body0 body (... ...))))]
     [(_ id contract lambda-exp)
      (replace-context #'id #'(id contract lambda-exp))]))
 
@@ -25,7 +25,7 @@
 ;; convert calling pattern to form (id body-exp)
 (define-syntax-rule (lambdafy stx)
   (syntax-case stx ()
-    [(_ (id arg (... ...) . rest-arg) body (... ...))
-     (replace-context #'id #'(id (λ (arg (... ...) . rest-arg) body (... ...))))]
+    [(_ (id arg (... ...) . rest-arg) body0 body (... ...))
+     (replace-context #'id #'(id (λ (arg (... ...) . rest-arg) body0 body (... ...))))]
     [(_ id lambda-exp)
      (replace-context #'id #'(id lambda-exp))]))
