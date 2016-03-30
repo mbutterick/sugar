@@ -1,7 +1,7 @@
 #lang racket
 (require (for-syntax racket/syntax syntax/strip-context))
 
-(define-syntax (eval-as-untyped stx)
+(define-syntax (eval-with-and-without-contracts stx)
   (syntax-case stx ()
     [(_ exprs ...)
      (with-syntax ([module-without-contracts (generate-temporary)]
@@ -18,7 +18,7 @@
                             (require 'module-with-contracts))))]))
 
 
-(eval-as-untyped
+(eval-with-and-without-contracts
  (check-equal? (->int 42) 42)
  (check-equal? (->int 42.1) 42)
  (check-equal? (->int 42+3i) 42)
@@ -56,6 +56,62 @@
  (check-true (->boolean "foo"))
  (check-true (->boolean '()))
  (check-true (->boolean '(1 2 3)))
+ 
+ 
+ (module dp racket/base
+   (require "../define.rkt")
+   (define+provide (dp-f x #:y [y 42] . zs)
+     (apply + x y zs)))
+ 
+ (require 'dp)
+ (check-equal? (dp-f 1 #:y 0 2 3) 6)
+ 
+ (module dps racket/base
+   (require sugar/define)
+   (define+provide+safe (dps-f x #:y [y 42] . zs)
+     ((integer?) (#:y integer?) #:rest (listof integer?) . ->* . integer?)
+     (apply + x y zs)))
+ 
+ (require 'dps)
+ (check-equal? (dps-f 1 #:y 0 2 3) 6)
+ (require (prefix-in safe: (submod 'dps safe)))
+ (check-equal? (safe:dps-f 1 #:y 0 2 3) 6)
+ (check-exn exn:fail? (λ _ (safe:dps-f 'foo)))
+ 
+ (module ps racket/base
+   (require "../define.rkt")
+   (provide+safe [ps-f ((integer?) (#:y integer?) #:rest (listof integer?) . ->* . integer?)])
+   (define (ps-f x #:y [y 42] . zs)
+     (apply + x y zs)))
+ 
+ (require 'ps)
+ (check-equal? (ps-f 1 #:y 0 2 3) 6)
+ (require (prefix-in safe: (submod 'ps safe)))
+ (check-equal? (safe:ps-f 1 #:y 0 2 3) 6)
+ (check-exn exn:fail? (λ _ (safe:ps-f 'foo)))
+ 
+ (module dcp racket/base
+   (require "../define.rkt" rackunit)
+   (define/contract+provide (dcp-f x #:y [y 42] . zs)
+     ((integer?) (#:y integer?) #:rest (listof integer?) . ->* . integer?)
+     (apply + x y zs))
+   (check-exn exn:fail? (λ _ (dcp-f 'foo))))
+ 
+ (require 'dcp)
+ (check-equal? (dcp-f 1 #:y 0 2 3) 6)
+ (check-exn exn:fail? (λ _ (dcp-f 'foo)))
+ 
+ (module dpc racket/base
+   (require "../define.rkt" rackunit)
+   (define+provide/contract (dpc-f x #:y [y 42] . zs)
+     ((integer?) (#:y integer?) #:rest (listof integer?) . ->* . list?)
+     (list* x y zs))
+   (check-equal? (dpc-f 'foo) '(foo 42))) ; locally, no contract triggered
+ 
+ (require 'dpc)
+ (check-equal? (dpc-f 1) '(1 42))
+ (check-exn exn:fail? (λ _ (dpc-f 'foo)))
+ 
  (check-true (members-unique? '(a b c)))
  (check-false (members-unique? '(a b c c)))
  (check-true (members-unique? "zoey"))
@@ -152,9 +208,3 @@
  (check-equal? (values->list (shift/values ys '(-1 0 1) 'boing)) `((1 2 3 4 boing) ,xs (boing 0 1 2 3))))
 
 
-
-#|
-;; todo: revise `check-typing-fails` to make it compatible with 6.0
-(check-typing-fails (slice-at (range 5) 0)) ; needs a positive integer as second arg
-(check-typing-fails (slicef-at (range 5) 3)) ; needs a procedure as second arg
-|#
