@@ -21,8 +21,7 @@
   (with-syntax ([(id contract lambda-exp) (lambdafy-with-contract stx)])
     #'(begin
         (define id lambda-exp)
-        (provide id)
-        (make-safe-module [id contract]))))
+        (provide+safe [id contract]))))
 
 
 ;; for previously defined identifiers

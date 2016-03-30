@@ -1,5 +1,5 @@
 #lang racket/base
-(require (for-syntax racket/base) syntax/strip-context)
+(require (for-syntax racket/base) syntax/define)
 (provide (all-defined-out))
 
 
@@ -14,18 +14,16 @@
 
 
 ;; convert calling pattern to form (id contract body-exp)
+;; hoist contract out of lambda-exp entirely
 (define-syntax-rule (lambdafy-with-contract stx)
-  (syntax-case stx ()
-    [(_ (id arg (... ...) . rest-arg) contract body0 body (... ...))
-     (replace-context #'id  #'(id contract (λ (arg (... ...) . rest-arg) body0 body (... ...))))]
-    [(_ id contract lambda-exp)
-     (replace-context #'id #'(id contract lambda-exp))]))
+  (with-syntax ([(id (lambda args contract body-exp (... ...))) (let*-values ([(id-stx rhs-exp-stx) (normalize-definition stx (datum->syntax stx 'λ) #t #t)])
+                                                                  (list id-stx (syntax->list rhs-exp-stx)))])
+    ;; lambda-exp = #'(lambda args body-exp (... ...))
+    #'(id contract (lambda args body-exp (... ...)))))
 
 
 ;; convert calling pattern to form (id body-exp)
 (define-syntax-rule (lambdafy stx)
-  (syntax-case stx ()
-    [(_ (id arg (... ...) . rest-arg) body0 body (... ...))
-     (replace-context #'id #'(id (λ (arg (... ...) . rest-arg) body0 body (... ...))))]
-    [(_ id lambda-exp)
-     (replace-context #'id #'(id lambda-exp))]))
+  (with-syntax ([(id lambda-exp) (let-values ([(id-stx body-exp-stx) (normalize-definition stx (datum->syntax stx 'λ) #t #t)])
+                                 (list id-stx body-exp-stx))])
+    #'(id lambda-exp)))
