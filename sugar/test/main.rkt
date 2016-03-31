@@ -78,6 +78,18 @@
  (check-equal? (safe:dps-f 1 #:y 0 2 3) 6)
  (check-exn exn:fail? (λ _ (safe:dps-f 'foo)))
  
+ (module dpsb racket/base
+   (require sugar/define)
+   (define+provide+safe dpsb-f 
+     ((integer?) (#:y integer?) #:rest (listof integer?) . ->* . integer?)
+     (λ(x #:y [y 42] . zs) (apply + x y zs))))
+ 
+ (require 'dpsb)
+ (check-equal? (dpsb-f 1 #:y 0 2 3) 6)
+ (require (prefix-in safe: (submod 'dpsb safe)))
+ (check-equal? (safe:dpsb-f 1 #:y 0 2 3) 6)
+ (check-exn exn:fail? (λ _ (safe:dpsb-f 'foo)))
+ 
  (module ps racket/base
    (require "../define.rkt")
    (provide+safe [ps-f ((integer?) (#:y integer?) #:rest (listof integer?) . ->* . integer?)])
