@@ -45,8 +45,9 @@
 (define+provide+safe (remove-ext x)
   (pathish? . -> . path?)
   ;; pass through hidden files (those starting with a dot)
-  (let ([x (->path x)])
-    (if ((->string x) . starts-with? . ".")
+  (let* ([x (->path x)]
+         [x-name (file-name-from-path x)])
+    (if ((->string x-name) . starts-with? . ".")
         x
         (path-replace-suffix x ""))))
 
@@ -54,11 +55,14 @@
 ;; take all extensions off path
 (define+provide+safe (remove-ext* x)
   (pathish? . -> . path?)
+  (define (remove* p)
+    (let ([path-with-removed-ext (path-replace-suffix p "")])
+      (if (equal? p path-with-removed-ext)
+          p
+          (remove* path-with-removed-ext))))
   ;; pass through hidden files (those starting with a dot)
-  (let ([x (->path x)])
-    (if ((->string x) . starts-with? . ".")
+  (let ([x (->path x)]
+        [x-name (file-name-from-path x)])
+    (if ((->string x-name) . starts-with? . ".")
         x
-        (let ([path-with-removed-ext (remove-ext x)])
-          (if (equal? x path-with-removed-ext)
-              x
-              (remove-ext* path-with-removed-ext))))))
+        (remove* x))))
