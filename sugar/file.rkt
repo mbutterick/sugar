@@ -1,12 +1,36 @@
 #lang racket/base
-(require "define.rkt" "coerce/base.rkt" racket/path)
+(require "define.rkt" "coerce/base.rkt")
 
 
-;; does path have a certain extension
+;; this is identical to `filename-extension` in `racket/path`
+;; but will not treat hidden files as an extension (which IMHO is a bug)
+(define (filename-extension name)
+  (let* ([name (file-name-from-path name)]
+         [name (and name (path->bytes name))])
+    (cond [(and name (regexp-match #rx#".[.]([^.]+)$" name)) => cadr]
+          [else #f])))
+
+(module+ test
+  (require rackunit)
+  (require (prefix-in rp: racket/path))
+  (check-equal? (rp:filename-extension (string->path ".foo")) #"foo") ; bad behavior
+  (check-false (filename-extension (string->path ".foo")))) ; good behavior
+
+
+;; this is pulled in from `racket/path` to avoid the dependency
+(define (file-name-from-path name)
+  (unless (or (path-string? name)
+              (path-for-some-system? name))
+    (raise-argument-error 'file-name-from-path "(or/c path-string? path-for-some-system?)" name))
+  (let-values ([(base file dir?) (split-path name)])
+    (and (not dir?) (path-for-some-system? file) file)))
+
+
+;; does path have a certain extension, case-insensitively
 (define+provide+safe (has-ext? x ext)
   (pathish? stringish? . -> . boolean?)
   (define ext-of-path (filename-extension (->path x)))
-  (->boolean (and ext-of-path (equal? (string-downcase (bytes->string/utf-8 ext-of-path)) (string-downcase (->string ext))))))
+  (and ext-of-path (equal? (string-downcase (bytes->string/utf-8 ext-of-path)) (string-downcase (->string ext)))))
 
 
 ;; get file extension as a string, or return #f 
@@ -40,29 +64,27 @@
   (define pat (regexp (format "^~a" (regexp-quote starter))))
   (and (regexp-match pat str) #t))
 
+(define (path-hidden? path)
+  ((->string (file-name-from-path path)) . starts-with? . "."))
+
+;; with `remove-ext` and `remove-ext*`,
+;; the policy is to pass through hidden files
+;; though I can't remember why.
 
 ;; take one extension off path
 (define+provide+safe (remove-ext x)
   (pathish? . -> . path?)
-  ;; pass through hidden files (those starting with a dot)
-  (let* ([x (->path x)]
-         [x-name (file-name-from-path x)])
-    (if ((->string x-name) . starts-with? . ".")
-        x
-        (path-replace-suffix x ""))))
+  (let ([path (->path x)])
+    (if (path-hidden? path)
+        path
+        (path-replace-suffix path ""))))
 
 
 ;; take all extensions off path
 (define+provide+safe (remove-ext* x)
   (pathish? . -> . path?)
-  (define (remove* p)
-    (let ([path-with-removed-ext (path-replace-suffix p "")])
-      (if (equal? p path-with-removed-ext)
-          p
-          (remove* path-with-removed-ext))))
-  ;; pass through hidden files (those starting with a dot)
-  (let ([x (->path x)]
-        [x-name (file-name-from-path x)])
-    (if ((->string x-name) . starts-with? . ".")
-        x
-        (remove* x))))
+  (let loop ([path (->path x)])
+    (define path-out (remove-ext path))
+    (if (equal? path path-out)
+        path
+        (loop path-out))))

@@ -147,6 +147,7 @@
  
  (check-equal? (get-ext (->path "foo.txt")) "txt")
  (check-false (get-ext "foo"))
+ (check-false (get-ext ".foo"))
  
  (check-equal? (add-ext (string->path "foo") "txt") (string->path "foo.txt"))
  (check-equal? (remove-ext foo-path) foo-path)
