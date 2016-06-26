@@ -64,19 +64,29 @@
   (define pat (regexp (format "^~a" (regexp-quote starter))))
   (and (regexp-match pat str) #t))
 
+
 (define (path-hidden? path)
   ((->string (file-name-from-path path)) . starts-with? . "."))
 
-;; with `remove-ext` and `remove-ext*`,
-;; the policy is to pass through hidden files
-;; though I can't remember why.
+
+(define (do what path)
+  (define reversed-path-elements (reverse (explode-path path)))
+  (apply build-path `(,@(reverse (cdr reversed-path-elements))
+                      ,(if (eq? what 'hide)
+                           (format ".~a" (->string (car reversed-path-elements)))
+                           (regexp-replace #rx"^." (->string (car reversed-path-elements)) "")))))
+
 
 ;; take one extension off path
 (define+provide+safe (remove-ext x)
   (pathish? . -> . path?)
   (let ([path (->path x)])
+    ;; `path-replace-suffix` incorrectly thinks any leading dot counts as a file extension
+    ;; when it might be a hidden path.
+    ;; so handle hidden paths specially.
+    ;; this is fixed in later Racket versions with `path-replace-extension`
     (if (path-hidden? path)
-        path
+        (do 'hide (path-replace-suffix (do 'unhide path) ""))
         (path-replace-suffix path ""))))
 
 

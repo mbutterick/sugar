@@ -151,24 +151,24 @@
  
  (check-equal? (add-ext (string->path "foo") "txt") (string->path "foo.txt"))
  (check-equal? (remove-ext foo-path) foo-path)
- (check-equal? (remove-ext (->path ".foo.txt")) (->path ".foo.txt"))
+ (check-equal? (remove-ext (->path ".foo.txt")) (->path ".foo"))
  (check-equal? (remove-ext foo.txt-path) foo-path)
  (check-equal? (remove-ext foo.bar.txt-path) foo.bar-path)
  (check-not-equal? (remove-ext foo.bar.txt-path) foo-path) ; does not remove all extensions
  ;; test remove-ext on paths that have "." prefix
  (check-equal? (remove-ext (->path "./foo.txt.bar")) (->path "./foo.txt"))
  (check-equal? (remove-ext (->path "../foo.txt.bar")) (->path "../foo.txt"))
- (check-equal? (remove-ext (->path "/hidden/file/.foo.txt.bar")) (->path "/hidden/file/.foo.txt.bar")) ; hidden file won't change
+ (check-equal? (remove-ext (->path "/hidden/file/.foo.txt.bar")) (->path "/hidden/file/.foo.txt"))
  
  (check-equal? (remove-ext* foo-path) foo-path)
  (check-equal? (remove-ext* foo.txt-path) foo-path)
- (check-equal? (remove-ext* (->path ".foo.txt")) (->path ".foo.txt"))
+ (check-equal? (remove-ext* (->path ".foo.txt")) (->path ".foo"))
  (check-not-equal? (remove-ext* foo.bar.txt-path) foo.bar-path) ; removes more than one ext
  (check-equal? (remove-ext* foo.bar.txt-path) foo-path)
  ;; test remove-ext* on paths that have  "." prefix
  (check-equal? (remove-ext* (->path "./foo.txt.bar")) (->path "./foo"))
  (check-equal? (remove-ext* (->path "../foo.txt.bar")) (->path "../foo"))
- (check-equal? (remove-ext* (->path "/hidden/file/.foo.txt.bar")) (->path "/hidden/file/.foo.txt.bar")) ; hidden file won't change
+ (check-equal? (remove-ext* (->path "/hidden/file/.foo.txt.bar")) (->path "/hidden/file/.foo"))
  
  (check-true (has-binary-ext? "foo.MP3"))
  (check-false (has-binary-ext? "foo.py"))
