@@ -15,87 +15,75 @@
   (dropf-right (dropf xs test-proc) test-proc))
 
 
+(define (slicef-and-filter-split-helper xs pred [drop-negated? #f])
+  (let loop ([xs xs][negating? #f])
+    (cond
+      [(empty? xs) empty]
+      [else
+       (define loop-pred (if negating? (compose1 not pred) pred))
+       (define-values (loop-pred-xs rest) (splitf-at xs loop-pred))
+       (define subxs (if (and negating? drop-negated?) empty loop-pred-xs))
+       (if (empty? subxs)
+           (loop rest (not negating?))
+           (cons subxs (loop rest (not negating?))))])))
+
+
 (define+provide+safe (slicef xs pred)
   (list? procedure? . -> . list-of-lists?)
-  (define-values (last-list list-of-lists last-negating)
-    (for/fold ([current-list empty]
-               [list-of-lists empty]
-               [negating? #f])
-              ([x (in-list xs)])
-      (define current-pred (if negating? (λ (x) (not (pred x))) pred))
-      (if (current-pred x)
-          (values (cons x current-list) list-of-lists negating?)
-          (values (cons x null) (if (not (empty? current-list))
-                                    (cons (reverse current-list) list-of-lists)
-                                    list-of-lists) (not negating?)))))
-  (reverse (cons (reverse last-list) list-of-lists)))
+  (slicef-and-filter-split-helper xs pred))
 
 
 (define+provide+safe (slicef-at xs pred [force? #f])
   ((list? procedure?) (boolean?) . ->* . list-of-lists?)
-  (define-values (last-list list-of-lists)
-    (for/fold
-     ([current-list empty][list-of-lists empty])
-     ([x (in-list xs)])
-      (if (pred x)
-          (values (cons x null) (if (not (empty? current-list))
-                                    (cons (reverse current-list) list-of-lists)
-                                    list-of-lists))
-          (values (cons x current-list) list-of-lists))))
-  (let ([list-of-lists (reverse (if (empty? last-list)
-                                    list-of-lists
-                                    (cons (reverse last-list) list-of-lists)))])
-    (if (and force? (not (empty? list-of-lists)) (not (pred (caar list-of-lists))))
-        (cdr list-of-lists)
-        list-of-lists)))
+  (let loop ([xs xs])
+    (cond
+      [(empty? xs) empty]
+      [(pred (car xs))
+       (define-values (not-pred-xs rest) (splitf-at (cdr xs) (compose1 not pred)))
+       (cons (cons (car xs) not-pred-xs) (loop rest))]
+      [else
+       (define-values (not-pred-xs rest) (splitf-at xs (compose1 not pred)))
+       (if force?
+           (loop rest)
+           (cons not-pred-xs (loop rest)))])))
 
 
 (define+provide+safe (slicef-after xs pred)
   (list? procedure? . -> . list-of-lists?)
-  (define-values (last-list list-of-lists)
-    (for/fold ([current-list empty][list-of-lists empty])
-              ([x (in-list xs)])
-      (if (pred x)
-          (values empty (cons (reverse (cons x current-list)) list-of-lists))
-          (values (cons x current-list) list-of-lists))))
-  (reverse (if (empty? last-list)
-               list-of-lists
-               (cons (reverse last-list) list-of-lists))))
+  (let loop ([xs xs])
+    (cond
+      [(empty? xs) empty]
+      [else
+       (define-values (not-pred-xs rest) (splitf-at xs (compose1 not pred)))
+       (if (pair? rest)
+           (let ([must-be-pred-x (car rest)])
+             (cons (append not-pred-xs (list must-be-pred-x)) (loop (cdr rest))))
+           not-pred-xs)])))
 
 
 (define+provide+safe (slice-at xs len [force? #f])
   ((list? (and/c integer? positive?)) (boolean?) . ->* . list-of-lists?)
-  (define-values (last-list list-of-lists)
-    (for/fold ([current-list empty][list-of-lists empty])
-              ([x (in-list xs)][i (in-naturals)])
-      (if (= (modulo (add1 i) len) 0)
-          (values empty (cons (reverse (cons x current-list)) list-of-lists))
-          (values (cons x current-list) list-of-lists))))
-  (reverse (if (or (empty? last-list) (and force? (not (= len (length last-list)))))
-               list-of-lists
-               (cons (reverse last-list) list-of-lists))))
+  (unless (and (integer? len) (positive? len))
+    (raise-argument-error 'slice-at "positive integer for sublist length" len))
+  (let loop ([xs xs])
+    (cond
+      [(< (length xs) len) (if (or force? (empty? xs)) empty (list xs))]
+      [else
+       (define-values (subxs rest) (split-at xs len))
+       (cons subxs (loop rest))])))
 
 
 (define+provide+safe (filter-split xs pred)
   (list? predicate/c . -> . list-of-lists?)
-  (define-values (last-list list-of-lists)
-    (for/fold ([current-list empty][list-of-lists empty])
-              ([x (in-list xs)])
-      (if (pred x)
-          (values empty (if (not (empty? current-list))
-                            (cons (reverse current-list) list-of-lists)
-                            list-of-lists))
-          (values (cons x current-list) list-of-lists))))
-  (reverse (if (not (empty? last-list))
-               (cons (reverse last-list) list-of-lists)
-               list-of-lists)))
+  ;; same idea as slicef, but the negated items are dropped(-
+  (slicef-and-filter-split-helper xs (compose1 not pred) 'drop-negated))
 
 
 (define+provide+safe (frequency-hash xs)
   (list? . -> . hash?)
   (define counter (make-hash))
   (for ([item (in-list xs)])
-       (hash-update! counter item (λ(v) (add1 v)) (λ _ 0)))
+       (hash-update! counter item add1 0))
   counter)
 
 (define (->list x)
