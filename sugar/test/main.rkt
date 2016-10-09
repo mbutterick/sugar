@@ -144,12 +144,18 @@
  (check-true ((->path "foo.TXT") . has-ext? . 'txt))
  (check-true (has-ext? foo.bar.txt-path 'txt))
  (check-false (foo.bar.txt-path . has-ext? . 'doc)) ; wrong extension
+ (check-exn exn:fail:contract? (λ () (has-ext? #f "foo")))
+ (check-exn exn:fail:contract? (λ () (has-ext? "foo" #f)))
  
  (check-equal? (get-ext (->path "foo.txt")) "txt")
  (check-false (get-ext "foo"))
  (check-false (get-ext ".foo"))
+ (check-exn exn:fail:contract? (λ () (get-ext #f)))
  
  (check-equal? (add-ext (string->path "foo") "txt") (string->path "foo.txt"))
+ (check-exn exn:fail:contract? (λ () (add-ext "foo" #f)))
+ (check-exn exn:fail:contract? (λ () (add-ext #f "foo" )))
+ 
  (check-equal? (remove-ext foo-path) foo-path)
  (check-equal? (remove-ext (->path ".foo.txt")) (->path ".foo"))
  (check-equal? (remove-ext foo.txt-path) foo-path)

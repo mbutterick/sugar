@@ -29,6 +29,10 @@
 ;; does path have a certain extension, case-insensitively
 (define+provide+safe (has-ext? x ext)
   (pathish? stringish? . -> . boolean?)
+  (unless (pathish? x)
+    (raise-argument-error 'has-ext? "pathish?" x))
+  (unless (stringish? ext)
+    (raise-argument-error 'has-ext? "stringish?" ext))
   (define ext-of-path (filename-extension (->path x)))
   (and ext-of-path (equal? (string-downcase (bytes->string/utf-8 ext-of-path)) (string-downcase (->string ext)))))
 
@@ -37,6 +41,8 @@
 ;; (consistent with filename-extension behavior)
 (define+provide+safe (get-ext x)
   (pathish? . -> . (or/c #f string?))
+  (unless (pathish? x)
+    (raise-argument-error 'get-ext "pathish?" x))
   (let ([fe-result (filename-extension (->path x))])
     (and fe-result (bytes->string/utf-8 fe-result))))
 
@@ -49,6 +55,8 @@
 
 (define+provide+safe (has-binary-ext? x)
   (pathish? . -> . boolean?)
+  (unless (pathish? x)
+    (raise-argument-error 'has-binary-ext? "pathish?" x))
   (let ([x (->path x)])
     (and (ormap (λ(ext) (has-ext? x ext)) binary-extensions) #t)))
 
@@ -57,6 +65,10 @@
 ;; use local contract here because this function is used within module
 (define+provide+safe (add-ext x ext)
   (stringish? stringish? . -> . pathish?)
+  (unless (stringish? x)
+    (raise-argument-error 'add-ext "stringish?" x))
+  (unless (stringish? ext)
+    (raise-argument-error 'add-ext "stringish?" ext))
   (->path (string-append (->string x) "." (->string ext))))
 
 
