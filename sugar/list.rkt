@@ -9,9 +9,12 @@
 
 (define (integers? x) (and (list? x) (andmap integer? x)))
 
+(define (negate pred) (λ(x) (not (pred x))))
 
 (define+provide+safe (trimf xs test-proc)
   (list? procedure? . -> . list?)
+  (unless (list? xs)
+    (raise-argument-error 'trimf "list?" xs))
   (dropf-right (dropf xs test-proc) test-proc))
 
 
@@ -20,29 +23,33 @@
     (cond
       [(empty? xs) empty]
       [else
-       (define loop-pred (if negating? (compose1 not pred) pred))
-       (define-values (loop-pred-xs rest) (splitf-at xs loop-pred))
+       (define loop-pred (if negating? (negate pred) pred))
+       (define-values (loop-pred-xs other-xs) (splitf-at xs loop-pred))
        (define subxs (if (and negating? drop-negated?) empty loop-pred-xs))
        (if (empty? subxs)
-           (loop rest (not negating?))
-           (cons subxs (loop rest (not negating?))))])))
+           (loop other-xs (not negating?))
+           (cons subxs (loop other-xs (not negating?))))])))
 
 
 (define+provide+safe (slicef xs pred)
   (list? procedure? . -> . list-of-lists?)
+  (unless (list? xs)
+    (raise-argument-error 'slicef "list?" xs))
   (slicef-and-filter-split-helper xs pred))
 
 
 (define+provide+safe (slicef-at xs pred [force? #f])
   ((list? procedure?) (boolean?) . ->* . list-of-lists?)
+  (unless (list? xs)
+    (raise-argument-error 'slicef-at "list?" xs))
   (let loop ([xs xs])
     (cond
       [(empty? xs) empty]
       [(pred (car xs))
-       (define-values (not-pred-xs rest) (splitf-at (cdr xs) (compose1 not pred)))
+       (define-values (not-pred-xs rest) (splitf-at (cdr xs) (negate pred)))
        (cons (cons (car xs) not-pred-xs) (loop rest))]
       [else
-       (define-values (not-pred-xs rest) (splitf-at xs (compose1 not pred)))
+       (define-values (not-pred-xs rest) (splitf-at xs (negate pred)))
        (if force?
            (loop rest)
            (cons not-pred-xs (loop rest)))])))
@@ -50,11 +57,13 @@
 
 (define+provide+safe (slicef-after xs pred)
   (list? procedure? . -> . list-of-lists?)
+  (unless (list? xs)
+    (raise-argument-error 'slicef-after "list?" xs))
   (let loop ([xs xs])
     (cond
       [(empty? xs) empty]
       [else
-       (define-values (not-pred-xs rest) (splitf-at xs (compose1 not pred)))
+       (define-values (not-pred-xs rest) (splitf-at xs (negate pred)))
        (if (pair? rest)
            (let ([must-be-pred-x (car rest)])
              (cons (append not-pred-xs (list must-be-pred-x)) (loop (cdr rest))))
@@ -63,6 +72,8 @@
 
 (define+provide+safe (slice-at xs len [force? #f])
   ((list? (and/c integer? positive?)) (boolean?) . ->* . list-of-lists?)
+  (unless (list? xs)
+    (raise-argument-error 'slice-at "list?" xs))
   (unless (and (integer? len) (positive? len))
     (raise-argument-error 'slice-at "positive integer for sublist length" len))
   (let loop ([xs xs])
@@ -75,15 +86,19 @@
 
 (define+provide+safe (filter-split xs pred)
   (list? predicate/c . -> . list-of-lists?)
+  (unless (list? xs)
+    (raise-argument-error 'filter-split "list?" xs))
   ;; same idea as slicef, but the negated items are dropped(-
-  (slicef-and-filter-split-helper xs (compose1 not pred) 'drop-negated))
+  (slicef-and-filter-split-helper xs (negate pred) 'drop-negated))
 
 
 (define+provide+safe (frequency-hash xs)
   (list? . -> . hash?)
+  (unless (list? xs)
+    (raise-argument-error 'frequency-hash "list?" xs))
   (define counter (make-hash))
   (for ([item (in-list xs)])
-       (hash-update! counter item add1 0))
+    (hash-update! counter item add1 0))
   counter)
 
 (define (->list x)
@@ -122,6 +137,8 @@
 
 (define+provide+safe (sublist xs i j)
   (list? index? index? . -> . list?)
+  (unless (list? xs)
+    (raise-argument-error 'sublist "list?" xs))
   (cond
     [(> j (length xs)) (error 'sublist (format "ending index ~a exceeds length of list" j))]
     [(>= j i) (take (drop xs i) (- j i))]
@@ -130,6 +147,8 @@
 
 (define+provide+safe (break-at xs bps)
   (list? any/c . -> . list-of-lists?)
+  (unless (list? xs)
+    (raise-argument-error 'break-at "list?" xs))
   (let ([bps (if (list? bps) bps (list bps))]) ; coerce bps to list
     (when (ormap (λ(bp) (>= bp (length xs))) bps)
       (error 'break-at (format "breakpoint in ~v is greater than or equal to input list length = ~a" bps (length xs))))
@@ -146,7 +165,9 @@
 
 
 (define+provide+safe (shift xs how-far [fill-item #f] [cycle #f])
-  ((list? integer?) (any/c boolean?) . ->* . list?)  
+  ((list? integer?) (any/c boolean?) . ->* . list?)
+  (unless (list? xs)
+    (raise-argument-error 'shift "list?" xs))
   (define abs-how-far (abs how-far))
   (cond 
     [(> abs-how-far (length xs)) (error 'shift "index is too large for list\nindex: ~a\nlist: ~v" how-far xs)]
@@ -165,6 +186,8 @@
 
 (define+provide+safe (shifts xs how-fars [fill-item #f] [cycle #f])
   ((list? integers?) (any/c boolean?) . ->* . (listof list?))
+  (unless (list? xs)
+    (raise-argument-error 'shifts "list?" xs))
   (map (λ(how-far) (shift xs how-far fill-item cycle)) how-fars))
 
 
