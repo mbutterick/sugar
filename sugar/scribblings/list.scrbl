@@ -183,7 +183,7 @@ Break @racket[_lst] into smaller lists at the index positions in @racket[_indexe
 [fill-item any/c #f]
 [cycle? boolean? #f])
 list?]
-Move the items in @racket[_lst] to the right (if @racket[_how-far] is positive) or left (if @racket[_how-far] is negative). By default, vacated spaces in the list are filled with @racket[_fill-item]. But if @racket[_cycle?] is true, elements of the list wrap around (and @racket[_fill-item] is ignored). Either way, the result list is always the same length as the input list. (If you don't care about the lengths being the same, you probably want @racket[take] or @racket[drop] instead.) If @racket[_how-far] is 0, return the original list. If @racket[_how-far] is bigger than the length of @racket[_lst], raise an error.
+Move the items in @racket[_lst] to the right (if @racket[_how-far] is positive) or left (if @racket[_how-far] is negative). By default, vacated spaces in the list are filled with @racket[_fill-item]. But if @racket[_cycle?] is true, elements of the list wrap around (and @racket[_fill-item] is ignored). Either way, the result list is always the same length as the input list. (If you don't care about the lengths being the same, you probably want @racket[take] or @racket[drop] instead.) If @racket[_how-far] is 0, return the original list. If @racket[_how-far] is bigger than the length of @racket[_lst], and @racket[_cycle] is not true, raise an error.
 
 @examples[#:eval my-eval
 (define xs (range 5))
@@ -194,6 +194,52 @@ Move the items in @racket[_lst] to the right (if @racket[_how-far] is positive) 
 (shift xs 0)
 (shift xs 42)
 ]
+
+@defproc[
+(shift-left
+[lst list?]
+[how-far integer?]
+[fill-item any/c #f]
+[cycle? boolean? #f])
+list?]
+Like @racket[shift], but the list is shifted left when @racket[_how-far] is positive, and right when it's negative. Otherwise identical.
+
+@examples[#:eval my-eval
+(define xs (range 5))
+(shift-left xs 2)
+(shift-left xs -2 0)
+(shift-left xs 2 'boing)
+(shift-left xs 2 'boing #t)
+(shift-left xs 0)
+(shift-left xs 42)
+]
+
+@deftogether[(
+@defproc[
+(shift-cycle
+[lst list?]
+[how-far integer?])
+list?]
+@defproc[
+(shift-left-cycle
+[lst list?]
+[how-far integer?])
+list?]
+)]
+Like @racket[shift] and @racket[shift-left], but automatically invokes cycle mode. @racket[_how-far] can be any size.
+
+@examples[#:eval my-eval
+(define xs (range 5))
+(shift-cycle xs 2)
+(shift-cycle xs -2)
+(shift-cycle xs 0)
+(shift-cycle xs 42)
+(shift-left-cycle xs 2)
+(shift-left-cycle xs -2)
+(shift-left-cycle xs 0)
+(shift-left-cycle xs 42)
+]
+
 
 @defproc[
 (shifts

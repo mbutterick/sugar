@@ -215,6 +215,15 @@
  (check-equal? (shifts xs '(-1 0 1) 'boing #t)  `((1 2 3 4 0) ,xs (4 0 1 2 3)))
  (check-equal? (shift xs 5 0) (make-list 5 0))
  (check-exn exn:fail? (λ() (shift xs -10)))
+
+ (check-equal? (map (λ(a b c) (list a b c)) (shift-left xs -1) (shift-left xs 0) (shift-left xs 1)) (map reverse '((1 0 #f) (2 1 0) (3 2 1) (4 3 2) (#f 4 3))))
+
+ (check-equal? (shift-cycle xs 2) '(3 4 0 1 2))
+ (check-equal? (shift-left-cycle xs 2) '(2 3 4 0 1))
+ (check-equal? (shift-cycle xs 7) '(3 4 0 1 2))
+ (check-equal? (shift-left-cycle xs 7) '(2 3 4 0 1))
+ (check-equal? (shift-cycle xs 107) '(3 4 0 1 2))
+ (check-equal? (shift-left-cycle xs 107) '(2 3 4 0 1))
  
  (check-true (urlish? (->path "/Users/MB/home.html")))
  (check-true (urlish? "/Users/MB/home.html?foo=bar"))

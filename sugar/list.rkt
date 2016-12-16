@@ -164,24 +164,47 @@
                      (cons tail (loop head (cdr bps)))))))))
 
 
-(define+provide+safe (shift xs how-far [fill-item #f] [cycle #f])
-  ((list? integer?) (any/c boolean?) . ->* . list?)
+(define (shift-base xs how-far fill-item cycle caller)
   (unless (list? xs)
-    (raise-argument-error 'shift "list?" xs))
-  (define abs-how-far (abs how-far))
+    (raise-argument-error caller "list?" xs))
+  (define abs-how-far (if cycle
+                          (modulo (abs how-far) (length xs))
+                          (abs how-far)))
   (cond 
-    [(> abs-how-far (length xs)) (error 'shift "index is too large for list\nindex: ~a\nlist: ~v" how-far xs)]
+    [(> abs-how-far (length xs)) (error caller "index is too large for list\nindex: ~a\nlist: ~v" how-far xs)]
     [(= how-far 0) xs]
     [(positive? how-far)
+     (define-values (head tail) (split-at-right xs abs-how-far))
      (define filler (if cycle
-                        (take-right xs abs-how-far)
+                        tail
                         (make-list abs-how-far fill-item)))            
-     (append filler (drop-right xs abs-how-far))]
+     (append filler head)]
     [else ; how-far is negative
+     (define-values (head tail) (split-at xs abs-how-far))
      (define filler (if cycle
-                        (take xs abs-how-far)
+                        head
                         (make-list abs-how-far fill-item)))
-     (append (drop xs abs-how-far) filler)]))
+     (append tail filler)]))
+
+
+(define+provide+safe (shift xs how-far [fill-item #f] [cycle #f])
+  ((list? integer?) (any/c boolean?) . ->* . list?)
+  (shift-base xs how-far fill-item cycle 'shift))
+
+
+(define+provide+safe (shift-left xs how-far [fill-item #f] [cycle #f])
+  ((list? integer?) (any/c boolean?) . ->* . list?)
+  (shift-base xs (- how-far) fill-item cycle 'shift-left))
+
+
+(define+provide+safe (shift-cycle xs how-far)
+  (list? integer? . -> . list?)
+  (shift-base xs how-far #f #t 'shift-cycle))
+
+
+(define+provide+safe (shift-left-cycle xs how-far)
+  (list? integer? . -> . list?)
+  (shift-base xs (- how-far) #f #t 'shift-left-cycle))
 
 
 (define+provide+safe (shifts xs how-fars [fill-item #f] [cycle #f])
