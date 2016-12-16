@@ -171,7 +171,7 @@
                           (modulo (abs how-far) (length xs))
                           (abs how-far)))
   (cond 
-    [(> abs-how-far (length xs)) (error caller "index is too large for list\nindex: ~a\nlist: ~v" how-far xs)]
+    [(> abs-how-far (length xs)) (error caller "index ~a is too large for list of length ~a" (* (if (eq? caller 'shift-left) -1 1) how-far) (length xs))]
     [(= how-far 0) xs]
     [(positive? how-far)
      (define-values (head tail) (split-at-right xs abs-how-far))
