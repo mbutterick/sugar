@@ -19,16 +19,14 @@
 
 
 (define (slicef-and-filter-split-helper xs pred [drop-negated? #f])
-  (let loop ([xs xs][negating? #f])
+  (let loop ([xs xs][negating? #f][acc empty])
     (cond
-      [(empty? xs) empty]
+      [(empty? xs) (reverse acc)]
       [else
        (define loop-pred (if negating? (negate pred) pred))
        (define-values (loop-pred-xs other-xs) (splitf-at xs loop-pred))
        (define subxs (if (and negating? drop-negated?) empty loop-pred-xs))
-       (if (empty? subxs)
-           (loop other-xs (not negating?))
-           (cons subxs (loop other-xs (not negating?))))])))
+       (loop other-xs (not negating?) (if (empty? subxs) acc (cons subxs acc)))])))
 
 
 (define+provide+safe (slicef xs pred)
@@ -42,31 +40,28 @@
   ((list? procedure?) (boolean?) . ->* . list-of-lists?)
   (unless (list? xs)
     (raise-argument-error 'slicef-at "list?" xs))
-  (let loop ([xs xs])
+  (let loop ([xs xs][acc empty])
     (cond
-      [(empty? xs) empty]
+      [(empty? xs) (reverse acc)]
       [(pred (car xs))
        (define-values (not-pred-xs rest) (splitf-at (cdr xs) (negate pred)))
-       (cons (cons (car xs) not-pred-xs) (loop rest))]
+       (loop rest (cons (cons (car xs) not-pred-xs) acc))]
       [else
        (define-values (not-pred-xs rest) (splitf-at xs (negate pred)))
-       (if force?
-           (loop rest)
-           (cons not-pred-xs (loop rest)))])))
-
+       (loop rest (if force? acc (cons not-pred-xs acc)))])))
 
 (define+provide+safe (slicef-after xs pred)
   (list? procedure? . -> . list-of-lists?)
   (unless (list? xs)
     (raise-argument-error 'slicef-after "list?" xs))
-  (let loop ([xs xs])
+  (let loop ([xs xs][acc empty])
     (cond
-      [(empty? xs) empty]
+      [(empty? xs) (reverse acc)]
       [else
        (define-values (not-pred-xs rest) (splitf-at xs (negate pred)))
        (if (pair? rest)
            (let ([must-be-pred-x (car rest)])
-             (cons (append not-pred-xs (list must-be-pred-x)) (loop (cdr rest))))
+             (loop (cdr rest) (cons (append not-pred-xs (list must-be-pred-x)) acc)))
            not-pred-xs)])))
 
 
@@ -76,12 +71,15 @@
     (raise-argument-error 'slice-at "list?" xs))
   (unless (and (integer? len) (positive? len))
     (raise-argument-error 'slice-at "positive integer for sublist length" len))
-  (let loop ([xs xs])
+  (let loop ([xs xs][slices empty])
     (cond
-      [(< (length xs) len) (if (or force? (empty? xs)) empty (list xs))]
+      [(< (length xs) len) (reverse
+                            (if (or force? (empty? xs))
+                                slices
+                                (cons xs slices)))]
       [else
        (define-values (subxs rest) (split-at xs len))
-       (cons subxs (loop rest))])))
+       (loop rest (cons subxs slices))])))
 
 
 (define+provide+safe (filter-split xs pred)
@@ -98,7 +96,7 @@
     (raise-argument-error 'frequency-hash "list?" xs))
   (define counter (make-hash))
   (for ([item (in-list xs)])
-    (hash-update! counter item add1 0))
+       (hash-update! counter item add1 0))
   counter)
 
 (define (->list x)
@@ -157,11 +155,11 @@
     ;; easier to do back to front, because then the list index for each item won't change during the recursion
     ;; cons a zero onto bps (which may already start with zero) and then use that as the terminating condition
     ;; because breaking at zero means we've reached the start of the list
-    (reverse (let loop ([xs xs][bps (reverse (cons 0 bps))])
-               (if (= (car bps) 0)
-                   (cons xs null) ; return whatever's left, because no more splits are possible
-                   (let-values ([(head tail) (split-at xs (car bps))])
-                     (cons tail (loop head (cdr bps)))))))))
+    (let loop ([xs xs][bps (reverse (cons 0 bps))][acc empty])
+      (if (zero? (car bps))
+          (cons xs acc) ; return whatever's left, because no more splits are possible
+          (let-values ([(head tail) (split-at xs (car bps))])
+            (loop head (cdr bps) (cons tail acc)))))))
 
 
 (define (shift-base xs how-far fill-item cycle caller)
