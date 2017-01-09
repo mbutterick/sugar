@@ -30,8 +30,9 @@
     
     [(_ id-exp maybe-contract body-exp (... ...)) ; matches two, or four or more
      (with-syntax ([(id (lambda args contract body-exp (... ...))) (values->list (normalize-definition stx (datum->syntax #'id-exp 'λ) #t #t))])
-       ;; lambda-exp = #'(lambda args body-exp (... ...))
-       #'(id contract (lambda args body-exp (... ...))))]
+       ;; because the macro provides the `lambda` below, it takes the local srcloc by default
+       ;; so `syntax/loc` applies the original srcloc (associated with args and body-exp)
+       #`(id contract #,(syntax/loc stx (lambda args body-exp (... ...)))))]
     
     [else ; matches zero or one arugments 
      (error 'define-macro "not enough arguments")]))
