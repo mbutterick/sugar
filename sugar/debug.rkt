@@ -90,12 +90,22 @@
      #'(values expr (let ([id id-alt]) expr) ...)]))
 
 (module reader racket/base
-  (require syntax/module-reader racket/syntax version/utils)  
+  (require (only-in syntax/module-reader make-meta-reader)
+           racket/syntax
+           version/utils
+           syntax/parse/define
+           (for-syntax racket/base racket/list))
   (provide (rename-out [debug-read read]
                        [debug-read-syntax read-syntax]
                        [debug-get-info get-info]))
 
   (define report-char #\R)
+
+  (define-simple-macro (require-a-lot require-spec)
+    #:with [i ...] (range -10 11)
+    (require (for-meta i require-spec) ...))
+
+  (require-a-lot racket/base)
   
   (define (make-debug-readtable [rt (current-readtable)])
     (make-readtable rt report-char 'dispatch-macro report-proc))
