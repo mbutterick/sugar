@@ -2,43 +2,45 @@
 (require (for-syntax racket/base racket/syntax) racket/contract "../define.rkt" "base.rkt")
 
 
-(define-syntax-rule (make-blame-handler try-proc expected-sym)
-  (λ(b)
-    (λ(x)
-      (with-handlers ([exn:fail? (λ(e)
-                                   (raise-blame-error
-                                    b x
-                                    '(expected: "~a" given: "~e")
-                                    expected-sym x))])
-        (try-proc x)))))
+(define-syntax-rule (make-blame-handler PROC EXPECTED)
+  (λ (b)
+    (λ (x) (with-handlers ([exn:fail? (λ (exn)
+                                        (raise-blame-error b x
+                                         '(expected: "~a" given: "~e")
+                                         EXPECTED x))])
+             (PROC x)))))
 
 
 (provide+safe make-coercion-contract)
 (define-syntax (make-coercion-contract stx)
   (syntax-case stx ()
-    [(_ stem coerce-proc)
-     (with-syntax ([coerce/stem? (format-id stx "coerce/~a?" #'stem)]
-                   [can-be-stem? (format-id stx "can-be-~a?" #'stem)])
+    [(_ STEM COERCE-PROC)
+     (with-syntax ([COERCE/STEM? (format-id stx "coerce/~a?" #'STEM)]
+                   [STEMISH? (format-id stx "~aish?" #'STEM)])
        #'(make-contract
-          #:name 'coerce/stem?
-          #:projection (make-blame-handler coerce-proc 'can-be-stem?)))]
-    [(_ stem)
-     (with-syntax ([->stem (format-id stx "->~a" #'stem)])
-       #'(make-coercion-contract stem ->stem))]))
+          #:name 'COERCE/STEM?
+          #:projection (make-blame-handler COERCE-PROC 'STEMISH?)))]
+    [(MACRO-NAME STEM)
+     (with-syntax ([->STEM (format-id stx "->~a" #'STEM)])
+       #'(MACRO-NAME STEM ->STEM))]))
 
 
 (define-syntax (define+provide-coercion-contract stx)
   (syntax-case stx ()
-    [(_ stem)
-     (with-syntax ([coerce/stem? (format-id stx "coerce/~a?" #'stem)])
+    [(_ STEM)
+     (with-syntax ([COERCE/STEM? (format-id stx "coerce/~a?" #'STEM)])
        #'(begin
-           (provide+safe coerce/stem?)
-           (define coerce/stem? (make-coercion-contract stem))))]))
+           (provide+safe COERCE/STEM?)
+           (define COERCE/STEM? (make-coercion-contract STEM))))]))
 
 
-(define+provide-coercion-contract int)
-(define+provide-coercion-contract string)
-(define+provide-coercion-contract symbol)
-(define+provide-coercion-contract path)
-(define+provide-coercion-contract boolean)
-(define+provide-coercion-contract list)
+(define-syntax-rule (define+provide-coercion-contracts STEM ...)
+  (begin (define+provide-coercion-contract STEM) ...))
+
+
+(define+provide-coercion-contracts int
+  string
+  symbol
+  path
+  boolean
+  list)
