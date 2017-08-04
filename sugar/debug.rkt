@@ -1,43 +1,44 @@
 #lang racket/base
-(require (for-syntax racket/base racket/syntax) "define.rkt")
+(require (for-syntax racket/base) "define.rkt")
 
 (provide+safe report report/line report/file
               report* report*/line report*/file
               report-apply repeat time-repeat time-repeat* compare)
 
+
 (define-syntax (report stx)
   (syntax-case stx ()
-    [(_ expr) #'(report expr expr)]
-    [(_ expr name)
-     #'(let ([expr-result expr]) 
-         (eprintf "~a = ~v\n" 'name expr-result)
+    [(MACRO EXPR) #'(MACRO EXPR EXPR)]
+    [(_ EXPR NAME)
+     #'(let ([expr-result EXPR]) 
+         (eprintf "~a = ~v\n" 'NAME expr-result)
          expr-result)]))
 
 
 (define-syntax (report/line stx)
   (syntax-case stx ()
-    [(_ expr) #'(report/line expr expr)]
-    [(_ expr name)
-     (with-syntax ([line (syntax-line #'expr)])
-       #'(let ([expr-result expr])
-           (eprintf "~a = ~v on line ~v\n" 'name expr-result line)
-           expr-result))]))
+    [(MACRO EXPR) #'(MACRO EXPR EXPR)]
+    [(_ EXPR NAME)
+     #`(let ([expr-result EXPR])
+         (eprintf "~a = ~v on line ~v\n" 'NAME expr-result #,(syntax-line #'EXPR))
+         expr-result)]))
 
 
 (define-syntax (report/file stx)
   (syntax-case stx ()
-    [(_ expr) #'(report/file expr expr)]
-    [(_ expr name)
-     (with-syntax ([file (syntax-source #'expr)]
-                   [line (syntax-line #'expr)])
-       #'(let ([expr-result expr])
-           (eprintf "~a = ~v on line ~v in \"~a\"\n" 'name expr-result line 'file)
-           expr-result))]))
+    [(MACRO EXPR) #'(MACRO EXPR EXPR)]
+    [(_ EXPR NAME)
+     #`(let ([expr-result EXPR])
+         (eprintf "~a = ~v on line ~v in \"~a\"\n" 'NAME expr-result
+                  #,(syntax-line #'EXPR)
+                  '#,(syntax-source #'EXPR))
+         expr-result)]))
 
 
 (define-syntax-rule (define-multi-version multi-name name)
   (define-syntax-rule (multi-name x (... ...))
     (begin (name x) (... ...))))
+
 
 (define-multi-version report* report)
 (define-multi-version report*/line report/line)
@@ -55,39 +56,27 @@
        (report (apply proc lst) (apply proc expr) #:line)
        lst)]))
 
-#|
-(define-syntax (verbalize stx)
-  (syntax-case stx ()
-    [(_ proc args ...)
-     (with-syntax ([proc-input (format-id stx "args to ~a" #'proc)])
-     #'(begin
-         (let () (report (list args ...) proc-input) (void))
-         (report (proc args ...))))]))
-|#
+
+(define-syntax-rule (repeat NUM EXPR ...)
+  (for/last ([i (in-range NUM)])
+            EXPR ...))
 
 
-
-
-(define-syntax-rule (repeat num expr ...)
-  (for/last ([i (in-range num)])
-    expr ...))
-
-
-(define-syntax-rule (time-repeat num expr ...)
-  (time (repeat num expr ...)))
+(define-syntax-rule (time-repeat NUM EXPR ...)
+  (time (repeat NUM EXPR ...)))
 
 
 (define-syntax (time-repeat* stx)
   (syntax-case stx ()
-    [(_ num expr ...) 
-     #'(let ([n num])
-         (values (time-repeat n expr) ...))]))
+    [(_ NUM EXPR ...) 
+     #'(let ([n NUM])
+         (values (time-repeat n EXPR) ...))]))
 
 
 (define-syntax (compare stx)
   (syntax-case stx ()
-    [(_ expr id id-alt ...) 
-     #'(values expr (let ([id id-alt]) expr) ...)]))
+    [(_ EXPR ID ID-ALT ...) 
+     #'(values EXPR (let ([ID ID-ALT]) EXPR) ...)]))
 
 (module reader racket/base
   (require syntax/module-reader racket/syntax version/utils)  
