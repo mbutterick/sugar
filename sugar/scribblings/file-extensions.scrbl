@@ -8,7 +8,7 @@
 @title{File extensions}
 @defmodule[#:multi (sugar/file (submod sugar/file safe))]
 
-These functions don't access the filesystem. 
+These functions don't access the filesystem. @bold{Warning}: these functions adopt the simplifying assumption that the paths are encoded as ASCII or UTF-8. A fully precise treatment of paths would need to handle them as byte strings. If you need that, see the functions in @racketmodname[racket/path]. This library will remain naive.
 
 Arguments that are @racket[pathish?] can take either a string or a path. For clarity below, I've used strings.
 
@@ -30,10 +30,11 @@ Return the last file extension of @racket[_file-path] as a string, or @racket[#f
 [file-path pathish?]
 [ext stringish?])
 boolean?]
-Return @racket[#t] if the last file extension of @racket[_file-path] is @racket[_ext], otherwise @racket[#f].
+Return @racket[#t] if the last file extension of @racket[_file-path] is @racket[_ext], otherwise @racket[#f]. Not sensitive to case.
 
 @examples[#:eval my-eval
 (has-ext? "foo.txt" "txt")
+(has-ext? "foo.txt" "TXT")
 (has-ext? "foo.txt" "jpg")
 (has-ext? "foo.jpg.txt" "jpg")]
 

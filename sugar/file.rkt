@@ -3,7 +3,7 @@
 
 
 ;; this is identical to `filename-extension` in `racket/path`
-;; but will not treat hidden files as an extension (which IMHO is a bug)
+;; but will not treat hidden files as an extension (which is a bug)
 (define (filename-extension name)
   (let* ([name (file-name-from-path name)]
          [name (and name (path->bytes name))])
