@@ -15,6 +15,7 @@
   (λ (exn) (raise-argument-error 'func (symbol->string 'funcish) val)))
 
 (define (disjoin . preds) (λ (x) (ormap (λ (pred) (pred x)) preds)))
+(define (conjoin . preds) (λ (x) (andmap (λ (pred) (pred x)) preds)))
 (define identity (λ (x) x))
 
 (define-generics+provide+safe stringish
@@ -86,7 +87,10 @@
   (any/c . -> . complete-path?)
   (->complete-path complete-pathish)
   #:fast-defaults
-  ([complete-path? (define ->complete-path identity)]
+  ([(conjoin path? complete-path?)
+    ;; caution: plain `complete-path?` returns #t for path strings,
+    ;; so also check `path?`
+    (define ->complete-path identity)]
    [stringish? (define (->complete-path x)
                  (with-handlers ([exn:fail? (make-coercion-error-handler ->complete-path complete-pathish? x)])
                    (path->complete-path (->path x))))]))
