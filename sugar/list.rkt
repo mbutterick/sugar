@@ -139,7 +139,9 @@
     (raise-argument-error 'sublist "list?" xs))
   (cond
     [(> j (length xs)) (error 'sublist (format "ending index ~a exceeds length of list" j))]
-    [(>= j i) (take (drop xs i) (- j i))]
+    [(>= j i) (for/list ([(x idx) (in-indexed xs)]
+                         #:when (<= i idx (sub1 j)))
+                        x)]
     [else (error 'sublist (format "starting index ~a is larger than ending index ~a" i j))]))
 
 
@@ -148,8 +150,9 @@
   (unless (list? xs)
     (raise-argument-error 'break-at "list?" xs))
   (let ([bps (if (list? bps) bps (list bps))]) ; coerce bps to list
-    (when (ormap (λ(bp) (>= bp (length xs))) bps)
-      (error 'break-at (format "breakpoint in ~v is greater than or equal to input list length = ~a" bps (length xs))))
+    (when (ormap (λ (bp) (>= bp (length xs))) bps)
+      (raise-argument-error 'break-at
+                            (format "breakpoints not greater than or equal to input list length = ~a" (length xs)) bps))
     (when (not (increasing-nonnegative-list? bps))
       (raise-argument-error 'break-at "increasing-nonnegative-list?" bps))
     ;; easier to do back to front, because then the list index for each item won't change during the recursion
@@ -169,7 +172,10 @@
                           (modulo (abs how-far) (length xs))
                           (abs how-far)))
   (cond 
-    [(> abs-how-far (length xs)) (error caller "index ~a is too large for list of length ~a" (* (if (eq? caller 'shift-left) -1 1) how-far) (length xs))]
+    [(> abs-how-far (length xs))
+     (raise-argument-error caller
+                           (format "index not larger than list length ~a" (length xs))
+                           (* (if (eq? caller 'shift-left) -1 1) how-far))]
     [(= how-far 0) xs]
     [(positive? how-far)
      (define-values (head tail) (split-at-right xs abs-how-far))
@@ -212,8 +218,6 @@
   (map (λ(how-far) (shift xs how-far fill-item cycle)) how-fars))
 
 
-;; todo: can this work in typed context? couldn't figure out how to polymorphically `apply values`
-;; macro doesn't work either
 (define+provide+safe (shift/values xs shift-amount-or-amounts [fill-item #f] [cycle #f])
   ((list? (or/c integers? integer?)) (any/c boolean?) . ->* . any)
   (apply values ((if (list? shift-amount-or-amounts)
