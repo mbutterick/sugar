@@ -1,17 +1,35 @@
 #lang racket/base
-(require "../define.rkt" racket/sequence)
+(require (for-syntax
+          racket/base
+          racket/syntax)
+         "../define.rkt"
+         racket/sequence
+         racket/generic)
 
-(define+provide+safe (len x)
-  ((or/c list? vector? sequence? string? symbol? path? hash?) . -> . integer?)
-  (cond
-    [(list? x) (length x)]
-    [(string? x) (string-length x)]
-    [(symbol? x) (len (symbol->string x))]
-    [(path? x) (len (path->string x))]
-    [(vector? x) (vector-length x)]
-    [(hash? x) (len (hash-keys x))]
-    [(and (sequence? x) (not (integer? x))) (len (sequence->list x))]
-    [else (error "len: can't calculate length of" x)]))
+
+(provide define-generics+provide+safe)
+(define-syntax (define-generics+provide+safe stx)
+  (syntax-case stx ()
+    [(_ TYPE ID-CONTRACT (ID . ID-ARGS) . ARGS)
+     (with-syntax ([TYPE? (format-id stx "~a?" #'TYPE)])
+       #'(begin
+           (provide TYPE? ID)
+           (module+ safe
+             (require racket/contract)
+             (provide TYPE? (contract-out [ID ID-CONTRACT])))
+           (define-generics TYPE (ID . ID-ARGS) . ARGS)))]))
+
+(provide len lengthable?)
+(define-generics lengthable
+  (len lengthable)
+  #:fast-defaults
+  ([list? (define len length)]
+    [string? (define len string-length)]
+    [symbol? (define len (compose1 string-length symbol->string))]
+    [path? (define len (compose1 string-length path->string))]
+    [vector? (define len vector-length)]
+    [hash? (define (len x) (length (hash-keys x)))]
+    [(λ (x) (and (sequence? x) (not (integer? x)))) (define len (compose1 length sequence->list))]))
 
 
 (module+ test

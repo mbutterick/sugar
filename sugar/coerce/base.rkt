@@ -1,119 +1,121 @@
 #lang racket/base
-(require (for-syntax racket/base racket/syntax))
-(require net/url racket/sequence "../unstable/len.rkt" "../define.rkt")
+(require (for-syntax
+          racket/base
+          racket/syntax)
+         racket/stream
+         racket/generic
+         net/url
+         racket/sequence
+         "../unstable/len.rkt"
+         "../define.rkt")
 
-(define-syntax-rule (make-coercion-error-handler target-format x)
-  (λ(e) (error (string->symbol (format "->~a" target-format)) (format "Can't convert ~s to ~a" x target-format))))
+(module+ safe (require racket/contract))
 
+(define-syntax-rule (make-coercion-error-handler func funcish val)
+  (λ (exn) (raise-argument-error 'func (symbol->string 'funcish) val)))
 
-(define+provide+safe (->int x)
-  (any/c . -> . integer?)
-  (with-handlers ([exn:fail? (make-coercion-error-handler 'int x)])
-    (cond
-      [(or (integer? x) (real? x)) (inexact->exact (floor x))]
-      [(complex? x) (->int (real-part x))]
-      [(string? x) (let ([strnum (string->number x)])
-                     (if (real? strnum) (->int strnum) (error 'ineligible-string)))]
-      [(or (symbol? x) (path? x) (bytes? x)) (->int (->string x))]
-      [(char? x) (char->integer x)]
-      [else (len x)]))) ; covers Lengthable types
+(define (disjoin . preds) (λ (x) (ormap (λ (pred) (pred x)) preds)))
+(define identity (λ (x) x))
 
-
-(define+provide+safe (->string x)
+(define-generics+provide+safe stringish
   (any/c . -> . string?)
-  (if (string? x)
-      x ; fast exit for strings
-      (with-handlers ([exn:fail? (make-coercion-error-handler 'string x)])
-        (cond
-          [(or (null? x) (void? x)) ""]
-          [(symbol? x) (symbol->string x)]
-          [(number? x) (number->string x)]
-          [(path? x) (path->string x)]
-          [(or (char? x) (bytes? x)) (format "~a" x)]
-          [(url? x) (url->string x)]
-          [else (error 'bad-type)]))))
+  (->string stringish)
+  #:fast-defaults
+  ([string? (define ->string identity)]
+   [(disjoin null? void?) (define (->string x) "")]
+   [symbol? (define ->string symbol->string)]
+   [number? (define ->string number->string)]
+   [path? (define ->string path->string)]
+   [(disjoin char? bytes?) (define (->string x) (format "~a" x))]
+   [url? (define ->string url->string)]))
 
 
-;; ->symbol, ->path, and ->url are just variants on ->string
-;; two advantages: return correct type, and more accurate error
+(define (real->int x) (inexact->exact (floor x)))
+(define (string->int x) (let ([strnum (string->number x)])
+                          (unless (real? strnum)
+                            (raise-argument-error '->int "eligible string" x))
+                          (real->int strnum)))
 
-;; no need for "Symbolable" type - same as Stringable
-(define+provide+safe (->symbol x)
+(define-generics+provide+safe intish
+  (any/c . -> . integer?)
+  (->int intish)
+  #:fast-defaults
+  ([(disjoin integer? real?) (define ->int real->int)]
+   [complex? (define ->int (compose1 real->int real-part))]
+   [string? (define ->int string->int)]
+   [(disjoin symbol? path? bytes?) (define ->int (compose1 string->int ->string))]
+   [char? (define ->int char->integer)]
+   [lengthable? (define (->int x)
+                  (with-handlers ([exn:fail? (make-coercion-error-handler ->int intish? x)])
+                    (len x)))]))
+
+
+(define-generics+provide+safe symbolish
   (any/c . -> . symbol?)
-  (if (symbol? x)
-      x
-      (with-handlers ([exn:fail? (make-coercion-error-handler 'symbol x)])
-        (string->symbol (->string x)))))
+  (->symbol symbolish)
+  #:fast-defaults
+  ([symbol? (define ->symbol identity)]
+   [stringish? (define (->symbol x)
+                 (with-handlers ([exn:fail? (make-coercion-error-handler ->symbol symbolish? x)])
+                   (string->symbol (->string x))))]))
 
 
-(define+provide+safe (->path x)
+(define-generics+provide+safe pathish
   (any/c . -> . path?)
-  (if (path? x)
-      x 
-      (with-handlers ([exn:fail? (make-coercion-error-handler 'path x)])
-        (cond 
-          [(url? x) (apply build-path (map path/param-path (url-path x)))]
-          [else (string->path (->string x))]))))
+  (->path pathish)
+  #:fast-defaults
+  ([path? (define ->path identity)]
+   [stringish? (define (->path x)
+                 (with-handlers ([exn:fail? (make-coercion-error-handler ->path pathish? x)])
+                   (if (url? x)
+                       (apply build-path (map path/param-path (url-path x)))
+                       (string->path (->string x)))))]))
 
 
-(define+provide+safe (->url x)
-  (any/c . -> . url?) 
-  (with-handlers ([exn:fail? (make-coercion-error-handler 'url x)])
-    (string->url (->string x))))
+(define-generics+provide+safe urlish
+  (any/c . -> . url?)
+  (->url urlish)
+  #:fast-defaults
+  ([url? (define ->url identity)]
+   [stringish? (define (->url x)
+                 (with-handlers ([exn:fail? (make-coercion-error-handler ->url urlish? x)])
+                   (string->url (->string x))))]))
 
 
-(define+provide+safe (->complete-path x)
+(define-generics+provide+safe complete-pathish
   (any/c . -> . complete-path?)
-  (with-handlers ([exn:fail? (make-coercion-error-handler 'complete-path x)])
-    (path->complete-path (->path x))))
+  (->complete-path complete-pathish)
+  #:fast-defaults
+  ([complete-path? (define ->complete-path identity)]
+   [stringish? (define (->complete-path x)
+                 (with-handlers ([exn:fail? (make-coercion-error-handler ->complete-path complete-pathish? x)])
+                   (path->complete-path (->path x))))]))
 
 
-(define+provide+safe (->list x)
+(define-generics+provide+safe listish
   (any/c . -> . list?)
-  (if (list? x)
-      x
-      (with-handlers ([exn:fail? (make-coercion-error-handler 'list x)])
-        (cond 
-          [(string? x) (list x)]
-          [(vector? x) (for/list ([i (in-vector x)])
-                         i)]
-          ;; conditional sequencing relevant because hash also tests true for `sequence?`
-          [(hash? x) (hash->list x)]
-          [(integer? x) (list x)] ; because an integer tests #t for sequence?
-          [(sequence? x) (sequence->list x)]
-          ;[(stream? x) (stream->list x)] ;; no support for streams in TR
-          [else (list x)]))))
+  (->list listish)
+  #:fast-defaults
+  ([list? (define ->list identity)]
+   [string? (define ->list list)]
+   [vector? (define ->list vector->list)]
+   [hash? (define ->list hash->list)]
+   [integer? (define ->list list)]
+   [sequence? (define ->list sequence->list)]
+   [stream? (define ->list stream->list)]
+   [(λ (x) #t) (define ->list list)]))
 
 
-(define+provide+safe (->vector x)
+(define-generics+provide+safe vectorish
   (any/c . -> . vector?)
-  (if (vector? x)
-      x
-      (with-handlers ([exn:fail? (make-coercion-error-handler 'vector x)])
-        (list->vector (->list x)))))
+  (->vector vectorish)
+  #:fast-defaults
+  ([vector? (define ->vector identity)]
+   [listish? (define (->vector x)
+               (with-handlers ([exn:fail? (make-coercion-error-handler ->vector vectorish? x)])
+                 (list->vector (->list x))))]))
 
 
 (define+provide+safe (->boolean x)
   (any/c . -> . boolean?)
   (and x #t))
-
-
-(define-syntax (make-*ish-predicate stx)
-  (syntax-case stx ()
-    [(_ stem)
-     (with-syntax ([stemish? (format-id stx "~aish?" #'stem)]
-                   [->stem (format-id stx "->~a" #'stem)])
-       #`(begin
-           (provide+safe stemish?)
-           (define (stemish? x)
-             (with-handlers ([exn:fail? (λ(e) #f)]) (and (->stem x) #t)))))]))
-
-
-(make-*ish-predicate int)
-(make-*ish-predicate string)
-(make-*ish-predicate symbol)
-(make-*ish-predicate url)
-(make-*ish-predicate complete-path)
-(make-*ish-predicate path)
-(make-*ish-predicate list)
-(make-*ish-predicate vector)
