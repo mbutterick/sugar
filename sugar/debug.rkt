@@ -59,7 +59,7 @@
 
 (define-syntax-rule (repeat NUM EXPR ...)
   (for/last ([i (in-range NUM)])
-            EXPR ...))
+    EXPR ...))
 
 
 (define-syntax-rule (time-repeat NUM EXPR ...)
@@ -84,72 +84,44 @@
                        [debug-read-syntax read-syntax]
                        [debug-get-info get-info]))
 
-  (define report-char #\R)
-  
-  (define (make-debug-readtable [rt (current-readtable)])
-    (make-readtable rt report-char 'dispatch-macro report-proc))
+  (define current-metalang-scope-flipper (make-parameter values))
 
-  
   (define (wrap-reader reader)
-    (define (rd . args)
-      (define intro (make-syntax-introducer))
+    (λ args
       (parameterize ([current-readtable (make-debug-readtable (current-readtable))]
-                     [current-syntax-introducer intro])
+                     [current-metalang-scope-flipper (make-syntax-introducer)])
         (define stx (apply reader args))
-        (if (and (syntax? stx) (version<=? "6.2.900.4" (version)))
-            (intro stx)
-            stx)))
-    rd)
+        (define proc (if (and (syntax? stx) (version<=? "6.2.900.4" (version)))
+                         (current-metalang-scope-flipper)
+                         values))
+        (proc stx))))
 
-  
-  (define current-syntax-introducer
-    (make-parameter (λ (x) x)))
-
-  
-  (define (report-proc c in src ln col pos)
-    (define c2 (peek-char in))
-    (define c3 (peek-char in 1))
-    (define intro (current-syntax-introducer))
-    (cond [(and (char=? c3 report-char) (char=? c2 report-char))
-           (read-char in)
-           (read-char in)
-           (define/with-syntax stx (intro (read-syntax/recursive src in)))
-           (intro
-            #'(let ()
-                (local-require (only-in sugar/debug [report/file report/file]))
-                (report/file stx)))]
-          [(char=? c2 report-char)
-           (read-char in)
-           (define/with-syntax stx (intro (read-syntax/recursive src in)))
-           (intro
-            #'(let ()
-                (local-require (only-in sugar/debug [report/line report/line]))
-                (report/line stx)))]
-          [else
-           (define/with-syntax stx (intro (read-syntax/recursive src in)))
-           (intro
-            #'(let ()
-                (local-require (only-in sugar/debug [report report]))
-                (report stx)))]))
-
-  
   (define-values (debug-read debug-read-syntax debug-get-info)
     (make-meta-reader
      'sugar/debug
      "language path"
-     (lambda (bstr)
-       (let* ([str (bytes->string/latin-1 bstr)]
-              [sym (string->symbol str)])
-         (and (module-path? sym)
-              (vector
-               ;; try submod first:
-               `(submod ,sym reader)
-               ;; fall back to /lang/reader:
-               (string->symbol (string-append str "/lang/reader"))))))
+     lang-reader-module-paths
      wrap-reader
      wrap-reader
-     (lambda (proc)
-       (lambda (key defval)
-         (define (fallback) (if proc (proc key defval) defval))
+     (λ (proc)
+       (λ (key defval)
          (case key
-           [else (fallback)]))))))
+           [else (if proc (proc key defval) defval)])))))
+
+  (define report-char #\R)
+
+  (define (make-debug-readtable [rt (current-readtable)])
+    (make-readtable rt report-char 'dispatch-macro report-proc))
+
+  (define (another-report-char? ip) (and (char=? (peek-char ip) report-char) (read-char ip)))
+  
+  (define (report-proc trigger-char ip src ln col pos)
+    (define flip-metalang-scope (current-metalang-scope-flipper))
+    (flip-metalang-scope (with-syntax ([REPORT-ID (cond
+                                      [(not (another-report-char? ip)) 'report] ; #R...
+                                      [(not (another-report-char? ip)) 'report/line] ; #RR...
+                                      [else 'report/file])] ; #RRR...
+                         [STX (flip-metalang-scope (read-syntax/recursive src ip))])
+             #'(let ()
+                 (local-require (only-in sugar/debug REPORT-ID))
+                 (REPORT-ID STX))))))
