@@ -100,7 +100,15 @@
     (make-meta-reader
      'sugar/debug
      "language path"
-     lang-reader-module-paths
+     (λ (bstr) ; copy of `lang-reader-module-paths`, only available since 6.7
+       (let* ([str (bytes->string/latin-1 bstr)]
+              [sym (string->symbol str)])
+         (and (module-path? sym)
+              (vector
+               ;; try submod first:
+               `(submod ,sym reader)
+               ;; fall back to /lang/reader:
+               (string->symbol (string-append str "/lang/reader"))))))
      wrap-reader
      wrap-reader
      (λ (proc)
@@ -118,10 +126,10 @@
   (define (report-proc trigger-char ip src ln col pos)
     (define flip-metalang-scope (current-metalang-scope-flipper))
     (flip-metalang-scope (with-syntax ([REPORT-ID (cond
-                                      [(not (another-report-char? ip)) 'report] ; #R...
-                                      [(not (another-report-char? ip)) 'report/line] ; #RR...
-                                      [else 'report/file])] ; #RRR...
-                         [STX (flip-metalang-scope (read-syntax/recursive src ip))])
-             #'(let ()
-                 (local-require (only-in sugar/debug REPORT-ID))
-                 (REPORT-ID STX))))))
+                                                    [(not (another-report-char? ip)) 'report] ; #R...
+                                                    [(not (another-report-char? ip)) 'report/line] ; #RR...
+                                                    [else 'report/file])] ; #RRR...
+                                       [STX (flip-metalang-scope (read-syntax/recursive src ip))])
+                           #'(let ()
+                               (local-require (only-in sugar/debug REPORT-ID))
+                               (REPORT-ID STX))))))
