@@ -44,6 +44,7 @@
  (check-equal? (->path 'foo) (string->path "foo"))
  (check-equal? (->path 123) (string->path "123"))
  (check-equal? (->path (string->url "foo/bar.html")) (string->path "foo/bar.html"))
+ (check-equal? (->path (string->url "/foo/bar.html")) (string->path "/foo/bar.html"))
  
  (check-equal? (->list '(1 2 3)) '(1 2 3))
  (check-equal? (->list (list->vector '(1 2 3))) '(1 2 3))

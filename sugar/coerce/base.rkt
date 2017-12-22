@@ -16,13 +16,12 @@
 
 (define (disjoin . preds) (λ (x) (ormap (λ (pred) (pred x)) preds)))
 (define (conjoin . preds) (λ (x) (andmap (λ (pred) (pred x)) preds)))
-(define identity (λ (x) x))
 
 (define-generics+provide+safe stringish
   (any/c . -> . string?)
   (->string stringish)
   #:fast-defaults
-  ([string? (define ->string identity)]
+  ([string? (define ->string values)]
    [(disjoin null? void?) (define (->string x) "")]
    [symbol? (define ->string symbol->string)]
    [number? (define ->string number->string)]
@@ -55,7 +54,7 @@
   (any/c . -> . symbol?)
   (->symbol symbolish)
   #:fast-defaults
-  ([symbol? (define ->symbol identity)]
+  ([symbol? (define ->symbol values)]
    [stringish? (define (->symbol x)
                  (with-handlers ([exn:fail? (make-coercion-error-handler ->symbol symbolish? x)])
                    (string->symbol (->string x))))]))
@@ -65,19 +64,18 @@
   (any/c . -> . path?)
   (->path pathish)
   #:fast-defaults
-  ([path? (define ->path identity)]
+  ([path? (define ->path values)]
    [stringish? (define (->path x)
                  (with-handlers ([exn:fail? (make-coercion-error-handler ->path pathish? x)])
                    (if (url? x)
-                       (apply build-path (map path/param-path (url-path x)))
+                       (url->path x)
                        (string->path (->string x)))))]))
-
 
 (define-generics+provide+safe urlish
   (any/c . -> . url?)
   (->url urlish)
   #:fast-defaults
-  ([url? (define ->url identity)]
+  ([url? (define ->url values)]
    [stringish? (define (->url x)
                  (with-handlers ([exn:fail? (make-coercion-error-handler ->url urlish? x)])
                    (string->url (->string x))))]))
@@ -90,7 +88,7 @@
   ([(conjoin path? complete-path?)
     ;; caution: plain `complete-path?` returns #t for path strings,
     ;; so also check `path?`
-    (define ->complete-path identity)]
+    (define ->complete-path values)]
    [stringish? (define (->complete-path x)
                  (with-handlers ([exn:fail? (make-coercion-error-handler ->complete-path complete-pathish? x)])
                    (path->complete-path (->path x))))]))
@@ -100,7 +98,7 @@
   (any/c . -> . list?)
   (->list listish)
   #:fast-defaults
-  ([list? (define ->list identity)]
+  ([list? (define ->list values)]
    [string? (define ->list list)]
    [vector? (define ->list vector->list)]
    [hash? (define ->list hash->list)]
@@ -114,7 +112,7 @@
   (any/c . -> . vector?)
   (->vector vectorish)
   #:fast-defaults
-  ([vector? (define ->vector identity)]
+  ([vector? (define ->vector values)]
    [listish? (define (->vector x)
                (with-handlers ([exn:fail? (make-coercion-error-handler ->vector vectorish? x)])
                  (list->vector (->list x))))]))
