@@ -1,38 +1,43 @@
 #lang racket/base
-(require (for-syntax racket/base) "define.rkt")
+(require racket/string (for-syntax racket/base) "define.rkt")
 
 (provide+safe report report/line report/file
               report* report*/line report*/file
               report-apply repeat time-repeat time-repeat* compare)
 
+(define (stringify-results expr-results)
+  (format (if (= 1 (length expr-results))
+              "~a"
+              "(values ~a)") (string-join (for/list ([r (in-list expr-results)])
+                                            (format "~v" r)) " ")))
 
 (define-syntax (report stx)
   (syntax-case stx ()
     [(MACRO EXPR) #'(MACRO EXPR EXPR)]
     [(_ EXPR NAME)
-     #'(let ([expr-result EXPR]) 
-         (eprintf "~a = ~v\n" 'NAME expr-result)
-         expr-result)]))
+     #'(let ([expr-results (call-with-values (λ () EXPR) list)]) 
+         (eprintf "~a = ~a\n" 'NAME (stringify-results expr-results))
+         (apply values expr-results))]))
 
 
 (define-syntax (report/line stx)
   (syntax-case stx ()
     [(MACRO EXPR) #'(MACRO EXPR EXPR)]
     [(_ EXPR NAME)
-     #`(let ([expr-result EXPR])
-         (eprintf "~a = ~v on line ~v\n" 'NAME expr-result #,(syntax-line #'EXPR))
-         expr-result)]))
+     #`(let ([expr-results (call-with-values (λ () EXPR) list)])
+         (eprintf "~a = ~v on line ~v\n" 'NAME (stringify-results expr-results) #,(syntax-line #'EXPR))
+         (apply values expr-results))]))
 
 
 (define-syntax (report/file stx)
   (syntax-case stx ()
     [(MACRO EXPR) #'(MACRO EXPR EXPR)]
     [(_ EXPR NAME)
-     #`(let ([expr-result EXPR])
-         (eprintf "~a = ~v on line ~v in \"~a\"\n" 'NAME expr-result
+     #`(let ([expr-results (call-with-values (λ () EXPR) list)])
+         (eprintf "~a = ~v on line ~v in \"~a\"\n" 'NAME (stringify-results expr-results)
                   #,(syntax-line #'EXPR)
                   '#,(syntax-source #'EXPR))
-         expr-result)]))
+         (apply values expr-results))]))
 
 
 (define-syntax-rule (define-multi-version multi-name name)

@@ -242,6 +242,15 @@
  
  (define ys (range 5))
  (check-equal? (values->list (shift/values ys -1 'boing)) '(1 2 3 4 boing))
- (check-equal? (values->list (shift/values ys '(-1 0 1) 'boing)) `((1 2 3 4 boing) ,xs (boing 0 1 2 3))))
+ (check-equal? (values->list (shift/values ys '(-1 0 1) 'boing)) `((1 2 3 4 boing) ,xs (boing 0 1 2 3)))
 
+ (check-equal? "42 = 42\n" (let ([os (open-output-string)])
+                             (parameterize ([current-error-port os])
+                               (report 42))
+                             (get-output-string os)))
+
+ (check-equal? "(quotient/remainder 10 3) = (values 3 1)\n" (let ([os (open-output-string)])
+                                                              (parameterize ([current-error-port os])
+                                                                (report (quotient/remainder 10 3))
+                                                                (get-output-string os)))))
 
