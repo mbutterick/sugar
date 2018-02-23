@@ -25,7 +25,7 @@
     [(MACRO EXPR) #'(MACRO EXPR EXPR)]
     [(_ EXPR NAME)
      #`(let ([expr-results (call-with-values (λ () EXPR) list)])
-         (eprintf "~a = ~v on line ~v\n" 'NAME (stringify-results expr-results) #,(syntax-line #'EXPR))
+         (eprintf "~a = ~a on line ~a\n" 'NAME (stringify-results expr-results) #,(syntax-line #'EXPR))
          (apply values expr-results))]))
 
 
@@ -34,7 +34,7 @@
     [(MACRO EXPR) #'(MACRO EXPR EXPR)]
     [(_ EXPR NAME)
      #`(let ([expr-results (call-with-values (λ () EXPR) list)])
-         (eprintf "~a = ~v on line ~v in \"~a\"\n" 'NAME (stringify-results expr-results)
+         (eprintf "~a = ~a on line ~a in \"~a\"\n" 'NAME (stringify-results expr-results)
                   #,(syntax-line #'EXPR)
                   '#,(syntax-source #'EXPR))
          (apply values expr-results))]))
