@@ -1,7 +1,8 @@
 #lang racket/base
 (require racket/string (for-syntax racket/base) "define.rkt")
 
-(provide+safe report report/line report/file
+(provide+safe report report/time time-name
+              report/line report/file
               report* report*/line report*/file
               report-apply repeat time-repeat time-repeat* compare)
 
@@ -9,7 +10,7 @@
   (format (if (= 1 (length expr-results))
               "~a"
               "(values ~a)") (string-join (for/list ([r (in-list expr-results)])
-                                            (format "~v" r)) " ")))
+                                                    (format "~v" r)) " ")))
 
 (define-syntax (report stx)
   (syntax-case stx ()
@@ -17,6 +18,17 @@
     [(_ EXPR NAME)
      #'(let ([expr-results (call-with-values (λ () EXPR) list)]) 
          (eprintf "~a = ~a\n" 'NAME (stringify-results expr-results))
+         (apply values expr-results))]))
+
+
+(define-syntax (report/time stx)
+  (syntax-case stx ()
+    [(MACRO EXPR) #'(MACRO EXPR EXPR)]
+    [(_ EXPR NAME)
+     #'(let* ([op (open-output-string)]
+              [expr-results (parameterize ([current-output-port op])
+                              (time (call-with-values (λ () EXPR) list)))]) 
+         (eprintf "~a = ~a [~a]\n" 'NAME (stringify-results expr-results) (string-trim (get-output-string op)))
          (apply values expr-results))]))
 
 
@@ -64,7 +76,7 @@
 
 (define-syntax-rule (repeat NUM EXPR ...)
   (for/last ([i (in-range NUM)])
-    EXPR ...))
+            EXPR ...))
 
 
 (define-syntax-rule (time-repeat NUM EXPR ...)
@@ -76,6 +88,16 @@
     [(_ NUM EXPR ...) 
      #'(let ([n NUM])
          (values (time-repeat n EXPR) ...))]))
+
+
+(define-syntax (time-name stx)
+  (syntax-case stx ()
+    [(_ NAME EXPR ...)
+     #'(let* ([op (open-output-string)]
+              [expr-results (parameterize ([current-output-port op])
+                              (time (call-with-values (λ () EXPR ...) values)))])
+              (display (format "~a: ~a" 'NAME (get-output-string op)))
+              expr-results)]))
 
 
 (define-syntax (compare stx)
