@@ -4,7 +4,7 @@
 (provide+safe report report/time time-name
               report/line report/file
               report* report*/line report*/file
-              report-apply repeat time-repeat time-repeat* compare)
+              report-apply repeat time-repeat time-repeat* time-name time-named time-avg compare)
 
 (define (stringify-results expr-results)
   (format (if (= 1 (length expr-results))
@@ -82,6 +82,27 @@
 (define-syntax-rule (time-repeat NUM EXPR ...)
   (time (repeat NUM EXPR ...)))
 
+(define (parse-time-str str)
+  (for/list ([num (in-port read (open-input-string str))]
+             #:when (number? num))
+            num))
+
+(define-syntax-rule (time-avg NUM EXPR ...)
+  (let ([n NUM])
+    (define-values (strs results)
+      (for/lists (strs results)
+                 ([i n])
+        (let* ([op (open-output-string)]
+               [expr-results (parameterize ([current-output-port op])
+                               (time (call-with-values (λ () EXPR ...) values)))])
+          (values (get-output-string op) expr-results))))
+    (displayln (apply format "~a: cpu time: ~a real time: ~a gc time: ~a (avg of ~a)"
+                      (append
+                       (list (car '(EXPR ...)))
+                       (for/list ([vals (apply map list (map parse-time-str strs))])
+                                 (floor (/ (apply + vals) n)))
+                       (list n))))
+    (car (reverse results))))
 
 (define-syntax (time-repeat* stx)
   (syntax-case stx ()
@@ -96,9 +117,17 @@
      #'(let* ([op (open-output-string)]
               [expr-results (parameterize ([current-output-port op])
                               (time (call-with-values (λ () EXPR ...) values)))])
-              (display (format "~a: ~a" 'NAME (get-output-string op)))
-              expr-results)]))
+         (display (format "~a: ~a" 'NAME (get-output-string op)))
+         expr-results)]))
 
+(define-syntax (time-named stx)
+  (syntax-case stx ()
+    [(_ EXPR ...)
+     #'(let* ([op (open-output-string)]
+              [expr-results (parameterize ([current-output-port op])
+                              (time (call-with-values (λ () EXPR ...) values)))])
+         (display (format "~a: ~a" (car '(EXPR ...)) (get-output-string op)))
+         expr-results)]))
 
 (define-syntax (compare stx)
   (syntax-case stx ()
