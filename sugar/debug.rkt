@@ -1,5 +1,7 @@
 #lang racket/base
-(require racket/string (for-syntax racket/base) "define.rkt")
+(require racket/string
+         (for-syntax racket/base)
+         "define.rkt")
 
 (provide+safe report report/time time-name
               report/line report/file
@@ -20,7 +22,6 @@
          (eprintf "~a = ~a\n" 'NAME (stringify-results expr-results))
          (apply values expr-results))]))
 
-
 (define-syntax (report/time stx)
   (syntax-case stx ()
     [(MACRO EXPR) #'(MACRO EXPR EXPR)]
@@ -31,7 +32,6 @@
          (eprintf "~a = ~a [~a]\n" 'NAME (stringify-results expr-results) (string-trim (get-output-string op)))
          (apply values expr-results))]))
 
-
 (define-syntax (report/line stx)
   (syntax-case stx ()
     [(MACRO EXPR) #'(MACRO EXPR EXPR)]
@@ -39,7 +39,6 @@
      #`(let ([expr-results (call-with-values (λ () EXPR) list)])
          (eprintf "~a = ~a on line ~a\n" 'NAME (stringify-results expr-results) #,(syntax-line #'EXPR))
          (apply values expr-results))]))
-
 
 (define-syntax (report/file stx)
   (syntax-case stx ()
@@ -51,33 +50,28 @@
                   '#,(syntax-source #'EXPR))
          (apply values expr-results))]))
 
-
-(define-syntax-rule (define-multi-version multi-name name)
-  (define-syntax-rule (multi-name x (... ...))
-    (begin (name x) (... ...))))
-
+(define-syntax-rule (define-multi-version MULTI-NAME NAME)
+  (define-syntax-rule (MULTI-NAME x (... ...))
+    (begin (NAME x) (... ...))))
 
 (define-multi-version report* report)
 (define-multi-version report*/line report/line)
 (define-multi-version report*/file report/file)
 
-
-(define-syntax report-apply
-  (syntax-rules ()
-    [(report-apply proc expr) 
-     (let ([lst expr])
-       (report (apply proc lst) (apply proc expr)) 
+(define-syntax (report-apply stx)
+  (syntax-case stx ()
+    [(_ PROC EXPR) 
+     #'(let ([lst EXPR])
+       (report (apply PROC lst) (apply PROC EXPR)) 
        lst)]
-    [(report-apply proc expr #:line)
-     (let ([lst expr])
-       (report (apply proc lst) (apply proc expr) #:line)
+    [(_ PROC EXPR #:line)
+     #'(let ([lst EXPR])
+       (report (apply PROC lst) (apply PROC EXPR) #:line)
        lst)]))
-
 
 (define-syntax-rule (repeat NUM EXPR ...)
   (for/last ([i (in-range NUM)])
             EXPR ...))
-
 
 (define-syntax-rule (time-repeat NUM EXPR ...)
   (time (repeat NUM EXPR ...)))
@@ -109,7 +103,6 @@
     [(_ NUM EXPR ...) 
      #'(let ([n NUM])
          (values (time-repeat n EXPR) ...))]))
-
 
 (define-syntax (time-name stx)
   (syntax-case stx ()

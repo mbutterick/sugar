@@ -1,22 +1,22 @@
 #lang racket
-(require (for-syntax racket/syntax syntax/strip-context))
+(require (for-syntax racket/syntax
+                     syntax/strip-context))
 
 (define-syntax (eval-with-and-without-contracts stx)
   (syntax-case stx ()
-    [(_ exprs ...)
-     (with-syntax ([module-without-contracts (generate-temporary)]
-                   [module-with-contracts (generate-temporary)])
+    [(_ EXPRS ...)
+     (with-syntax ([MODULE-WITHOUT-CONTRACTS (generate-temporary)]
+                   [MODULE-WITH-CONTRACTS (generate-temporary)])
        (replace-context stx
                         #'(begin
-                            (module module-without-contracts racket
+                            (module MODULE-WITHOUT-CONTRACTS racket
                               (require rackunit "../main.rkt" net/url)
-                              exprs ...)
-                            (require 'module-without-contracts)
-                            (module module-with-contracts racket
+                              EXPRS ...)
+                            (require 'MODULE-WITHOUT-CONTRACTS)
+                            (module MODULE-WITH-CONTRACTS racket
                               (require rackunit (submod "../main.rkt" safe) net/url)
-                              exprs ...)
-                            (require 'module-with-contracts))))]))
-
+                              EXPRS ...)
+                            (require 'MODULE-WITH-CONTRACTS))))]))
 
 (eval-with-and-without-contracts
  (check-equal? (->int 42) 42)
