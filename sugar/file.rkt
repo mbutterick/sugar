@@ -8,10 +8,12 @@
 ;; this is identical to `filename-extension` in `racket/path`
 ;; but will not treat hidden files as an extension (which is a bug)
 (define (filename-extension name)
-  (define filename (file-name-from-path name))
-  (define bytes (and filename (path->bytes filename)))
-  (match (and bytes (regexp-match #rx#".[.]([^.]+)$" bytes))
-    [(list _ second) second]
+  (match (file-name-from-path name)
+    [(? path-for-some-system? filename)
+     (=> resume)
+     (match (regexp-match #rx#".[.]([^.]+)$" (path->bytes filename))
+       [(list _ second) second]
+       [_ (resume)])]
     [_ #false]))
 
 (module+ test
@@ -52,7 +54,7 @@
     (raise-argument-error 'has-binary-ext? "pathish?" x))
   (for/or ([ext (in-list binary-extensions)]
            #:when (has-ext? (->path x) ext))
-    #true))
+          #true))
 
 ;; put extension on path
 ;; use local contract here because this function is used within module
