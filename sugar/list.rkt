@@ -6,18 +6,8 @@
          racket/function
          "define.rkt")
 
-(define (list-of-lists? x)
-  (match x
-    [(list (? list?) ...) #true]
-    [_ #false]))
-
 (define (increasing-nonnegative-list? x)
   (and (list? x) (or (empty? x) (apply < -1 x))))
-
-(define (integers? x)
-  (match x
-    [(list (? integer?) ...) #true]
-    [_ #false]))
 
 (define+provide+safe (trimf xs test-proc)
   (list? procedure? . -> . list?)
@@ -36,13 +26,13 @@
        (loop other-xs (not negating?) (if (empty? subxs) acc (cons subxs acc)))])))
 
 (define+provide+safe (slicef xs pred)
-  (list? procedure? . -> . list-of-lists?)
+  (list? procedure? . -> . (listof list?))
   (unless (list? xs)
     (raise-argument-error 'slicef "list?" xs))
   (slicef-and-filter-split-helper xs pred))
 
 (define+provide+safe (slicef-at xs pred [force? #f])
-  ((list? procedure?) (boolean?) . ->* . list-of-lists?)
+  ((list? procedure?) (boolean?) . ->* . (listof list?))
   (unless (list? xs)
     (raise-argument-error 'slicef-at "list?" xs))
   (let loop ([xs xs][acc empty])
@@ -68,7 +58,7 @@
                       [(not-pred-xs _) not-pred-xs]))))
 
 (define+provide+safe (slice-at xs len [force? #f])
-  ((list? (and/c integer? positive?)) (boolean?) . ->* . list-of-lists?)
+  ((list? exact-nonnegative-integer?) (boolean?) . ->* . (listof list?))
   (unless (list? xs)
     (raise-argument-error 'slice-at "list?" xs))
   (unless (and (integer? len) (positive? len))
@@ -82,7 +72,7 @@
                       [(subxs rest) (loop rest (cons subxs slices))]))))
 
 (define+provide+safe (filter-split xs pred)
-  (list? predicate/c . -> . list-of-lists?)
+  (list? predicate/c . -> . (listof list?))
   (unless (list? xs)
     (raise-argument-error 'filter-split "list?" xs))
   ;; same idea as slicef, but the negated items are dropped(-
@@ -138,7 +128,7 @@
     [else (raise-argument-error 'sublist (format "starting index larger than ending index" (list i j)))]))
 
 (define+provide+safe (break-at xs bps-in)
-  (list? any/c . -> . list-of-lists?)
+  (list? any/c . -> . (listof list?))
   (unless (list? xs)
     (raise-argument-error 'break-at "list" xs))
   (define bps ((if (list? bps-in) values list) bps-in))
@@ -193,13 +183,13 @@
   (shift-base xs (- how-far) #false #true 'shift-left-cycle))
 
 (define+provide+safe (shifts xs how-fars [fill-item #f] [cycle #f])
-  ((list? integers?) (any/c boolean?) . ->* . (listof list?))
+  ((list? (listof integer?)) (any/c boolean?) . ->* . (listof list?))
   (unless (list? xs)
     (raise-argument-error 'shifts "list?" xs))
   (map (λ (how-far) (shift xs how-far fill-item cycle)) how-fars))
 
 (define+provide+safe (shift/values xs shift-amount-or-amounts [fill-item #f] [cycle #f])
-  ((list? (or/c integers? integer?)) (any/c boolean?) . ->* . any)
+  ((list? (or/c (listof integer?) integer?)) (any/c boolean?) . ->* . any)
   (apply values ((if (list? shift-amount-or-amounts)
                      shifts
                      shift) xs shift-amount-or-amounts fill-item cycle)))
