@@ -9,8 +9,8 @@
 ;; but will not treat hidden files as an extension (which is a bug)
 (define (filename-extension name)
   (define filename (file-name-from-path name))
-  (define bytes (and name (path->bytes filename)))
-  (match (and name (regexp-match #rx#".[.]([^.]+)$" bytes))
+  (define bytes (and filename (path->bytes filename)))
+  (match (and bytes (regexp-match #rx#".[.]([^.]+)$" bytes))
     [(list _ second) second]
     [_ #false]))
 
