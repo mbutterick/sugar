@@ -32,7 +32,7 @@
                     (values->list (normalize-definition stx (datum->syntax stx 'λ) #t #t))])
        ;; because the macro provides the `lambda` below, it takes the local srcloc by default
        ;; so `syntax/loc` applies the original srcloc (associated with args and body-exp)
-       #`(NEW-ID CONTRACT (LAMBDA ARGS . NEW-BODY)))]
+       #`(NEW-ID CONTRACT #,(syntax/loc #'ID-EXP (LAMBDA ARGS . NEW-BODY))))]
     ;; matches zero or one arguments 
     [_ (raise-syntax-error 'define-macro "not enough arguments")]))
 
