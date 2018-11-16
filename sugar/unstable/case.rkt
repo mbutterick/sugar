@@ -2,21 +2,9 @@
 (require (for-syntax racket/base racket/syntax))
 (provide (all-defined-out))
 
-(define-syntax-rule (define-case-macro ID PRED)
-  (define-syntax (ID stx)
-    (syntax-case stx ()
-      [(_ TEST-VAL [(MATCH0 . MATCH-VALS) . RESULT] (... ...) [else . ELSE-RESULT])
-       #'(cond
-           [(PRED TEST-VAL '(MATCH0 . MATCH-VALS)) . RESULT] (... ...)
-           [else . ELSE-RESULT])]
-      [(_ TEST-VAL MATCH-CLAUSE (... ...))
-       #'(ID TEST-VAL
-             MATCH-CLAUSE (... ...)
-             [else (error 'ID (format "no match for ~a" TEST-VAL))])])))
-
 ;; like case but strictly uses `eq?` comparison (as opposed to `equal?`)
-(define-case-macro caseq memq)
-(define-case-macro casev memv)
+(define-syntax caseq (make-rename-transformer #'case))
+(define-syntax casev (make-rename-transformer #'case))
 
 
 (require sugar/debug)
