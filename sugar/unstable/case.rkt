@@ -1,9 +1,10 @@
 #lang racket/base
-(require (for-syntax racket/base racket/syntax br/syntax) br/define)
+(require (for-syntax racket/base racket/syntax))
 (provide (all-defined-out))
 
-(define-macro (define-case-macro ID PRED)
-  #'(define-macro-cases ID
+(define-syntax-rule (define-case-macro ID PRED)
+  (define-syntax (ID stx)
+    (syntax-case stx ()
       [(_ TEST-VAL [(MATCH0 . MATCH-VALS) . RESULT] (... ...) [else . ELSE-RESULT])
        #'(cond
            [(PRED TEST-VAL '(MATCH0 . MATCH-VALS)) . RESULT] (... ...)
@@ -11,7 +12,7 @@
       [(_ TEST-VAL MATCH-CLAUSE (... ...))
        #'(ID TEST-VAL
              MATCH-CLAUSE (... ...)
-             [else (error 'ID (format "no match for ~a" TEST-VAL))])]))
+             [else (error 'ID (format "no match for ~a" TEST-VAL))])])))
 
 ;; like case but strictly uses `eq?` comparison (as opposed to `equal?`)
 (define-case-macro caseq memq)
@@ -19,6 +20,7 @@
 
 
 (require sugar/debug)
-(define-macro-cases cond-report
-  [(_ [COND . BODY] ... [else . ELSE-BODY]) #'(cond [(report COND) (report (let () (void) . BODY))] ... [else . ELSE-BODY])]
-  [(_ [COND . BODY] ... ) #'(cond-report [COND . BODY] ... [else (void)])]) 
+(define-syntax (cond-report stx)
+  (syntax-case stx ()
+    [(_ [COND . BODY] ... [else . ELSE-BODY]) #'(cond [(report COND) (report (let () (void) . BODY))] ... [else . ELSE-BODY])]
+    [(_ [COND . BODY] ... ) #'(cond-report [COND . BODY] ... [else (void)])])) 

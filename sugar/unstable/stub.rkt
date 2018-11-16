@@ -1,5 +1,5 @@
 #lang racket/base
-(require (for-syntax racket/base br/syntax) br/define)
+(require (for-syntax racket/base racket/syntax))
 (provide (all-defined-out))
 
 (begin-for-syntax
@@ -7,25 +7,33 @@
   (define (make-prefix caller-stx)
     (string-join (map ~a (list (syntax-source caller-stx) (syntax-line caller-stx))) ":" #:after-last ":")))
 
-(define-macro (define-stub-stop ID)
-  (with-pattern ([ERROR-ID (suffix-id (prefix-id (make-prefix caller-stx) #'ID) ":not-implemented")])
-                #'(define (ID . args)
-                    (error 'ERROR-ID))))
+(define-syntax (define-stub-stop stx)
+  (syntax-case stx ()
+    [(_ ID)
+     (with-syntax ([ERROR-ID (format-id stx "~a~a:not-implemented" (make-prefix stx) (syntax->datum #'ID))])
+       #'(define (ID . args)
+           (error 'ERROR-ID)))]))
 
 (provide (rename-out [define-stub-stop define-stub]))
 
-(define-macro (define-stub-go ID)
-  (with-pattern ([ERROR-ID (suffix-id (prefix-id (make-prefix caller-stx) #'ID) ":not-implemented")])
-                #'(define (ID . args)
-                    (displayln 'ERROR-ID))))
+(define-syntax (define-stub-go stx)
+  (syntax-case stx ()
+    [(_ ID)
+     (with-syntax ([ERROR-ID (format-id stx "~a~a:not-implemented" (make-prefix stx) (syntax->datum #'ID))])
+       #'(define (ID . args)
+           (displayln 'ERROR-ID)))]))
 
-(define-macro (define-unfinished (ID . ARGS) . BODY)
-  (with-pattern ([ID-UNFINISHED (suffix-id (prefix-id (make-prefix caller-stx) #'ID) ":unfinished")])
-                #'(define (ID . ARGS)
-                    (begin . BODY)
-                    (error 'ID-UNFINISHED))))
+(define-syntax (define-unfinished stx)
+  (syntax-case stx ()
+    [(_ (ID . ARGS) . BODY)
+     (with-syntax ([ID-UNFINISHED (format-id stx "~a~a:unfinished" (make-prefix stx) (syntax->datum #'ID))])
+       #'(define (ID . ARGS)
+           (begin . BODY)
+           (error 'ID-UNFINISHED)))]))
 
 
-(define-macro (unfinished)
-  (with-pattern ([ID-UNFINISHED (prefix-id (syntax-source caller-stx) ":" (syntax-line caller-stx) ":" #'unfinished)])
-                #'(error 'ID-UNFINISHED)))
+(define-syntax (unfinished stx)
+  (syntax-case stx ()
+    [(_)
+     (with-syntax ([ID-UNFINISHED (format-id stx "~a:~a:~a" (syntax-source stx) (syntax-line stx) (syntax->datum #'unfinished))])
+       #'(error 'ID-UNFINISHED))]))

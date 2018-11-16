@@ -1,27 +1,28 @@
 #lang racket/base
-(require racket/class (for-syntax racket/base racket/syntax br/syntax) br/define racket/dict)
+(require racket/class (for-syntax racket/base racket/syntax) racket/dict)
 (provide (all-defined-out))
 
 
 ;; js-style `push`, which appends to end of list
-(define-macro (push-end! ID THING)
-  #'(set! ID (append ID (list THING))))
+(define-syntax-rule (push-end! ID THING)
+  (set! ID (append ID (list THING))))
 
 
-(define-macro-cases increment!
-  [(_ ID)  #'(increment! ID 1)]
-  [(_ ID EXPR)
-   #'(begin (set! ID (+ ID EXPR)) ID)])
+(define-syntax (increment! stx)
+  (syntax-case stx ()
+    [(_ ID)  #'(increment! ID 1)]
+    [(_ ID EXPR)
+     #'(begin (set! ID (+ ID EXPR)) ID)]))
 
 (module+ test
   (define xs '(1 2 3))
   (push-end! xs 4)
   (check-equal? xs '(1 2 3 4)))
 
-(define-macro (+= ID THING) #'(begin (set! ID (+ ID THING)) ID)) 
-(define-macro (++ ID) #'(+= ID 1))
-(define-macro (-- ID) #'(+= ID -1))
-(define-macro (-= ID THING) #'(+= ID (- THING)))
+(define-syntax-rule (+= ID THING) (begin (set! ID (+ ID THING)) ID)) 
+(define-syntax-rule (++ ID) (+= ID 1))
+(define-syntax-rule (-- ID) (+= ID -1))
+(define-syntax-rule (-= ID THING) (+= ID (- THING)))
 
 
 ;; fancy number->string. bounds are checked, inexact integers are coerced.
@@ -57,7 +58,7 @@
                         [else #f])]
          [else (raise-argument-error '· "object or dict" x)]))) '·))
 
-(define-macro (· X REF ...) #'(·-helper X 'REF ...))
+(define-syntax-rule (· X REF ...) (·-helper X 'REF ...))
 
 #;(module+ test
     (define c (class object%
@@ -71,8 +72,8 @@
     (check-equal? (· co a) 42)
     (check-equal? (· co b) 43))
 
-(define-macro (·map REF XS)
-  #'(for/list ([x (in-list XS)]) (· x REF)))
+(define-syntax-rule (·map REF XS)
+  (for/list ([x (in-list XS)]) (· x REF)))
 
 (module+ test
   (require rackunit)
