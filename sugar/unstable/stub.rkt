@@ -35,5 +35,5 @@
 (define-syntax (unfinished stx)
   (syntax-case stx ()
     [(_)
-     (with-syntax ([ID-UNFINISHED (format-id stx "~a:~a:~a" (syntax-source stx) (syntax-line stx) (syntax->datum #'unfinished))])
+     (with-syntax ([ID-UNFINISHED (format-id stx "~a:~a:~a" (path->string (syntax-source stx)) (syntax-line stx) (syntax->datum #'unfinished))])
        #'(error 'ID-UNFINISHED))]))
