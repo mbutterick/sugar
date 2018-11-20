@@ -29,7 +29,8 @@
 (define (number x)
   (unless (and (number? x) (< -1e21 x 1e21))
     (raise-argument-error 'number "valid number" x))
-  (let ([x (/ (round (* x 1e6)) 1e6)])
+  ;; 181120 suppress rounding to make test10 work
+  (let (#;[x (/ (round (* x 1e6)) 1e6)])
     (number->string (if (integer? x)
                         (inexact->exact x)
                         x))))
