@@ -26,11 +26,10 @@
 
 
 ;; fancy number->string. bounds are checked, inexact integers are coerced.
-(define (number x)
+(define (number x #:round [round? #true])
   (unless (and (number? x) (< -1e21 x 1e21))
     (raise-argument-error 'number "valid number" x))
-  ;; 181120 suppress rounding to make test10 work
-  (let (#;[x (/ (round (* x 1e6)) 1e6)])
+  (let ([x (if round? (/ (round (* x 1e6)) 1e6) x)])
     (number->string (if (integer? x)
                         (inexact->exact x)
                         x))))
