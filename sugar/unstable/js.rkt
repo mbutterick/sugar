@@ -1,8 +1,5 @@
 #lang racket/base
-(require (for-syntax racket/base racket/syntax)
-         racket/class
-         racket/promise
-         racket/dict)
+(require racket/class (for-syntax racket/base racket/syntax) racket/dict)
 (provide (all-defined-out))
 
 
@@ -47,7 +44,7 @@
 (define ·-helper
   (procedure-rename
    (λ (x . refs)
-     (for/fold ([x (force x)])
+     (for/fold ([x x])
                ([ref (in-list refs)]
                 #:break (not x))
        (cond
@@ -58,7 +55,7 @@
          [(dict? x) (dict-ref x ref #f)]
          [(object? x) (cond
                         [(memq ref (field-names x)) (dynamic-get-field ref x)]
-                        [else #f])] 
+                        [else #f])]
          [else (raise-argument-error '· "object or dict" x)]))) '·))
 
 (define-syntax-rule (· X REF ...) (·-helper X 'REF ...))
@@ -86,7 +83,7 @@
       (field [foo 'field])
       (define/public (bar) 'method)
       (define/public (zam) (hasheq 'zoom 'hash))))
-  (define h (delay (hasheq 'bam (new C) 'foo 'hashlet)))
+  (define h (hasheq 'bam (new C) 'foo 'hashlet))
   (define o (new C))
   (check-equal? (· o foo) 'field)
   (check-equal? (· o bar) 'method)
