@@ -56,7 +56,7 @@
          [(object? x) (cond
                         [(memq ref (field-names x)) (dynamic-get-field ref x)]
                         [else #f])]
-         [else (raise-argument-error '· "object or dict" x)]))) '·))
+         [else (raise-argument-error '· "object or dict" (cons x refs))]))) '·))
 
 (define-syntax-rule (· X REF ...) (·-helper X 'REF ...))
 
