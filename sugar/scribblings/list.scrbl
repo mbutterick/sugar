@@ -89,7 +89,7 @@ If none of the elements match @racket[_pred], there is no slice to be made, and 
 (slicef-after
 [lst list?]
 [pred procedure?]
-[force? boolean? #f]))
+[force? boolean? #f])
 (listof list?)]
 Divide @racket[_lst] into sublists, each ending with an element matching @racket[_pred]. The last element of the last sublist may not match @racket[_pred]. But if you really & truly want only the sublists ending with an element matching @racket[_pred], set @racket[_force?] to @racket[#true]. 
 
