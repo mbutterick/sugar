@@ -98,6 +98,7 @@ If none of the elements match @racket[_pred], there is no slice to be made, and 
 @examples[#:eval my-eval
 (slicef-after '(1 2 2 1 2) even?)
 (slicef-after (range 5) odd?)
+(slicef-after (range 5) odd? #true)
 (slicef-after (range 5) string?)]
 
 
