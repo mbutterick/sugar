@@ -35,27 +35,28 @@
   ((list? procedure?) (boolean?) . ->* . (listof list?))
   (unless (list? xs)
     (raise-argument-error 'slicef-at "list?" xs))
+  (unless (procedure? pred)
+    (raise-argument-error 'slicef-at "procedure?" pred))
   (let loop ([xs xs][acc empty])
     (match xs
       [(== empty) (reverse acc)]
-      [(cons (? pred first) rest)
-       (define-values (not-pred-xs tail) (splitf-at rest (negate pred)))
-       (loop tail (cons (cons first not-pred-xs) acc))]
-      [rest
-       (define-values (not-pred-xs tail) (splitf-at rest (negate pred)))
+      [(list* (? pred pred-x) (? (negate pred) not-pred-xs) ... tail)
+       (loop tail (cons (cons pred-x not-pred-xs) acc))]
+      [(list* (? (negate pred) not-pred-xs) ... tail)
        (loop tail (if force? acc (cons not-pred-xs acc)))])))
 
-(define+provide+safe (slicef-after xs pred)
-  (list? procedure? . -> . (listof list?))
+(define+provide+safe (slicef-after xs pred [force? #f])
+  ((list? procedure?) (boolean?) . ->* . (listof list?))
   (unless (list? xs)
     (raise-argument-error 'slicef-after "list?" xs))
+  (unless (procedure? pred)
+    (raise-argument-error 'slicef-after "procedure?" pred))
   (let loop ([xs xs][acc empty])
-    (if (empty? xs)
-        (reverse acc)
-        (match/values (splitf-at xs (negate pred))
-                      [(not-pred-xs (cons first-pred-x other-pred-xs))
-                       (loop other-pred-xs (cons (append not-pred-xs (list first-pred-x)) acc))]
-                      [(not-pred-xs _) not-pred-xs]))))
+    (match xs
+      [(== empty) (reverse acc)]
+      [(list* (? (negate pred) not-pred-xs) ... (? pred pred-x) tail)
+       (loop tail (cons (append not-pred-xs (list pred-x)) acc))]
+      [tail (loop empty (if force? acc (cons tail acc)))])))
 
 (define+provide+safe (slice-at xs len [force? #f])
   ((list? exact-nonnegative-integer?) (boolean?) . ->* . (listof list?))

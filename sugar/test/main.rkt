@@ -198,6 +198,14 @@
  
  (check-equal? (slicef-at '(1 2 2 1 2) even?) '((1) (2) (2 1) (2)))
  (check-equal? (slicef-at '(1 2 2 1 2) even? #t) '((2) (2 1) (2)))
+
+ (check-equal? (slicef-after (range 5) even?) '((0) (1 2) (3 4)))
+ (check-equal? (slicef-after (range 5) odd?) '((0 1) (2 3) (4)))
+ (check-equal? (slicef-after (range 5) odd? #t) '((0 1) (2 3)))
+ (check-equal? (slicef-after (range 5) procedure?) '((0 1 2 3 4)))
+ 
+ (check-equal? (slicef-after '(2 1 2 2 1) even?) '((2) (1 2) (2) (1)))
+ (check-equal? (slicef-after '(2 1 2 2 1) even? #t) '((2) (1 2) (2)))
  
  (check-equal? (sublist (range 5) 0 0) '())
  (check-equal? (sublist (range 5) 0 1) '(0))

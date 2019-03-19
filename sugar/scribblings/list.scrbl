@@ -74,7 +74,9 @@ Divide @racket[_lst] into sublists that are homogeneously @racket[_pred] or not 
 [pred procedure?]
 [force? boolean? #f])
 (listof list?)]
-Divide @racket[_lst] into sublists starting with elements matching @racket[_pred]. The first element of the first sublist may not match @racket[_pred]. Or, if you really & truly want only the sublists starting with an element matching @racket[_pred], set @racket[_force?] to @racket[#t].
+Divide @racket[_lst] into sublists, each starting with an element matching @racket[_pred]. The first element of the first sublist may not match @racket[_pred]. But if you really & truly want only the sublists starting with an element matching @racket[_pred], set @racket[_force?] to @racket[#true].
+
+If none of the elements match @racket[_pred], there is no slice to be made, and the result is the whole input list.
 
 @examples[#:eval my-eval
 (slicef-at (range 5) even?)
@@ -86,9 +88,12 @@ Divide @racket[_lst] into sublists starting with elements matching @racket[_pred
 @defproc[
 (slicef-after
 [lst list?]
-[pred procedure?])
+[pred procedure?]
+[force? boolean? #f]))
 (listof list?)]
-Divide @racket[_lst] into sublists ending with elements matching @racket[_pred]. (Distinct from @racket[slicef-at], which gives you sublists that @italic{start} with elements matching @racket[_pred].) If none of the elements match @racket[_pred], there is no slice to be made, and the result is the whole input list.
+Divide @racket[_lst] into sublists, each ending with an element matching @racket[_pred]. The last element of the last sublist may not match @racket[_pred]. But if you really & truly want only the sublists ending with an element matching @racket[_pred], set @racket[_force?] to @racket[#true]. 
+
+If none of the elements match @racket[_pred], there is no slice to be made, and the result is the whole input list.
 
 @examples[#:eval my-eval
 (slicef-after '(1 2 2 1 2) even?)
