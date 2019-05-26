@@ -1,4 +1,4 @@
-#lang racket/base
+#lang debug racket/base
 (require (for-syntax
           racket/base)
          racket/list
@@ -15,15 +15,29 @@
     (raise-argument-error 'trimf "list?" xs))
   (dropf-right (dropf xs test-proc) test-proc))
 
-(define (slicef-and-filter-split-helper xs pred [drop-negated? #f])
-  (let loop ([xs xs][negating? #f][acc empty])
-    (cond
-      [(empty? xs) (reverse acc)]
-      [else
-       (define loop-pred (if negating? (negate pred) pred))
-       (define-values (loop-pred-xs other-xs) (splitf-at xs loop-pred))
-       (define subxs (if (and negating? drop-negated?) empty loop-pred-xs))
-       (loop other-xs (not negating?) (if (empty? subxs) acc (cons subxs acc)))])))
+(define (slicef-and-filter-split-helper xs pred [separate-negated? #f])
+  (let loop ([xs xs][negating? #f][acc empty][negated-acc empty])
+    (match xs
+      [(? empty?) (if separate-negated?
+                      (values (reverse acc) (reverse negated-acc))
+                      (reverse acc))]
+      [(list* (? (if negating? (negate pred) pred) pred-xs) ... other-xs)
+       (cond
+         [(and negating? separate-negated?)
+          (loop other-xs
+                (not negating?)
+                acc
+                (match pred-xs
+                  [(? empty?) negated-acc]
+                  [_ (cons pred-xs negated-acc)]))]
+         [else
+          (loop other-xs
+                (not negating?)
+                (match pred-xs
+                  [(? empty?) acc]
+                  [_ (cons pred-xs acc)])
+                negated-acc)])])))
+
 
 (define+provide+safe (slicef xs pred)
   (list? procedure? . -> . (listof list?))
@@ -72,12 +86,19 @@
         (match/values (split-at xs len)
                       [(subxs rest) (loop rest (cons subxs slices))]))))
 
+(define+provide+safe (partition* pred xs)
+  (predicate/c list? . -> . (values list? list?))
+  (unless (list? xs)
+    (raise-argument-error 'partition* "list?" xs))
+  (slicef-and-filter-split-helper xs pred 'drop-negated))
+
 (define+provide+safe (filter-split xs pred)
   (list? predicate/c . -> . (listof list?))
   (unless (list? xs)
     (raise-argument-error 'filter-split "list?" xs))
-  ;; same idea as slicef, but the negated items are dropped(-
-  (slicef-and-filter-split-helper xs (negate pred) 'drop-negated))
+  ;; same idea as slicef, but the negated items are dropped
+  (define-values (negated-pred-xs _) (partition* (negate pred) xs))
+  negated-pred-xs)
 
 (define+provide+safe (frequency-hash xs)
   (list? . -> . hash?)

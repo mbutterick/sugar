@@ -132,7 +132,9 @@
  
  (check-equal? (trimf (list 4 1 2 3 4) even?) '(1 2 3))
  (check-equal? (trimf (list 1 3 2 4 5 6 8 9 13) odd?) '(2 4 5 6 8))
- (check-equal? (filter-split '(1 2 3 4 5 6) even?) '((1)(3)(5)))
+ (check-equal? (filter-split '(1 1 2 3 4 4 5 6) even?) '((1 1)(3)(5)))
+ (check-equal? (let-values ([(preds not-preds) (partition* even? '(1 1 2 3 4 4 5 6))])
+                 (list preds not-preds)) (list '((2)(4 4)(6)) '((1 1)(3)(5))))
  
  (define foo-path-strings '("foo" "foo.txt" "foo.bar" "foo.bar.txt"))
  (match-define (list foo-path foo.txt-path foo.bar-path foo.bar.txt-path) (map ->path foo-path-strings))

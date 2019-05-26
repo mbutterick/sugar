@@ -1,9 +1,9 @@
 #lang scribble/manual
 
-@(require scribble/eval (for-label racket sugar))
+@(require scribble/eval (for-label racket sugar racket/function))
 
 @(define my-eval (make-base-eval))
-@(my-eval `(require sugar racket/list))
+@(my-eval `(require sugar racket/list racket/function))
 
 @title{Lists}
 @defmodule[#:multi (sugar/list (submod sugar/list safe))]
@@ -33,9 +33,20 @@ Like @racket[string-split], but for lists. Drop elements from anywhere in @racke
 
 @examples[#:eval my-eval
 (filter-split '(1 a b c 2 d e f 3) integer?)
-(filter-split '(1 a b c 2 d e f 3) (compose not integer?))
-(filter-split '(a b c 1 2 3 d e f) integer?)
-(filter-split '(a b c 1 2 3 d e f) (compose not integer?))]
+(filter-split '(1 a b c 2 d e f 3) (negate integer?))]
+
+@defproc[
+(partition*
+[pred procedure?]
+[lst list?])
+(values list? list?)]
+Like @racket[partition], but contiguous groups of elements matching (or not matching) @racket[_pred] are kept together in sublists.
+
+Same as @racket[(values (filter-split _lst _pred) (filter-split _lst (negate _pred)))], but only traverses the list once.
+
+@examples[#:eval my-eval
+(partition* integer? '(1 a b c 2 d e f 3))
+(partition* (negate integer?) '(1 a b c 2 d e f 3))]
 
 @defproc[
 (slice-at
