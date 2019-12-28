@@ -1,5 +1,4 @@
-Sugar [![Build Status](https://travis-ci.org/mbutterick/sugar.svg?branch=master)](https://travis-ci.org/mbutterick/sugar)
------
+## Sugar [![Build Status](https://travis-ci.org/mbutterick/sugar.svg?branch=master)](https://travis-ci.org/mbutterick/sugar)
 
 Functions that improve the readability of Racket code in Racket 6.0+.
 
@@ -16,3 +15,6 @@ In safe mode (with contracts):
     (require (submod sugar safe))
 
 You can [read the docs here](http://pkg-build.racket-lang.org/doc/sugar).
+
+
+## License = MIT
