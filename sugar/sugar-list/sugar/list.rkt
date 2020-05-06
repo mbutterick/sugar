@@ -1,13 +1,9 @@
 #lang racket/base
-(require (for-syntax
-          racket/base)
+(require (for-syntax racket/base)
          racket/list
          racket/match
          racket/function
-         "define.rkt")
-
-(define (increasing-nonnegative-list? x)
-  (and (list? x) (or (empty? x) (apply < -1 x))))
+         sugar/define)
 
 (define+provide+safe (trimf xs test-proc)
   (list? procedure? . -> . list?)
@@ -109,18 +105,22 @@
     (hash-update! counter item add1 0))
   counter)
 
-(define (->list x)
-  (match x
-    [(? list? x) x]
-    [(? vector?) (vector->list x)]
-    [(? string?) (string->list x)]
-    [else (raise-argument-error '->list "item that can be converted to list" x)]))
+(define+provide+safe (->list xs)
+  (sequence? . -> . list?)
+  (unless (sequence? xs)
+    (raise-argument-error '->list "sequence" xs))
+  (match xs
+    [(? list?) xs]
+    [(? vector?) (vector->list xs)]
+    [(? string?) (string->list xs)]
+    [seq (for/list ([x seq]) x)]))
 
 (define+provide+safe (members-unique? x)
-  ((or/c list? vector? string?) . -> . boolean?)
-  (match (->list x)
-    [(? list? x) (= (length (remove-duplicates x)) (length x))]
-    [_ (raise-argument-error 'members-unique? "list, vector, or string" x)]))
+  (sequence? . -> . boolean?)
+  (unless (sequence? x)
+    (raise-argument-error 'members-unique? "sequence" x))
+  (define all-unique-signal (gensym))
+  (eq? (check-duplicates  (->list x) #:default all-unique-signal) all-unique-signal))
 
 (define+provide+safe (members-unique?/error x)
   ((or/c list? vector? string?) . -> . boolean?)
@@ -138,23 +138,30 @@
   (syntax-case stx ()
     [(_ VALUES-EXPR) #'(call-with-values (λ () VALUES-EXPR) list)]))
 
-(define+provide+safe (sublist xs i j)
-  (list? exact-nonnegative-integer? exact-nonnegative-integer? . -> . list?)
-  (unless (list? xs)
-    (raise-argument-error 'sublist "list?" xs))
-  (cond
-    [(> j (length xs)) (error 'sublist (format "ending index ~a exceeds length of list" j))]
-    [(>= j i) (for/list ([(x idx) (in-indexed xs)]
-                         #:when (<= i idx (sub1 j)))
-                x)]
-    [else (raise-argument-error 'sublist (format "starting index larger than ending index" (list i j)))]))
+(define+provide+safe (sublist seq i j)
+  (sequence? exact-nonnegative-integer? exact-nonnegative-integer? . -> . list?)
+  (unless (sequence? seq)
+    (raise-argument-error 'sublist "sequence?" seq))
+  (define xs (->list seq))
+  (when (> j (length xs))
+    (raise-argument-error 'sublist (format "ending index ~a exceeds length of list" j)))
+  (when (> i j)
+    (raise-argument-error 'sublist (format "starting index larger than ending index" (list i j))))
+  (for/list ([(x idx) (in-indexed xs)]
+             #:when (<= i idx (sub1 j)))
+    x))
+
+(define (increasing-nonnegative-list? x)
+   (or (empty? x) (and (list? x) (apply < -1 x))))
 
 (define+provide+safe (break-at xs bps-in)
   (list? any/c . -> . (listof list?))
   (unless (list? xs)
     (raise-argument-error 'break-at "list" xs))
   (define bps ((if (list? bps-in) values list) bps-in))
-  (when (ormap (λ (bp) (<= (length xs) bp)) bps)
+  (when (let ([lenxs (length xs)])
+          (for/or ([bp bps])
+            (<= lenxs bp)))
     (raise-argument-error 'break-at
                           (format "breakpoints not greater than or equal to input list length = ~a" (length xs)) bps))
   (unless (increasing-nonnegative-list? bps)
@@ -175,16 +182,16 @@
                           (modulo (abs how-far) (length xs))
                           (abs how-far)))
   (define (make-fill thing) (if cycle thing (make-list abs-how-far fill-item)))
-  (cond 
-    [(> abs-how-far (length xs))
-     (raise-argument-error caller
-                           (format "index not larger than list length ~a" (length xs))
-                           (* (if (eq? caller 'shift-left) -1 1) how-far))]
-    [(zero? how-far) xs]
-    [(positive? how-far)
+  (when (> abs-how-far (length xs))
+    (raise-argument-error caller
+                          (format "index not larger than list length ~a" (length xs))
+                          (* (if (eq? caller 'shift-left) -1 1) how-far)))
+  (match how-far 
+    [0 xs]
+    [(? positive?)
      (match/values (split-at-right xs abs-how-far)
                    [(head tail) (append (make-fill tail) head)])]
-    [else ; how-far is negative
+    [_ ; how-far is negative
      (match/values (split-at xs abs-how-far)
                    [(head tail) (append tail (make-fill head))])]))
 

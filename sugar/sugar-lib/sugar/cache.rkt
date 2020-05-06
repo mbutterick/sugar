@@ -1,7 +1,7 @@
 #lang racket/base
 (require (for-syntax
           racket/base
-          "private/syntax-utils.rkt")
+          sugar/private/syntax-utils)
          "define.rkt")
 
 (define+provide+safe (make-caching-proc base-proc) 

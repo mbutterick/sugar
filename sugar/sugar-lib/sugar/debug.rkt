@@ -1,7 +1,7 @@
 #lang racket/base
 (require racket/string
          (for-syntax racket/base)
-         "define.rkt")
+         sugar/define)
 
 (provide+safe report report/time time-name
               report/line report/file
