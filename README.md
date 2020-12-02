@@ -1,4 +1,4 @@
-## Sugar [![Build Status](https://travis-ci.org/mbutterick/sugar.svg?branch=master)](https://travis-ci.org/mbutterick/sugar)
+## Sugar ![Build Status](https://github.com/mbutterick/sugar/workflows/CI/badge.svg)
 
 Functions that improve the readability of Racket code in Racket 6.0+.
 
