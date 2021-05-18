@@ -17,4 +17,10 @@ In safe mode (with contracts):
 You can [read the docs here](http://pkg-build.racket-lang.org/doc/sugar).
 
 
-## License = MIT
+## License 
+
+MIT
+
+## Project status
+
+Complete. Maintained but no improvements planned. I don’t disavow this code, exactly, and I maintain other projects that rely on it. But it arises from a more naive era of personal Racketeering. I would not necessarily recommend taking inspiration from the code herein.
